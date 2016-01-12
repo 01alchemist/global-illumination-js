@@ -3,6 +3,8 @@ import {Material} from "../scene/materials/Material";
 import {Vector3} from "../math/Vector3";
 import {Triangle} from "../scene/shapes/Triangle";
 import {append} from "../utils/MapUtils";
+import {Color} from "../math/Color";
+import {Texture} from "../scene/materials/Texture";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
@@ -10,6 +12,7 @@ export class OBJLoader {
 
     parentMaterial:Material;
     lastMesh:Mesh;
+    materials:Map;
 
     constructor() {
 
@@ -60,7 +63,7 @@ export class OBJLoader {
         var vts:Vector3[] = [null]; // 1-based indexing
         var vns:Vector3[] = [null]; // 1-based indexing
         var triangles:Triangle[];
-        var materials:Map = new Map();//make(map[string]*Material)
+        this.materials = new Map();//make(map[string]*Material)
         var material:Material = this.parentMaterial;
         var lines = data.split("\n");
 
@@ -80,7 +83,7 @@ export class OBJLoader {
                     break;
 
                 case "usemtl":
-                    //material = materials[item.value];
+                    material = this.getMaterial(item.value[0]);
                     break;
 
                 case "v":
@@ -137,7 +140,15 @@ export class OBJLoader {
         }
         return Mesh.newMesh(triangles);
     }
-
+    getMaterial(index:string):Material{
+        if(this.materials[index] == undefined){
+            var material:Material = new Material();
+            this.materials[index] = material;
+            return material;
+        }else{
+            return this.materials[index];
+        }
+    }
     loadMTL(url:string, parent:Material, materials:Map<string,Material>) {
 
         console.log("Loading MTL:" + url);
@@ -145,44 +156,34 @@ export class OBJLoader {
         var xhr:XMLHttpRequest = new XMLHttpRequest();
         xhr.open('GET', url, true);
         xhr.onload = function () {
-            self.lastMesh = self.loadOBJ(xhr.response);
-            if(onLoad){
-                onLoad(self.lastMesh);
+            var lines = xhr.response.split("\n");
+
+            for (var i = 0; i < lines.length; i++) {
+                let line:string = lines[i];
+                if (line.length == 0) {
+                    continue;
+                }
+                let item = OBJLoader.getEntry(line);
+                var material:Material;
+                switch(item.keyword){
+                    case "newmtl":
+                        material = self.materials[item.value[0]];
+                        material = material?material:new Material();
+                        self.materials[item.value[0]] = material;
+                        break;
+                    case "Kd":
+                        var c:number[] = OBJLoader.parseFloats(item.value);
+                        material.color = new Color(c[0], c[1], c[2]);
+                        break;
+                    case "map_Kd":
+                        material.texture = Texture.getTexture(item.value[0]);
+                        break;
+                }
             }
         };
         xhr.send(null);
         return null;
 
 
-        file, err := os.Open(path)
-         if err != nil {
-         return err
-         }
-         defer file.Close()
-         scanner := bufio.NewScanner(file)
-         parentCopy := parent
-         material := &parentCopy
-         for scanner.Scan() {
-         line := scanner.Text()
-         fields := strings.Fields(line)
-         if len(fields) == 0 {
-         continue
-         }
-         keyword := fields[0]
-         args := fields[1:]
-         switch keyword {
-         case "newmtl":
-         parentCopy := parent
-         material = &parentCopy
-         materials[args[0]] = material
-         case "Kd":
-         c := ParseFloats(args)
-         material.Color = Color{c[0], c[1], c[2]}
-         case "map_Kd":
-         p := RelativePath(path, args[0])
-         material.Texture = GetTexture(p)
-         }
-         }
-         return scanner.Err()
     }
 }

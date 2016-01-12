@@ -1,10 +1,13 @@
-System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Triangle", "../utils/MapUtils"], function(exports_1) {
-    var Mesh_1, Vector3_1, Triangle_1, MapUtils_1;
+System.register(["../scene/shapes/Mesh", "../scene/materials/Material", "../math/Vector3", "../scene/shapes/Triangle", "../utils/MapUtils", "../math/Color", "../scene/materials/Texture"], function(exports_1) {
+    var Mesh_1, Material_1, Vector3_1, Triangle_1, MapUtils_1, Color_1, Texture_1;
     var OBJLoader;
     return {
         setters:[
             function (Mesh_1_1) {
                 Mesh_1 = Mesh_1_1;
+            },
+            function (Material_1_1) {
+                Material_1 = Material_1_1;
             },
             function (Vector3_1_1) {
                 Vector3_1 = Vector3_1_1;
@@ -14,6 +17,12 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
             },
             function (MapUtils_1_1) {
                 MapUtils_1 = MapUtils_1_1;
+            },
+            function (Color_1_1) {
+                Color_1 = Color_1_1;
+            },
+            function (Texture_1_1) {
+                Texture_1 = Texture_1_1;
             }],
         execute: function() {
             OBJLoader = (function () {
@@ -59,7 +68,7 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                     var vts = [null];
                     var vns = [null];
                     var triangles;
-                    var materials = new Map();
+                    this.materials = new Map();
                     var material = this.parentMaterial;
                     var lines = data.split("\n");
                     for (var i = 0; i < lines.length; i++) {
@@ -76,6 +85,7 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                                 this.loadMTL(p, parent, materials);
                                 break;
                             case "usemtl":
+                                material = this.getMaterial(item.value[0]);
                                 break;
                             case "v":
                                 f = OBJLoader.parseFloats(item.value);
@@ -126,57 +136,52 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                     }
                     return Mesh_1.Mesh.newMesh(triangles);
                 };
+                OBJLoader.prototype.getMaterial = function (index) {
+                    if (this.materials[index] == undefined) {
+                        var material = new Material_1.Material();
+                        this.materials[index] = material;
+                        return material;
+                    }
+                    else {
+                        return this.materials[index];
+                    }
+                };
                 OBJLoader.prototype.loadMTL = function (url, parent, materials) {
                     console.log("Loading MTL:" + url);
                     var self = this;
                     var xhr = new XMLHttpRequest();
                     xhr.open('GET', url, true);
                     xhr.onload = function () {
-                        self.lastMesh = self.loadOBJ(xhr.response);
-                        if (onLoad) {
-                            onLoad(self.lastMesh);
+                        var lines = xhr.response.split("\n");
+                        for (var i = 0; i < lines.length; i++) {
+                            var line = lines[i];
+                            if (line.length == 0) {
+                                continue;
+                            }
+                            var item = OBJLoader.getEntry(line);
+                            var material;
+                            switch (item.keyword) {
+                                case "newmtl":
+                                    material = self.materials[item.value[0]];
+                                    material = material ? material : new Material_1.Material();
+                                    self.materials[item.value[0]] = material;
+                                    break;
+                                case "Kd":
+                                    var c = OBJLoader.parseFloats(item.value);
+                                    material.color = new Color_1.Color(c[0], c[1], c[2]);
+                                    break;
+                                case "map_Kd":
+                                    material.texture = Texture_1.Texture.getTexture(item.value[0]);
+                                    break;
+                            }
                         }
                     };
                     xhr.send(null);
                     return null;
-                    file, err;
-                    os.Open(path);
-                    if (err != nil) {
-                        return err;
-                    }
-                    defer;
-                    file.Close();
-                    scanner:  = bufio.NewScanner(file);
-                    parentCopy:  = parent;
-                    material:  =  & parentCopy;
-                    for (scanner.Scan(); {
-                        line:  = scanner.Text(),
-                        fields:  = strings.Fields(line),
-                        if: len(fields) == 0 }; {
-                        continue: 
-                    })
-                        keyword:  = fields[0];
-                    args:  = fields[1];
-                    switch (keyword) {
-                        case "newmtl":
-                            parentCopy:  = parent;
-                            material =  & parentCopy;
-                            materials[args[0]] = material;
-                        case "Kd":
-                            c:  = ParseFloats(args);
-                            material.Color = Color;
-                            {
-                                c[0], c[1], c[2];
-                            }
-                        case "map_Kd":
-                            p:  = RelativePath(path, args[0]);
-                            material.Texture = GetTexture(p);
-                    }
                 };
                 return OBJLoader;
             })();
             exports_1("OBJLoader", OBJLoader);
-            return scanner.Err();
         }
     }
 });
