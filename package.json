@@ -1,0 +1,24 @@
+{
+  "name": "ParallelRayJS",
+  "version": "0.0.1",
+  "description": "ParallelRayJS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/01alchemist/ParallelRayJS.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/01alchemist/ParallelRayJS/issues"
+  },
+  "homepage": "https://github.com/01alchemist/ParallelRayJS",
+
+  "dependencies": {
+    "typescript": "^1.7.5",
+    "systemjs": "0.19.6"
+  }
+}
