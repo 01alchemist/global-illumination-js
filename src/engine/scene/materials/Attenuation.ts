@@ -3,6 +3,7 @@
  */
 export class Attenuation {
 
+    static SIZE:number = 3;
 
     constructor(public constant:number=1, public linear:number=0, public quadratic:number=0) {
 
@@ -25,6 +26,28 @@ export class Attenuation {
         this.linear = attenation.linear;
         this.quadratic = attenation.quadratic;
         return this;
+    }
+
+    clone():Attenuation {
+        return new Attenuation(
+            this.constant,
+            this.linear,
+            this.quadratic
+        );
+    }
+
+    writeToMemory(mem:Float32Array, offset:number):number {
+        mem[offset++] = this.constant;
+        mem[offset++] = this.linear;
+        mem[offset++] = this.quadratic;
+        return offset;
+    }
+
+    read(mem:Float32Array, offset:number):number {
+        this.constant = mem[offset++];
+        this.linear = mem[offset++];
+        this.quadratic = mem[offset++];
+        return offset;
     }
 }
 

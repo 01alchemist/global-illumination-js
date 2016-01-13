@@ -30,13 +30,14 @@ System.register(["../../math/Vector3", "../materials/Material", "./Box", "../../
                 function Cube(min, max, material, box) {
                     if (min === void 0) { min = new Vector3_1.Vector3(); }
                     if (max === void 0) { max = new Vector3_1.Vector3(); }
-                    if (material === void 0) { material = new Material_1.Material(); }
-                    if (box === void 0) { box = new Box_1.Box(); }
+                    if (material === void 0) { material = null; }
+                    if (box === void 0) { box = null; }
                     this.min = min;
                     this.max = max;
                     this.material = material;
                     this.box = box;
                     this.type = Shape_1.ShapeType.CUBE;
+                    this.size = (Vector3_1.Vector3.SIZE * 2) + 2;
                 }
                 Cube.fromJson = function (shape) {
                     return new Cube(Vector3_1.Vector3.fromJson(shape.min), Vector3_1.Vector3.fromJson(shape.max), MaterialUtils_1.MaterialUtils.fromJson(shape.material), Box_1.Box.fromJson(shape.box));
@@ -92,6 +93,24 @@ System.register(["../../math/Vector3", "../materials/Material", "./Box", "../../
                     var y = this.min.y + Math.random() * (this.max.y - this.min.y);
                     var z = this.min.z + Math.random() * (this.max.z - this.min.z);
                     return new Vector3_1.Vector3(x, y, z);
+                };
+                Cube.prototype.writeToMemory = function (memory, offset) {
+                    memory[offset++] = this.type;
+                    offset = this.min.writeToMemory(memory, offset);
+                    offset = this.max.writeToMemory(memory, offset);
+                    memory[offset++] = this.material.materialIndex;
+                    return offset;
+                };
+                Cube.prototype.read = function (memory, offset) {
+                    offset = this.min.read(memory, offset);
+                    offset = this.max.read(memory, offset);
+                    this.box = new Box_1.Box(this.min, this.max);
+                    var materialIndex = memory[offset++];
+                    var material = Material_1.Material.map[materialIndex];
+                    if (material) {
+                        this.material = material;
+                    }
+                    return offset;
                 };
                 return Cube;
             })();

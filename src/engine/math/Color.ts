@@ -11,19 +11,21 @@ export interface RGBA {
 }
 export class Color {
 
+    static SIZE:number = 3;
+
     constructor(public r:number = 0,
                 public g:number = 0,
                 public b:number = 0) {
     }
 
     static fromJson(color:Color):Color {
-        if(color){
+        if (color) {
             return new Color(
                 color.r,
                 color.g,
                 color.b
             );
-        }else{
+        } else {
             return null;
         }
     }
@@ -84,5 +86,27 @@ export class Color {
         let a = this.mulScalar(1 - pct);
         b = b.mulScalar(pct);
         return a.add(b);
+    }
+
+    clone():Color {
+        return new Color(
+            this.r,
+            this.g,
+            this.b
+        );
+    }
+
+    writeToMemory(mem:Float32Array, offset:number):number {
+        mem[offset++] = this.r;
+        mem[offset++] = this.g;
+        mem[offset++] = this.b;
+        return offset;
+    }
+
+    read(mem:Float32Array, offset:number):number {
+        this.r = mem[offset++];
+        this.g = mem[offset++];
+        this.b = mem[offset++];
+        return offset;
     }
 }

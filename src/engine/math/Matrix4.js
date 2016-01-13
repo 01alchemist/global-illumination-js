@@ -205,6 +205,7 @@ System.register(["./Vector3", "../scene/shapes/Box", "./Ray"], function(exports_
                     m.x33 = (a.x01 * a.x12 * a.x20 - a.x02 * a.x11 * a.x20 + a.x02 * a.x10 * a.x21 - a.x00 * a.x12 * a.x21 - a.x01 * a.x10 * a.x22 + a.x00 * a.x11 * a.x22) / d;
                     return m;
                 };
+                Matrix4.SIZE = 16;
                 return Matrix4;
             })();
             exports_1("Matrix4", Matrix4);

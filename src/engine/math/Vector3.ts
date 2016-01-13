@@ -4,6 +4,8 @@
 
 export class Vector3 {
 
+    static SIZE:number = 3;
+
     constructor(public x:number = 0, public y:number = 0, public z:number = 0) {
 
     }
@@ -118,5 +120,19 @@ export class Vector3 {
 
     equals(v:Vector3):Boolean {
         return this.x == v.x && this.y == v.y && this.z == v.z;
+    }
+
+    writeToMemory(memory:Float32Array, offset:number):number {
+        memory[offset++] = this.x;
+        memory[offset++] = this.y;
+        memory[offset++] = this.z;
+        return offset;
+    }
+
+    read(memory:Float32Array, offset:number):number {
+        this.x = memory[offset++];
+        this.y = memory[offset++];
+        this.z = memory[offset++];
+        return offset;
     }
 }

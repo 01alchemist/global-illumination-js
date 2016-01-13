@@ -17,6 +17,16 @@ import {Triangle} from "./shapes/Triangle";
  */
 export class Scene {
 
+    get estimatedMemory():number{
+        var size:number = Color.SIZE + 1;// 1 for shape length;
+        this.shapes.forEach(function (shape:Shape) {
+            size += shape.size;
+        });
+        return size;
+    }
+
+    shared:boolean = false;
+
     constructor(public color:Color = new Color(),
                 public shapes:Shape[] = [],
                 public lights:Shape[] = [],
@@ -54,6 +64,9 @@ export class Scene {
     }
 
     compile():Scene{
+        if(this.shared){
+            return;
+        }
         this.shapes.forEach(function (shape:Shape) {
             shape.compile();
         });

@@ -84,6 +84,7 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                 };
                 Teapot.prototype.render = function () {
                     if (!this.paused) {
+                        this.info.innerHTML = "Iterations:" + this.renderer.iterations;
                         this.renderer.iterateParallel();
                         this.updatePixels(this.pixels);
                         requestAnimationFrame(this.render.bind(this));

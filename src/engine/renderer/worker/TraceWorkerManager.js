@@ -16,6 +16,7 @@ System.register(["./TraceJob"], function(exports_1) {
                     console.log("configure");
                     var width = param.width;
                     var height = param.height;
+                    this.sceneMemory = param.scene.getMemory();
                     this.pixelMemory = new Uint8ClampedArray(new SharedArrayBuffer(width * height * 3));
                     this.jobs = [];
                     var num_threads = param.num_threads;
@@ -32,8 +33,7 @@ System.register(["./TraceJob"], function(exports_1) {
                         var _height = height / num_threads;
                         for (var j = 0; j < num_threads; j++) {
                             for (var i = 0; i < num_threads; i++) {
-                                this.jobs.push(new TraceJob_1.TraceJob(this.pixelMemory, {
-                                    scene: param.scene,
+                                this.jobs.push(new TraceJob_1.TraceJob(this.pixelMemory, this.sceneMemory, {
                                     camera: param.camera,
                                     cameraSamples: param.cameraSamples,
                                     hitSamples: param.hitSamples,
@@ -83,8 +83,9 @@ System.register(["./TraceJob"], function(exports_1) {
                 TraceWorkerManager.prototype.render = function () {
                     var self = this;
                     if (this.workersFinished()) {
+                        self.iterations++;
                         this.jobs.forEach(function (w) {
-                            w.run(++self.iterations);
+                            w.run(self.iterations);
                         });
                     }
                 };

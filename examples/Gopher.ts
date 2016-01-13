@@ -10,6 +10,9 @@ import {Cube} from "../src/engine/scene/shapes/Cube";
 import {NoAttenuation} from "../src/engine/scene/materials/Attenuation";
 import {OBJLoader} from "../src/engine/data/OBJLoader";
 import {CanvasDisplay} from "./CanvasDisplay";
+import {GlossyMaterial} from "../src/engine/scene/materials/GlossyMaterial";
+import {MathUtils} from "../src/engine/utils/MathUtils";
+import {SharedScene} from "../src/engine/scene/SharedScene";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
@@ -18,7 +21,6 @@ export class Gopher extends CanvasDisplay {
     private renderer:Renderer;
     private pixels:Uint8ClampedArray;
     public paused:boolean = false;
-    private info;
 
     constructor() {
         super();
@@ -26,26 +28,30 @@ export class Gopher extends CanvasDisplay {
 
     onInit() {
 
-        this.info = document.getElementById("info");
+        var scene:SharedScene = new SharedScene();
+        //scene.add(Sphere.newSphere(new Vector3(-2, 5, -3), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
+        //scene.add(Sphere.newSphere(new Vector3(5, 5, -3), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
+        //scene.add(Cube.newCube(new Vector3(-30, -1, -30), new Vector3(30, 0.376662, 30), new SpecularMaterial(Color.hexColor(0xFCFAE1), 2)));
 
-        var scene:Scene = new Scene();
-        scene.add(Sphere.newSphere(new Vector3(-2, 5, -3), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
-        scene.add(Sphere.newSphere(new Vector3(5, 5, -3), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
-        scene.add(Cube.newCube(new Vector3(-30, -1, -30), new Vector3(30, 0, 30), new SpecularMaterial(Color.hexColor(0xFCFAE1), 2)));
+        var wall = new SpecularMaterial(Color.hexColor(0xFCFAE1), 2);
+        scene.add(Sphere.newSphere(new Vector3(4, 7, 3), 2, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
+        scene.add(Cube.newCube(new Vector3(-30, -1, -30), new Vector3(-8, 10, 30), wall));
+        scene.add(Cube.newCube(new Vector3(-30, -1, -30), new Vector3(30, 0.376662, 30), wall));
+
         var loader:OBJLoader = new OBJLoader();
-        loader.parentMaterial = new SpecularMaterial(Color.hexColor(0xB9121B), 2);
+        loader.parentMaterial = new GlossyMaterial(new Color(),1.5, MathUtils.radians(30));
 
         var self = this;
         var mesh;
         this.renderer = new Renderer();
-        //this.i_width = 2560 / 2;
-        //this.i_height = 1440 / 2;
-        this.i_width = 1280;
-        this.i_height = 720;
+        this.i_width = 2560 / 4;
+        this.i_height = 1440 / 4;
+        //this.i_width = 1280;
+        //this.i_height = 720;
         var cameraSamples:number = 4;
         var hitSamples:number = 16/16;
         var bounces:number = 4;
-        var camera:Camera = Camera.lookAt(new Vector3(2, 5, -6), new Vector3(0.5, 1, 0), new Vector3(0, 1, 0), 45);
+        var camera:Camera = Camera.lookAt(new Vector3(8, 3, 0.5), new Vector3(-1, 2.5, 0.5), new Vector3(0, 1, 0), 45);
 
         loader.load("gopher.obj", function (_mesh) {
             if (!_mesh) {
@@ -56,7 +62,7 @@ export class Gopher extends CanvasDisplay {
                 scene.add(mesh);
 
                 self.pixels = self.renderer.initParallelRender(
-                    scene, camera, self.width, self.height, cameraSamples, hitSamples, bounces
+                    scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples, bounces
                 );
                 self.drawPixels(self.pixels, {x: 0, y: 0, width: self.i_width, height: self.i_height});
 
@@ -69,7 +75,7 @@ export class Gopher extends CanvasDisplay {
     render() {
         if (!this.paused) {
             this.renderer.iterateParallel();
-            this.updatePixels(this.pixels);
+            this.updatePixels(this.pixels, this.renderer.iterations);
             requestAnimationFrame(this.render.bind(this));
         }
     }

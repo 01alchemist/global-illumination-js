@@ -13,7 +13,7 @@ export class TraceWorkerManager {
 
     private propertySize:number = 512;
     private propertyMemory:Uint8Array;
-    private sceneMemory:Uint8Array;
+    private sceneMemory:Float32Array;
     private pixelMemory:Uint8ClampedArray;
 
     private jobs:Array<TraceJob>;
@@ -27,6 +27,9 @@ export class TraceWorkerManager {
         console.log("configure");
         var width:number = param.width;
         var height:number = param.height;
+
+        //this.sceneMemory = new Float32Array(new SharedArrayBuffer(param.scene.size * Float32Array.BYTES_PER_ELEMENT));
+        this.sceneMemory = param.scene.getMemory();
         this.pixelMemory = new Uint8ClampedArray(new SharedArrayBuffer(width * height * 3));
 
         this.jobs = [];
@@ -56,8 +59,8 @@ export class TraceWorkerManager {
                     this.jobs.push(
                         new TraceJob(
                             this.pixelMemory,
+                            this.sceneMemory,
                             {
-                                scene: param.scene,
                                 camera: param.camera,
                                 cameraSamples: param.cameraSamples,
                                 hitSamples: param.hitSamples,
@@ -106,8 +109,9 @@ export class TraceWorkerManager {
     render():void {
         var self = this;
         if (this.workersFinished()) {
+            self.iterations++;
             this.jobs.forEach(function (w:TraceJob) {
-                w.run(++self.iterations);
+                w.run(self.iterations);
             });
         }
     }

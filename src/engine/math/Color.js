@@ -66,6 +66,22 @@ System.register([], function(exports_1) {
                     b = b.mulScalar(pct);
                     return a.add(b);
                 };
+                Color.prototype.clone = function () {
+                    return new Color(this.r, this.g, this.b);
+                };
+                Color.prototype.writeToMemory = function (mem, offset) {
+                    mem[offset++] = this.r;
+                    mem[offset++] = this.g;
+                    mem[offset++] = this.b;
+                    return offset;
+                };
+                Color.prototype.read = function (mem, offset) {
+                    this.r = mem[offset++];
+                    this.g = mem[offset++];
+                    this.b = mem[offset++];
+                    return offset;
+                };
+                Color.SIZE = 3;
                 return Color;
             })();
             exports_1("Color", Color);

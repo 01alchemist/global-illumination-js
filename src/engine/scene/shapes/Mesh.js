@@ -33,12 +33,26 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
         execute: function() {
             Mesh = (function () {
                 function Mesh(box, triangles, tree) {
+                    if (box === void 0) { box = null; }
+                    if (triangles === void 0) { triangles = []; }
                     if (tree === void 0) { tree = null; }
                     this.box = box;
                     this.triangles = triangles;
                     this.tree = tree;
                     this.type = Shape_1.ShapeType.MESH;
                 }
+                Object.defineProperty(Mesh.prototype, "size", {
+                    get: function () {
+                        if (this.box && this.triangles) {
+                            return Box_1.Box.SIZE + this.triangles.length * Triangle_1.Triangle.SIZE + 2;
+                        }
+                        else {
+                            return 0;
+                        }
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
                 Mesh.fromJson = function (mesh) {
                     return new Mesh(Box_1.Box.fromJson(mesh.box), Triangle_1.Triangle.fromJson(mesh.triangles));
                 };
@@ -49,11 +63,7 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                 Mesh.prototype.compile = function () {
                     var m = this;
                     if (m.tree == null) {
-                        var shapes = [];
-                        m.triangles.forEach(function (triangle, i) {
-                            shapes[i] = triangle;
-                        });
-                        m.tree = Tree_1.Tree.newTree(shapes);
+                        m.tree = Tree_1.Tree.newTree(m.triangles, m.box);
                     }
                 };
                 Mesh.prototype.intersect = function (r) {
@@ -143,6 +153,26 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                     });
                     m.updateBox();
                     m.tree = null;
+                };
+                Mesh.prototype.writeToMemory = function (memory, offset) {
+                    memory[offset++] = this.type;
+                    offset = this.box.writeToMemory(memory, offset);
+                    memory[offset++] = this.triangles.length;
+                    this.triangles.forEach(function (t) {
+                        offset = t.writeToMemory(memory, offset);
+                    });
+                    return offset;
+                };
+                Mesh.prototype.read = function (memory, offset) {
+                    this.box = new Box_1.Box();
+                    offset = this.box.read(memory, offset);
+                    var numTriangles = memory[offset++];
+                    for (var i = 0; i < numTriangles; i++) {
+                        var triangle = new Triangle_1.Triangle();
+                        offset = triangle.read(memory, offset);
+                        this.triangles.push(triangle);
+                    }
+                    return offset;
                 };
                 return Mesh;
             })();

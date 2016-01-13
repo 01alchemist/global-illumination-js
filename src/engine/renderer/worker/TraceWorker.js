@@ -1,19 +1,19 @@
-System.register(["../../scene/Camera", "../../scene/Scene", "../../math/Color", "../Renderer"], function(exports_1) {
-    var Camera_1, Scene_1, Color_1, Renderer_1;
+System.register(["../../scene/Camera", "../../math/Color", "../Renderer", "../../scene/SharedScene"], function(exports_1) {
+    var Camera_1, Color_1, Renderer_1, SharedScene_1;
     var TraceWorker;
     return {
         setters:[
             function (Camera_1_1) {
                 Camera_1 = Camera_1_1;
             },
-            function (Scene_1_1) {
-                Scene_1 = Scene_1_1;
-            },
             function (Color_1_1) {
                 Color_1 = Color_1_1;
             },
             function (Renderer_1_1) {
                 Renderer_1 = Renderer_1_1;
+            },
+            function (SharedScene_1_1) {
+                SharedScene_1 = SharedScene_1_1;
             }],
         execute: function() {
             TraceWorker = (function () {
@@ -26,14 +26,16 @@ System.register(["../../scene/Camera", "../../scene/Scene", "../../math/Color", 
                             self.command = e.data;
                         }
                         else if (self.command == TraceWorker.INIT) {
+                            TraceWorker.id = e.data.id;
+                            console.time("WOKER_INIT:" + TraceWorker.id);
                             self.command = null;
                             self.pixelMemory = new Uint8ClampedArray(e.data.pixelMemory);
-                            TraceWorker.id = e.data.id;
+                            self.sceneMemory = new Float32Array(e.data.sceneMemory);
                             if (!self.camera) {
                                 self.camera = Camera_1.Camera.fromJson(e.data.camera);
                             }
                             if (!self.scene) {
-                                self.scene = Scene_1.Scene.fromJson(e.data.scene);
+                                self.scene = SharedScene_1.SharedScene.getScene(self.sceneMemory);
                                 self.scene.compile();
                             }
                             self.full_width = e.data.full_width;
@@ -42,6 +44,7 @@ System.register(["../../scene/Camera", "../../scene/Scene", "../../math/Color", 
                             self.hitSamples = e.data.hitSamples;
                             self.bounces = e.data.bounces;
                             self.init(e.data.width, e.data.height, e.data.xoffset, e.data.yoffset);
+                            console.timeEnd("WOKER_INIT:" + TraceWorker.id);
                             postMessage(TraceWorker.INITED);
                         }
                         else if (self.command == TraceWorker.TRACE) {

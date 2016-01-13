@@ -11,8 +11,7 @@ System.register(["./TraceWorker", "./Thread"], function(exports_1) {
             }],
         execute: function() {
             TraceJob = (function () {
-                function TraceJob(pixelMemory, param) {
-                    this.pixelMemory = pixelMemory;
+                function TraceJob(pixelMemory, sceneMemory, param) {
                     this.width = param.width;
                     this.height = param.height;
                     this.xoffset = param.xoffset;
@@ -31,7 +30,7 @@ System.register(["./TraceWorker", "./Thread"], function(exports_1) {
                     this.thread.sendData({
                         id: this.id,
                         pixelMemory: pixelMemory.buffer,
-                        scene: param.scene,
+                        sceneMemory: sceneMemory.buffer,
                         camera: param.camera,
                         cameraSamples: param.cameraSamples,
                         hitSamples: param.hitSamples,
@@ -42,7 +41,7 @@ System.register(["./TraceWorker", "./Thread"], function(exports_1) {
                         height: param.height,
                         xoffset: param.xoffset,
                         yoffset: param.yoffset
-                    }, [pixelMemory.buffer]);
+                    }, [pixelMemory.buffer, sceneMemory.buffer]);
                 }
                 TraceJob.prototype.run = function (iterations) {
                     if (this.thread.initialized && !this.thread.isTracing) {

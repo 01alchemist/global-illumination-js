@@ -18,9 +18,10 @@ System.register(["../shapes/Box", "./Node", "../../math/Hit"], function(exports_
                     this.box = box;
                     this.root = root;
                 }
-                Tree.newTree = function (shapes) {
+                Tree.newTree = function (shapes, box) {
+                    if (box === void 0) { box = null; }
                     console.log("Building k-d tree (" + shapes.length + " shapes)... ");
-                    var box = Box_1.Box.boxForShapes(shapes);
+                    var box = box ? box : Box_1.Box.boxForShapes(shapes);
                     var node = Node_1.Node.newNode(shapes);
                     node.split(0);
                     return new Tree(box, node);

@@ -55,11 +55,11 @@ export class RayLXOLoader {
     }
 
     loadLXOData(data:any):Mesh {
-
+        return null;
     }
     loadLXO(data:any):Mesh {
-
-        var vs:Vector3[] = [null]; //1024 // 1-based indexing
+        return null;
+        /*var vs:Vector3[] = [null]; //1024 // 1-based indexing
         var vts:Vector3[] = [null]; // 1-based indexing
         var vns:Vector3[] = [null]; // 1-based indexing
         var triangles:Triangle[];
@@ -88,7 +88,7 @@ export class RayLXOLoader {
             triangles = append(triangles, t);
         }
 
-        return Mesh.newMesh(triangles);
+        return Mesh.newMesh(triangles);*/
     }
 
     loadMTL(url:string, parent:Material, materials:Map<string,Material>) {

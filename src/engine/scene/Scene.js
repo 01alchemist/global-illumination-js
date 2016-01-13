@@ -49,7 +49,19 @@ System.register(["../math/Color", "./tree/Tree", "../utils/MapUtils", "../math/V
                     this.lights = lights;
                     this.tree = tree;
                     this.rays = rays;
+                    this.shared = false;
                 }
+                Object.defineProperty(Scene.prototype, "estimatedMemory", {
+                    get: function () {
+                        var size = Color_1.Color.SIZE + 1;
+                        this.shapes.forEach(function (shape) {
+                            size += shape.size;
+                        });
+                        return size;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
                 Scene.fromJson = function (scene) {
                     var _scene = new Scene(Color_1.Color.fromJson(scene.color));
                     scene.shapes.forEach(function (shape) {
@@ -74,6 +86,9 @@ System.register(["../math/Color", "./tree/Tree", "../utils/MapUtils", "../math/V
                     return _scene;
                 };
                 Scene.prototype.compile = function () {
+                    if (this.shared) {
+                        return;
+                    }
                     this.shapes.forEach(function (shape) {
                         shape.compile();
                     });

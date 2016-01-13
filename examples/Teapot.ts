@@ -68,6 +68,7 @@ export class Teapot extends CanvasDisplay {
 
     render() {
         if (!this.paused) {
+            this.info.innerHTML = "Iterations:"+this.renderer.iterations;
             this.renderer.iterateParallel();
             this.updatePixels(this.pixels);
             requestAnimationFrame(this.render.bind(this));

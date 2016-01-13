@@ -8,12 +8,10 @@ export class TraceJob {
     private xoffset:number;
     private yoffset:number;
     private id:number;
-    private pixelMemory:Uint8Array;
     public finished:boolean;
     public thread:Thread;
 
-    constructor(pixelMemory:Uint8Array, param) {
-        this.pixelMemory = pixelMemory;
+    constructor(pixelMemory:Uint8Array, sceneMemory:Float32Array, param) {
         this.width = param.width;
         this.height = param.height;
         this.xoffset = param.xoffset;
@@ -35,7 +33,7 @@ export class TraceJob {
         this.thread.sendData({
             id: this.id,
             pixelMemory: pixelMemory.buffer,
-            scene: param.scene,
+            sceneMemory: sceneMemory.buffer,
             camera: param.camera,
             cameraSamples: param.cameraSamples,
             hitSamples: param.hitSamples,
@@ -46,7 +44,7 @@ export class TraceJob {
             height: param.height,
             xoffset: param.xoffset,
             yoffset: param.yoffset
-        },[pixelMemory.buffer]);
+        },[pixelMemory.buffer, sceneMemory.buffer]);
     }
 
     run(iterations:number):void {

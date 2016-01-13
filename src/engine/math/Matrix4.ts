@@ -6,6 +6,8 @@ import {Ray} from "./Ray";
  */
 export class Matrix4 {
 
+    static SIZE:number = 16;
+
     m:Float64Array;
 
     constructor(public x00 = 0, public x01 = 0, public x02 = 0, public x03 = 0,

@@ -9,6 +9,9 @@ System.register([], function(exports_1) {
                     if (height === void 0) { height = 720; }
                     this.width = width;
                     this.height = height;
+                    this.time = 0;
+                    this.delta = 0;
+                    this.iterations = 0;
                     var self = this;
                     this.canvas = document.getElementById("viewport");
                     if (this.canvas) {
@@ -24,7 +27,7 @@ System.register([], function(exports_1) {
                     this.canvas.width = this.width;
                     this.canvas.height = this.height;
                     this.ctx = this.canvas.getContext("2d");
-                    this.drawTest();
+                    this.info = document.getElementById("info");
                     if (this.onInit) {
                         this.onInit();
                     }
@@ -45,8 +48,11 @@ System.register([], function(exports_1) {
                         }
                     }
                     this.ctx.putImageData(this.imageData, 0, 0);
+                    this.iterations = 0;
+                    this.time = performance.now();
+                    this.info.innerHTML = "Initializing workers...";
                 };
-                CanvasDisplay.prototype.updatePixels = function (pixels) {
+                CanvasDisplay.prototype.updatePixels = function (pixels, iterations) {
                     for (var y = 0; y < this.i_height; y++) {
                         for (var x = 0; x < this.i_width; x++) {
                             var i = y * (this.i_width * 4) + (x * 4);
@@ -58,20 +64,13 @@ System.register([], function(exports_1) {
                         }
                     }
                     this.ctx.putImageData(this.imageData, 0, 0);
-                };
-                CanvasDisplay.prototype.drawTest = function () {
-                    var imageData = this.ctx.createImageData(50, 50);
-                    var data = imageData.data;
-                    for (var y = 0; y < 50; y++) {
-                        for (var x = 0; x < 50; x++) {
-                            var i = y * (50 * 4) + (x * 4);
-                            data[i] = 255;
-                            data[i + 1] = 0;
-                            data[i + 2] = 0;
-                            data[i + 3] = 255;
-                        }
+                    if (this.iterations < iterations) {
+                        var _time = this.time;
+                        this.time = performance.now();
+                        this.delta = Math.round(this.time - _time) / 1000;
+                        this.iterations = iterations;
                     }
-                    this.ctx.putImageData(imageData, 0, 0);
+                    this.info.innerHTML = "Iterations:" + iterations + ", time:" + this.delta + " sec";
                 };
                 return CanvasDisplay;
             })();

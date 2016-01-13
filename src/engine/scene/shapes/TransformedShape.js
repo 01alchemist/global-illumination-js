@@ -16,11 +16,27 @@ System.register(["../../math/Matrix4", "../../math/Hit", "./Shape"], function(ex
         execute: function() {
             TransformedShape = (function () {
                 function TransformedShape(shape, matrix, inverse) {
+                    if (shape === void 0) { shape = null; }
+                    if (matrix === void 0) { matrix = new Matrix4_1.Matrix4(); }
+                    if (inverse === void 0) { inverse = new Matrix4_1.Matrix4(); }
                     this.shape = shape;
                     this.matrix = matrix;
                     this.inverse = inverse;
                     this.type = Shape_1.ShapeType.TRANSFORMED_SHAPE;
                 }
+                Object.defineProperty(TransformedShape.prototype, "size", {
+                    get: function () {
+                        if (this.shape) {
+                            return this.shape.size + Matrix4_1.Matrix4.SIZE;
+                        }
+                        else {
+                            return 0;
+                        }
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                ;
                 TransformedShape.fromJson = function (transformedShape) {
                     return new TransformedShape(Shape_2.ShapefromJson(transformedShape.shape), Matrix4_1.Matrix4.fromJson(transformedShape.matrix), Matrix4_1.Matrix4.fromJson(transformedShape.inverse));
                 };
@@ -56,6 +72,13 @@ System.register(["../../math/Matrix4", "../../math/Hit", "./Shape"], function(ex
                 };
                 TransformedShape.prototype.getRandomPoint = function () {
                     return this.matrix.mulPosition(this.shape.getRandomPoint());
+                };
+                TransformedShape.prototype.writeToMemory = function (mem, offset) {
+                    console.log("something wrong");
+                    return offset;
+                };
+                TransformedShape.prototype.read = function (memory, offset) {
+                    return offset;
                 };
                 return TransformedShape;
             })();

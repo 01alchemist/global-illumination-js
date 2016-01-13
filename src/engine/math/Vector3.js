@@ -106,6 +106,19 @@ System.register([], function(exports_1) {
                 Vector3.prototype.equals = function (v) {
                     return this.x == v.x && this.y == v.y && this.z == v.z;
                 };
+                Vector3.prototype.writeToMemory = function (memory, offset) {
+                    memory[offset++] = this.x;
+                    memory[offset++] = this.y;
+                    memory[offset++] = this.z;
+                    return offset;
+                };
+                Vector3.prototype.read = function (memory, offset) {
+                    this.x = memory[offset++];
+                    this.y = memory[offset++];
+                    this.z = memory[offset++];
+                    return offset;
+                };
+                Vector3.SIZE = 3;
                 return Vector3;
             })();
             exports_1("Vector3", Vector3);

@@ -13,6 +13,9 @@ export class OBJLoader {
     parentMaterial:Material;
     lastMesh:Mesh;
     materials:Map;
+    private hasMaterials:boolean=false;
+    private materialLoaded:boolean=false;
+    private pendingCallback:Function=null;
 
     constructor() {
 
@@ -25,8 +28,12 @@ export class OBJLoader {
         xhr.open('GET', url, true);
         xhr.onload = function () {
             self.lastMesh = self.loadOBJ(xhr.response);
-            if(onLoad){
-                onLoad(self.lastMesh);
+            if (onLoad) {
+                if(self.hasMaterials && self.materialLoaded){
+                    onLoad(self.lastMesh);
+                }else{
+                    self.pendingCallback = onLoad;
+                }
             }
         };
         xhr.send(null);
@@ -42,7 +49,11 @@ export class OBJLoader {
     }
 
     static getEntry(line:string):{keyword:string, value:string[]} {
-        var _str = line.match(/^(\S+)\s(.*)/).slice(1);
+        try {
+            var _str = line.match(/^(\S+)\s(.*)/).slice(1);
+        } catch (e) {
+            console.log("Error in line:", line);
+        }
         return {
             keyword: _str[0],
             value: _str[1].split(/ {1,}/)
@@ -68,7 +79,7 @@ export class OBJLoader {
         var lines = data.split("\n");
 
         for (var i = 0; i < lines.length; i++) {
-            let line:string = lines[i];
+            let line:string = lines[i].trim();
             if (line.length == 0) {
                 continue;
             }
@@ -78,8 +89,9 @@ export class OBJLoader {
 
             switch (item.keyword) {
                 case "mtllib":
-                    var path:string = item.value[0];
-                    this.loadMTL(p, parent, materials);
+                    this.hasMaterials = true;
+                    this.materialLoaded = false;
+                    this.loadMTL(item.value[0]);
                     break;
 
                 case "usemtl":
@@ -140,16 +152,18 @@ export class OBJLoader {
         }
         return Mesh.newMesh(triangles);
     }
-    getMaterial(index:string):Material{
-        if(this.materials[index] == undefined){
-            var material:Material = new Material();
+
+    getMaterial(index:string):Material {
+        if (this.materials[index] == undefined) {
+            var material:Material = this.parentMaterial.clone();
             this.materials[index] = material;
             return material;
-        }else{
+        } else {
             return this.materials[index];
         }
     }
-    loadMTL(url:string, parent:Material, materials:Map<string,Material>) {
+
+    loadMTL(url:string) {
 
         console.log("Loading MTL:" + url);
         var self = this;
@@ -159,16 +173,16 @@ export class OBJLoader {
             var lines = xhr.response.split("\n");
 
             for (var i = 0; i < lines.length; i++) {
-                let line:string = lines[i];
+                let line:string = lines[i].trim();
                 if (line.length == 0) {
                     continue;
                 }
                 let item = OBJLoader.getEntry(line);
                 var material:Material;
-                switch(item.keyword){
+                switch (item.keyword) {
                     case "newmtl":
                         material = self.materials[item.value[0]];
-                        material = material?material:new Material();
+                        material = material ? material : self.parentMaterial.clone();
                         self.materials[item.value[0]] = material;
                         break;
                     case "Kd":
@@ -180,10 +194,14 @@ export class OBJLoader {
                         break;
                 }
             }
+            self.materialLoaded = true;
+            if(self.pendingCallback){
+                self.pendingCallback(self.lastMesh);
+                self.pendingCallback = null;
+            }
         };
         xhr.send(null);
+
         return null;
-
-
     }
 }

@@ -29,6 +29,22 @@ System.register([], function(exports_1) {
                     this.quadratic = attenation.quadratic;
                     return this;
                 };
+                Attenuation.prototype.clone = function () {
+                    return new Attenuation(this.constant, this.linear, this.quadratic);
+                };
+                Attenuation.prototype.writeToMemory = function (mem, offset) {
+                    mem[offset++] = this.constant;
+                    mem[offset++] = this.linear;
+                    mem[offset++] = this.quadratic;
+                    return offset;
+                };
+                Attenuation.prototype.read = function (mem, offset) {
+                    this.constant = mem[offset++];
+                    this.linear = mem[offset++];
+                    this.quadratic = mem[offset++];
+                    return offset;
+                };
+                Attenuation.SIZE = 3;
                 return Attenuation;
             })();
             exports_1("Attenuation", Attenuation);

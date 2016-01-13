@@ -16,9 +16,16 @@ import {ShapeType} from "./Shape";
 export class Mesh implements Shape{
 
     type:ShapeType = ShapeType.MESH;
+    get size():number{
+        if(this.box && this.triangles){
+            return Box.SIZE + this.triangles.length * Triangle.SIZE + 2;// 1 for length of triangles
+        }else{
+            return 0;
+        }
+    }
 
-    constructor(public box:Box,
-                public triangles:Triangle[],
+    constructor(public box:Box=null,
+                public triangles:Triangle[]=[],
                 public tree:Tree=null) {
 
     }
@@ -38,11 +45,11 @@ export class Mesh implements Shape{
     compile() {
         var m:Mesh = this;
         if (m.tree == null) {
-            var shapes:Shape[] = [];
+            /*var shapes:Shape[] = [];
             m.triangles.forEach(function (triangle, i) {
                 shapes[i] = triangle;
-            });
-            m.tree = Tree.newTree(shapes);
+            });*/
+            m.tree = Tree.newTree(m.triangles, m.box);
         }
     }
 
@@ -146,5 +153,26 @@ export class Mesh implements Shape{
         });
         m.updateBox();
         m.tree = null; // dirty
+    }
+    writeToMemory(memory:Float32Array, offset:number):number{
+        memory[offset++] = this.type;
+        offset = this.box.writeToMemory(memory, offset);
+        memory[offset++] = this.triangles.length;
+        this.triangles.forEach(function (t:Triangle) {
+            offset = t.writeToMemory(memory, offset);
+        });
+        return offset;
+    }
+
+    read(memory:Float32Array, offset:number):number {
+        this.box = new Box();
+        offset = this.box.read(memory, offset);
+        var numTriangles:number = memory[offset++];
+        for (var i = 0; i < numTriangles; i++) {
+            var triangle:Triangle = new Triangle();
+            offset = triangle.read(memory, offset);
+            this.triangles.push(triangle);
+        }
+        return offset;
     }
 }

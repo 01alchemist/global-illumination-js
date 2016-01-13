@@ -15,7 +15,10 @@ import {MaterialUtils} from "../materials/MaterialUtils";
  */
 export class Triangle implements Shape {
 
+    static SIZE:number = Box.SIZE + (Vector3.SIZE * 9) + 2;//+1 for material index
+
     type:ShapeType = ShapeType.TRIANGLE;
+    size:number = Triangle.SIZE;
 
     constructor(public material:Material = new Material(),
                 public box:Box = new Box(),
@@ -26,25 +29,25 @@ export class Triangle implements Shape {
     }
 
     static fromJson(triangles:Triangle|Triangle[]):Triangle|Triangle[] {
-        if(triangles instanceof Triangle){
+        if (triangles instanceof Triangle) {
             var t:Triangle = <Triangle>triangles;
             return new Triangle(
                 MaterialUtils.fromJson(t.material),
                 Box.fromJson(t.box),
-                Vector3.fromJson(t.v1),Vector3.fromJson(t.v2),Vector3.fromJson(t.v3),
-                Vector3.fromJson(t.n1),Vector3.fromJson(t.n2),Vector3.fromJson(t.n3),
-                Vector3.fromJson(t.t1),Vector3.fromJson(t.t2),Vector3.fromJson(t.t3)
+                Vector3.fromJson(t.v1), Vector3.fromJson(t.v2), Vector3.fromJson(t.v3),
+                Vector3.fromJson(t.n1), Vector3.fromJson(t.n2), Vector3.fromJson(t.n3),
+                Vector3.fromJson(t.t1), Vector3.fromJson(t.t2), Vector3.fromJson(t.t3)
             )
-        }else{
+        } else {
             var _ts:Triangle[] = [];
             var ts:Triangle[] = <Triangle[]>triangles;
-            ts.forEach(function(t:Triangle){
+            ts.forEach(function (t:Triangle) {
                 _ts.push(new Triangle(
                     MaterialUtils.fromJson(t.material),
                     Box.fromJson(t.box),
-                    Vector3.fromJson(t.v1),Vector3.fromJson(t.v2),Vector3.fromJson(t.v3),
-                    Vector3.fromJson(t.n1),Vector3.fromJson(t.n2),Vector3.fromJson(t.n3),
-                    Vector3.fromJson(t.t1),Vector3.fromJson(t.t2),Vector3.fromJson(t.t3)
+                    Vector3.fromJson(t.v1), Vector3.fromJson(t.v2), Vector3.fromJson(t.v3),
+                    Vector3.fromJson(t.n1), Vector3.fromJson(t.n2), Vector3.fromJson(t.n3),
+                    Vector3.fromJson(t.t1), Vector3.fromJson(t.t2), Vector3.fromJson(t.t3)
                 ));
             });
             return _ts;
@@ -232,5 +235,71 @@ export class Triangle implements Shape {
         if (t.n3 == undefined || t.n3.equals(zero)) {
             t.n3 = n;
         }
+    }
+
+    writeToMemory(memory:Float32Array, offset:number):number {
+        //Not writing box
+        memory[offset++] = this.type;
+        memory[offset++] = this.material.materialIndex;
+        offset = this.v1.writeToMemory(memory, offset);
+        offset = this.v2.writeToMemory(memory, offset);
+        offset = this.v3.writeToMemory(memory, offset);
+        offset = this.n1.writeToMemory(memory, offset);
+        offset = this.n2.writeToMemory(memory, offset);
+        offset = this.n3.writeToMemory(memory, offset);
+
+        if (this.t1) {
+            offset = this.t1.writeToMemory(memory, offset);
+        } else {
+            offset = offset + Vector3.SIZE;
+        }
+        if (this.t2) {
+            offset = this.t2.writeToMemory(memory, offset);
+        } else {
+            offset = offset + Vector3.SIZE;
+        }
+        if (this.t3) {
+            offset = this.t3.writeToMemory(memory, offset);
+        } else {
+            offset = offset + Vector3.SIZE;
+        }
+
+        return offset;
+    }
+
+    read(memory:Float32Array, offset:number):number {
+
+        var materialIndex:number = memory[offset++];
+        var material:Material = Material.map[materialIndex];
+        if (material) {
+            this.material = material;
+        }
+
+        offset = this.v1.read(memory, offset);
+        offset = this.v2.read(memory, offset);
+        offset = this.v3.read(memory, offset);
+        offset = this.n1.read(memory, offset);
+        offset = this.n2.read(memory, offset);
+        offset = this.n3.read(memory, offset);
+
+        if (this.t1) {
+            offset = this.t1.read(memory, offset);
+        } else {
+            offset = offset + Vector3.SIZE;
+        }
+        if (this.t2) {
+            offset = this.t2.read(memory, offset);
+        } else {
+            offset = offset + Vector3.SIZE;
+        }
+        if (this.t3) {
+            offset = this.t3.read(memory, offset);
+        } else {
+            offset = offset + Vector3.SIZE;
+        }
+
+        this.updateBox();
+
+        return offset;
     }
 }

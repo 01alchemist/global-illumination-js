@@ -8,6 +8,8 @@ import {Ray} from "../../math/Ray";
  */
 export class Box {
 
+    static SIZE:number = Vector3.SIZE * 2;
+
     constructor(public min:Vector3 = new Vector3(), public max:Vector3 = new Vector3()) {
 
     }
@@ -108,5 +110,16 @@ export class Box {
         return {left: left, right: right};
     }
 
+    writeToMemory(memory:Float32Array, offset:number):number {
+        offset = this.min.writeToMemory(memory, offset);
+        offset = this.max.writeToMemory(memory, offset);
+        return offset;
+    }
+
+    read(memory:Float32Array, offset:number):number {
+        offset = this.min.read(memory, offset);
+        offset = this.max.read(memory, offset);
+        return offset;
+    }
 }
 

@@ -1,13 +1,10 @@
-System.register(["../scene/shapes/Mesh", "../scene/materials/Material", "../math/Vector3", "../scene/shapes/Triangle", "../utils/MapUtils", "../math/Color", "../scene/materials/Texture"], function(exports_1) {
-    var Mesh_1, Material_1, Vector3_1, Triangle_1, MapUtils_1, Color_1, Texture_1;
+System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Triangle", "../utils/MapUtils", "../math/Color", "../scene/materials/Texture"], function(exports_1) {
+    var Mesh_1, Vector3_1, Triangle_1, MapUtils_1, Color_1, Texture_1;
     var OBJLoader;
     return {
         setters:[
             function (Mesh_1_1) {
                 Mesh_1 = Mesh_1_1;
-            },
-            function (Material_1_1) {
-                Material_1 = Material_1_1;
             },
             function (Vector3_1_1) {
                 Vector3_1 = Vector3_1_1;
@@ -27,6 +24,9 @@ System.register(["../scene/shapes/Mesh", "../scene/materials/Material", "../math
         execute: function() {
             OBJLoader = (function () {
                 function OBJLoader() {
+                    this.hasMaterials = false;
+                    this.materialLoaded = false;
+                    this.pendingCallback = null;
                 }
                 OBJLoader.prototype.load = function (url, onLoad) {
                     console.log("Loading OBJ:" + url);
@@ -36,7 +36,12 @@ System.register(["../scene/shapes/Mesh", "../scene/materials/Material", "../math
                     xhr.onload = function () {
                         self.lastMesh = self.loadOBJ(xhr.response);
                         if (onLoad) {
-                            onLoad(self.lastMesh);
+                            if (self.hasMaterials && self.materialLoaded) {
+                                onLoad(self.lastMesh);
+                            }
+                            else {
+                                self.pendingCallback = onLoad;
+                            }
                         }
                     };
                     xhr.send(null);
@@ -50,7 +55,12 @@ System.register(["../scene/shapes/Mesh", "../scene/materials/Material", "../math
                     return n;
                 };
                 OBJLoader.getEntry = function (line) {
-                    var _str = line.match(/^(\S+)\s(.*)/).slice(1);
+                    try {
+                        var _str = line.match(/^(\S+)\s(.*)/).slice(1);
+                    }
+                    catch (e) {
+                        console.log("Error in line:", line);
+                    }
                     return {
                         keyword: _str[0],
                         value: _str[1].split(/ {1,}/)
@@ -72,7 +82,7 @@ System.register(["../scene/shapes/Mesh", "../scene/materials/Material", "../math
                     var material = this.parentMaterial;
                     var lines = data.split("\n");
                     for (var i = 0; i < lines.length; i++) {
-                        var line = lines[i];
+                        var line = lines[i].trim();
                         if (line.length == 0) {
                             continue;
                         }
@@ -81,8 +91,9 @@ System.register(["../scene/shapes/Mesh", "../scene/materials/Material", "../math
                         var v = void 0;
                         switch (item.keyword) {
                             case "mtllib":
-                                var path = item.value[0];
-                                this.loadMTL(p, parent, materials);
+                                this.hasMaterials = true;
+                                this.materialLoaded = false;
+                                this.loadMTL(item.value[0]);
                                 break;
                             case "usemtl":
                                 material = this.getMaterial(item.value[0]);
@@ -138,7 +149,7 @@ System.register(["../scene/shapes/Mesh", "../scene/materials/Material", "../math
                 };
                 OBJLoader.prototype.getMaterial = function (index) {
                     if (this.materials[index] == undefined) {
-                        var material = new Material_1.Material();
+                        var material = this.parentMaterial.clone();
                         this.materials[index] = material;
                         return material;
                     }
@@ -146,7 +157,7 @@ System.register(["../scene/shapes/Mesh", "../scene/materials/Material", "../math
                         return this.materials[index];
                     }
                 };
-                OBJLoader.prototype.loadMTL = function (url, parent, materials) {
+                OBJLoader.prototype.loadMTL = function (url) {
                     console.log("Loading MTL:" + url);
                     var self = this;
                     var xhr = new XMLHttpRequest();
@@ -154,7 +165,7 @@ System.register(["../scene/shapes/Mesh", "../scene/materials/Material", "../math
                     xhr.onload = function () {
                         var lines = xhr.response.split("\n");
                         for (var i = 0; i < lines.length; i++) {
-                            var line = lines[i];
+                            var line = lines[i].trim();
                             if (line.length == 0) {
                                 continue;
                             }
@@ -163,7 +174,7 @@ System.register(["../scene/shapes/Mesh", "../scene/materials/Material", "../math
                             switch (item.keyword) {
                                 case "newmtl":
                                     material = self.materials[item.value[0]];
-                                    material = material ? material : new Material_1.Material();
+                                    material = material ? material : self.parentMaterial.clone();
                                     self.materials[item.value[0]] = material;
                                     break;
                                 case "Kd":
@@ -174,6 +185,11 @@ System.register(["../scene/shapes/Mesh", "../scene/materials/Material", "../math
                                     material.texture = Texture_1.Texture.getTexture(item.value[0]);
                                     break;
                             }
+                        }
+                        self.materialLoaded = true;
+                        if (self.pendingCallback) {
+                            self.pendingCallback(self.lastMesh);
+                            self.pendingCallback = null;
                         }
                     };
                     xhr.send(null);

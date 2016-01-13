@@ -22,6 +22,7 @@ export enum ShapeType{
 export interface Shape {
 
     type:ShapeType;
+    size:number;
     box:Box;
     compile();
     intersect(r:Ray):Hit;
@@ -29,12 +30,13 @@ export interface Shape {
     getMaterial(p:Vector3):Material;
     getNormal(p:Vector3):Vector3;
     getRandomPoint():Vector3;
+    writeToMemory(memory:Float32Array, offset:number):number;
 }
 export function ShapesfromJson(shapes:Shape[]):Shape[] {
     var _shapes:Shape[] = [];
-    shapes.forEach(function(shape:Shape){
+    shapes.forEach(function (shape:Shape) {
 
-        switch(shape.type){
+        switch (shape.type) {
             case ShapeType.CUBE:
                 _shapes.push(Cube.fromJson(<Cube>shape));
                 break;
@@ -55,8 +57,8 @@ export function ShapesfromJson(shapes:Shape[]):Shape[] {
     });
     return _shapes;
 }
-export function ShapefromJson(shape:Shape):Shape{
-    switch(shape.type){
+export function ShapefromJson(shape:Shape):Shape {
+    switch (shape.type) {
         case ShapeType.CUBE:
             return Cube.fromJson(<Cube>shape);
             break;
@@ -71,6 +73,36 @@ export function ShapefromJson(shape:Shape):Shape{
             break;
         case ShapeType.TRIANGLE:
             return <Triangle>Triangle.fromJson(<Triangle>shape);
+            break;
+    }
+}
+export function restoreShape(memory:Float32Array, offset:number, container:Shape[]):number {
+    var type:ShapeType = memory[offset++];
+    switch (type) {
+        case ShapeType.CUBE:
+            var cube = new Cube();
+            container.push(cube);
+            return cube.read(memory, offset);
+            break;
+        case ShapeType.SPHERE:
+            var sphere = new Sphere();
+            container.push(sphere);
+            return sphere.read(memory, offset);
+            break;
+        case ShapeType.MESH:
+            var mesh = new Mesh();
+            container.push(mesh);
+            return mesh.read(memory, offset);
+            break;
+        /*case ShapeType.TRANSFORMED_SHAPE:
+            var shape = new TransformedShape();
+            container.push(shape);
+            return shape.read(memory, offset);
+            break;*/
+        case ShapeType.TRIANGLE:
+            var triangle = new Triangle();
+            container.push(triangle);
+            return triangle.read(memory, offset);
             break;
     }
 }

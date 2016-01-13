@@ -97,6 +97,17 @@ System.register(["../../math/Vector3", "../Axis"], function(exports_1) {
                     }
                     return { left: left, right: right };
                 };
+                Box.prototype.writeToMemory = function (memory, offset) {
+                    offset = this.min.writeToMemory(memory, offset);
+                    offset = this.max.writeToMemory(memory, offset);
+                    return offset;
+                };
+                Box.prototype.read = function (memory, offset) {
+                    offset = this.min.read(memory, offset);
+                    offset = this.max.read(memory, offset);
+                    return offset;
+                };
+                Box.SIZE = Vector3_1.Vector3.SIZE * 2;
                 return Box;
             })();
             exports_1("Box", Box);

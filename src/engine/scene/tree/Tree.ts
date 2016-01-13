@@ -15,9 +15,9 @@ export class Tree{
     ){
 
     }
-    static newTree(shapes:Shape[]):Tree {
+    static newTree(shapes:Shape[], box:Box=null):Tree {
         console.log("Building k-d tree ("+shapes.length+" shapes)... ");
-        var box:Box = Box.boxForShapes(shapes);
+        var box:Box = box?box:Box.boxForShapes(shapes);
         var node:Node = Node.newNode(shapes);
         node.split(0);
         return new Tree(box, node);

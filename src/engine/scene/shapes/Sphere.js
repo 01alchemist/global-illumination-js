@@ -1,10 +1,13 @@
-System.register(["../../math/Vector3", "./Box", "../../math/Hit", "./Shape", "../materials/MaterialUtils"], function(exports_1) {
-    var Vector3_1, Box_1, Hit_1, Hit_2, Shape_1, MaterialUtils_1;
+System.register(["../../math/Vector3", "../materials/Material", "./Box", "../../math/Hit", "./Shape", "../materials/MaterialUtils"], function(exports_1) {
+    var Vector3_1, Material_1, Box_1, Hit_1, Hit_2, Shape_1, MaterialUtils_1;
     var Sphere;
     return {
         setters:[
             function (Vector3_1_1) {
                 Vector3_1 = Vector3_1_1;
+            },
+            function (Material_1_1) {
+                Material_1 = Material_1_1;
             },
             function (Box_1_1) {
                 Box_1 = Box_1_1;
@@ -22,11 +25,21 @@ System.register(["../../math/Vector3", "./Box", "../../math/Hit", "./Shape", "..
         execute: function() {
             Sphere = (function () {
                 function Sphere(center, radius, material, box) {
+                    if (center === void 0) { center = new Vector3_1.Vector3(); }
+                    if (radius === void 0) { radius = 1; }
+                    if (material === void 0) { material = null; }
+                    if (box === void 0) { box = null; }
                     this.center = center;
                     this.radius = radius;
                     this.material = material;
                     this.box = box;
                     this.type = Shape_1.ShapeType.SPHERE;
+                    this.size = Vector3_1.Vector3.SIZE + 3;
+                    if (!box && center) {
+                        var min = new Vector3_1.Vector3(center.x - radius, center.y - radius, center.z - radius);
+                        var max = new Vector3_1.Vector3(center.x + radius, center.y + radius, center.z + radius);
+                        this.box = new Box_1.Box(min, max);
+                    }
                 }
                 Sphere.fromJson = function (sphere) {
                     return new Sphere(Vector3_1.Vector3.fromJson(sphere.center), sphere.radius, MaterialUtils_1.MaterialUtils.fromJson(sphere.material), Box_1.Box.fromJson(sphere.box));
@@ -79,6 +92,26 @@ System.register(["../../math/Vector3", "./Box", "../../math/Hit", "./Shape", "..
                             return v.mulScalar(this.radius).add(this.center);
                         }
                     }
+                };
+                Sphere.prototype.writeToMemory = function (memory, offset) {
+                    memory[offset++] = this.type;
+                    offset = this.center.writeToMemory(memory, offset);
+                    memory[offset++] = this.radius;
+                    memory[offset++] = this.material.materialIndex;
+                    return offset;
+                };
+                Sphere.prototype.read = function (memory, offset) {
+                    offset = this.center.read(memory, offset);
+                    this.radius = memory[offset++];
+                    var min = new Vector3_1.Vector3(this.center.x - this.radius, this.center.y - this.radius, this.center.z - this.radius);
+                    var max = new Vector3_1.Vector3(this.center.x + this.radius, this.center.y + this.radius, this.center.z + this.radius);
+                    this.box = new Box_1.Box(min, max);
+                    var materialIndex = memory[offset++];
+                    var material = Material_1.Material.map[materialIndex];
+                    if (material) {
+                        this.material = material;
+                    }
+                    return offset;
                 };
                 return Sphere;
             })();

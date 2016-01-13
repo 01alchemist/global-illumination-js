@@ -54,6 +54,7 @@ System.register(["../materials/Material", "./Box", "../../math/Vector3", "../../
                     this.t2 = t2;
                     this.t3 = t3;
                     this.type = Shape_1.ShapeType.TRIANGLE;
+                    this.size = Triangle.SIZE;
                 }
                 Triangle.fromJson = function (triangles) {
                     if (triangles instanceof Triangle) {
@@ -238,6 +239,69 @@ System.register(["../materials/Material", "./Box", "../../math/Vector3", "../../
                         t.n3 = n;
                     }
                 };
+                Triangle.prototype.writeToMemory = function (memory, offset) {
+                    memory[offset++] = this.type;
+                    memory[offset++] = this.material.materialIndex;
+                    offset = this.v1.writeToMemory(memory, offset);
+                    offset = this.v2.writeToMemory(memory, offset);
+                    offset = this.v3.writeToMemory(memory, offset);
+                    offset = this.n1.writeToMemory(memory, offset);
+                    offset = this.n2.writeToMemory(memory, offset);
+                    offset = this.n3.writeToMemory(memory, offset);
+                    if (this.t1) {
+                        offset = this.t1.writeToMemory(memory, offset);
+                    }
+                    else {
+                        offset = offset + Vector3_1.Vector3.SIZE;
+                    }
+                    if (this.t2) {
+                        offset = this.t2.writeToMemory(memory, offset);
+                    }
+                    else {
+                        offset = offset + Vector3_1.Vector3.SIZE;
+                    }
+                    if (this.t3) {
+                        offset = this.t3.writeToMemory(memory, offset);
+                    }
+                    else {
+                        offset = offset + Vector3_1.Vector3.SIZE;
+                    }
+                    return offset;
+                };
+                Triangle.prototype.read = function (memory, offset) {
+                    var materialIndex = memory[offset++];
+                    var material = Material_1.Material.map[materialIndex];
+                    if (material) {
+                        this.material = material;
+                    }
+                    offset = this.v1.read(memory, offset);
+                    offset = this.v2.read(memory, offset);
+                    offset = this.v3.read(memory, offset);
+                    offset = this.n1.read(memory, offset);
+                    offset = this.n2.read(memory, offset);
+                    offset = this.n3.read(memory, offset);
+                    if (this.t1) {
+                        offset = this.t1.read(memory, offset);
+                    }
+                    else {
+                        offset = offset + Vector3_1.Vector3.SIZE;
+                    }
+                    if (this.t2) {
+                        offset = this.t2.read(memory, offset);
+                    }
+                    else {
+                        offset = offset + Vector3_1.Vector3.SIZE;
+                    }
+                    if (this.t3) {
+                        offset = this.t3.read(memory, offset);
+                    }
+                    else {
+                        offset = offset + Vector3_1.Vector3.SIZE;
+                    }
+                    this.updateBox();
+                    return offset;
+                };
+                Triangle.SIZE = Box_1.Box.SIZE + (Vector3_1.Vector3.SIZE * 9) + 2;
                 return Triangle;
             })();
             exports_1("Triangle", Triangle);

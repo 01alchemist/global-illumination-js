@@ -15,11 +15,12 @@ import {MaterialUtils} from "../materials/MaterialUtils";
 export class Cube implements Shape {
 
     type:ShapeType = ShapeType.CUBE;
+    size:number = (Vector3.SIZE * 2) + 2;// min, max, material index
 
     constructor(public min:Vector3 = new Vector3(),
                 public max:Vector3 = new Vector3(),
-                public material:Material = new Material(),
-                public box:Box = new Box()) {
+                public material:Material = null,
+                public box:Box=null) {
 
     }
 
@@ -89,5 +90,26 @@ export class Cube implements Shape {
         var y = this.min.y + Math.random() * (this.max.y - this.min.y);
         var z = this.min.z + Math.random() * (this.max.z - this.min.z);
         return new Vector3(x, y, z);
+    }
+    writeToMemory(memory:Float32Array, offset:number):number{
+        memory[offset++] = this.type;
+        offset = this.min.writeToMemory(memory, offset);
+        offset = this.max.writeToMemory(memory, offset);
+        memory[offset++] = this.material.materialIndex;
+        return offset;
+    }
+
+    read(memory:Float32Array, offset:number):number {
+        offset = this.min.read(memory, offset);
+        offset = this.max.read(memory, offset);
+
+        this.box = new Box(this.min, this.max);
+
+        var materialIndex:number = memory[offset++];
+        var material:Material = Material.map[materialIndex];
+        if(material){
+            this.material = material;
+        }
+        return offset;
     }
 }
