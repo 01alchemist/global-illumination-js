@@ -82,9 +82,9 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                             console.log("Obj file loaded");
                             mesh = _mesh;
                             scene.add(mesh);
-                            self.pixels = self.renderer.initParallelRender(scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples, bounces);
-                            self.drawPixels(self.pixels, { x: 0, y: 0, width: self.i_width, height: self.i_height });
-                            requestAnimationFrame(self.render.bind(self));
+                            console.time("compile");
+                            mesh.compile();
+                            console.timeEnd("compile");
                         }
                     });
                 };

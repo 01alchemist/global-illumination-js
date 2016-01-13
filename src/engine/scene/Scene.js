@@ -86,9 +86,6 @@ System.register(["../math/Color", "./tree/Tree", "../utils/MapUtils", "../math/V
                     return _scene;
                 };
                 Scene.prototype.compile = function () {
-                    if (this.shared) {
-                        return;
-                    }
                     this.shapes.forEach(function (shape) {
                         shape.compile();
                     });

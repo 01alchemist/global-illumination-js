@@ -10,6 +10,7 @@ import {append} from "../../utils/MapUtils";
 import {Tree} from "../tree/Tree";
 import {Box} from "./Box";
 import {ShapeType} from "./Shape";
+import {SharedTree} from "../tree/SharedTree";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -161,6 +162,10 @@ export class Mesh implements Shape{
         this.triangles.forEach(function (t:Triangle) {
             offset = t.writeToMemory(memory, offset);
         });
+
+        //serialize kd tree
+        offset = SharedTree.compileAndWriteToMemory(memory, this.triangles,offset);
+
         return offset;
     }
 

@@ -10,27 +10,27 @@ import {MathUtils} from "../../utils/MathUtils";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
-export class Node {
+export class SharedNode {
 
-    static map:Array<Node> = [];
+    static map:Array<SharedNode> = [];
 
     index:number;
 
     constructor(public axis:Axis,
                 public point:number,
                 public shapes:Shape[],
-                public left:Node,
-                public right:Node) {
+                public left:SharedNode,
+                public right:SharedNode) {
 
-        this.index = Node.map.push(this) - 1;
+        this.index = SharedNode.map.push(this) - 1;
     }
 
-    static newNode(shapes:Shape[]):Node {
-        return new Node(Axis.AxisNone, 0, shapes, null, null)
+    static newNode(shapes:Shape[]):SharedNode {
+        return new SharedNode(Axis.AxisNone, 0, shapes, null, null)
     }
 
     intersect(r:Ray, tmin:number, tmax:number):Hit {
-        var node:Node = this;
+        var node:SharedNode = this;
         var tsplit:number;
         var leftFirst:boolean;
 
@@ -50,8 +50,8 @@ export class Node {
                 leftFirst = (r.origin.z < node.point) || (r.origin.z == node.point && r.direction.z <= 0)
                 break;
         }
-        var first:Node;
-        var second:Node;
+        var first:SharedNode;
+        var second:SharedNode;
         if (leftFirst) {
             first = node.left;
             second = node.right;
@@ -78,7 +78,7 @@ export class Node {
     }
 
     intersectShapes(r:Ray):Hit {
-        var node:Node = this;
+        var node:SharedNode = this;
         var hit:Hit = NoHit;
         node.shapes.forEach(function (shape:Shape) {
             var h = shape.intersect(r);
@@ -90,7 +90,7 @@ export class Node {
     }
 
     partitionScore(axis:Axis, point:number):number {
-        var node:Node = this;
+        var node:SharedNode = this;
         var left = 0;
         var right = 0;
         node.shapes.forEach(function (shape) {
@@ -111,7 +111,7 @@ export class Node {
     }
 
     partition(size:number, axis:Axis, point:number):{left:Shape[], right:Shape[]} {
-        var node:Node = this;
+        var node:SharedNode = this;
         var left:Shape[] = [];
         var right:Shape[] = [];
         node.shapes.forEach(function (shape:Shape) {
@@ -127,7 +127,7 @@ export class Node {
         return {left: left, right: right};
     }
 
-    split(depth:number) {
+    split(depth:number, memory:Float32Array, offset:number) {
         var node = this;
         if (node.shapes.length < 8) {
             return;
@@ -174,15 +174,28 @@ export class Node {
             bestPoint = mz;
         }
         if (bestAxis == Axis.AxisNone) {
+
             return;
         }
         var p = node.partition(best, bestAxis, bestPoint);
         node.axis = bestAxis;
         node.point = bestPoint;
-        node.left = Node.newNode(p.left);
-        node.right = Node.newNode(p.right);
-        node.left.split(depth + 1);
-        node.right.split(depth + 1);
+        node.left = SharedNode.newNode(p.left);
+        node.right = SharedNode.newNode(p.right);
+
+        offset = node.left.split(depth + 1, memory, offset);
+
+        offset = node.right.split(depth + 1, memory, offset);
+
         node.shapes = null; // only needed at leaf nodes
+
+        return offset;
+    }
+
+    static compileAndWriteToMemory(memory:Float32Array, shapes:Shape[], offset:number):number{
+        var node:SharedNode = new SharedNode(Axis.AxisNone, 0, shapes, null, null);
+        memory[offset++] = node.index;
+        offset = node.split(0, memory, offset);
+        return offset;
     }
 }

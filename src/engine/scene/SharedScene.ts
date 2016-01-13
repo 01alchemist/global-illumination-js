@@ -34,6 +34,7 @@ export class SharedScene extends Scene{
         this.shapes.forEach(function(shape:Shape){
             offset = shape.writeToMemory(memory, offset);
         });
+
         console.timeEnd("getMemory");
         return memory;
     }
