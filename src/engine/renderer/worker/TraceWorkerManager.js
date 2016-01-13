@@ -50,8 +50,7 @@ System.register(["./TraceJob"], function(exports_1) {
                         }
                     }
                     else {
-                        this.jobs.push(new TraceJob_1.TraceJob(this.pixelMemory, {
-                            scene: param.scene,
+                        this.jobs.push(new TraceJob_1.TraceJob(this.pixelMemory, this.sceneMemory, {
                             camera: param.camera,
                             cameraSamples: param.cameraSamples,
                             hitSamples: param.hitSamples,

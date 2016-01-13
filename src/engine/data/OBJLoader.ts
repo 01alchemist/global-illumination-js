@@ -31,6 +31,8 @@ export class OBJLoader {
             if (onLoad) {
                 if(self.hasMaterials && self.materialLoaded){
                     onLoad(self.lastMesh);
+                }else if(!self.hasMaterials){
+                    onLoad(self.lastMesh);
                 }else{
                     self.pendingCallback = onLoad;
                 }

@@ -80,8 +80,8 @@ export class TraceWorkerManager {
             this.jobs.push(
                 new TraceJob(
                     this.pixelMemory,
+                    this.sceneMemory,
                     {
-                        scene: param.scene,
                         camera: param.camera,
                         cameraSamples: param.cameraSamples,
                         hitSamples: param.hitSamples,

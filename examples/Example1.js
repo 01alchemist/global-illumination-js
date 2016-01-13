@@ -1,10 +1,10 @@
-System.register(["../src/engine/math/Color", "../src/engine/scene/materials/LightMaterial", "../src/engine/math/Vector3", "../src/engine/scene/shapes/Sphere", "../src/engine/scene/Scene", "../src/engine/scene/materials/SpecularMaterial", "../src/engine/scene/Camera", "../src/engine/renderer/Renderer", "../src/engine/scene/shapes/Cube", "./CanvasDisplay", "../src/engine/scene/materials/DiffuseMaterial", "../src/engine/scene/materials/Attenuation"], function(exports_1) {
+System.register(["../src/engine/math/Color", "../src/engine/scene/materials/LightMaterial", "../src/engine/math/Vector3", "../src/engine/scene/shapes/Sphere", "../src/engine/scene/materials/SpecularMaterial", "../src/engine/scene/Camera", "../src/engine/renderer/Renderer", "../src/engine/scene/shapes/Cube", "./CanvasDisplay", "../src/engine/scene/materials/DiffuseMaterial", "../src/engine/scene/materials/Attenuation", "../src/engine/scene/SharedScene"], function(exports_1) {
     var __extends = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
-    var Color_1, LightMaterial_1, Vector3_1, Sphere_1, Scene_1, SpecularMaterial_1, Camera_1, Renderer_1, Cube_1, CanvasDisplay_1, DiffuseMaterial_1, Attenuation_1;
+    var Color_1, LightMaterial_1, Vector3_1, Sphere_1, SpecularMaterial_1, Camera_1, Renderer_1, Cube_1, CanvasDisplay_1, DiffuseMaterial_1, Attenuation_1, SharedScene_1;
     var Example1;
     return {
         setters:[
@@ -19,9 +19,6 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
             },
             function (Sphere_1_1) {
                 Sphere_1 = Sphere_1_1;
-            },
-            function (Scene_1_1) {
-                Scene_1 = Scene_1_1;
             },
             function (SpecularMaterial_1_1) {
                 SpecularMaterial_1 = SpecularMaterial_1_1;
@@ -43,6 +40,9 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
             },
             function (Attenuation_1_1) {
                 Attenuation_1 = Attenuation_1_1;
+            },
+            function (SharedScene_1_1) {
+                SharedScene_1 = SharedScene_1_1;
             }],
         execute: function() {
             Example1 = (function (_super) {
@@ -54,7 +54,7 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                 }
                 Example1.prototype.onInit = function () {
                     console.info("onInit");
-                    var scene = new Scene_1.Scene();
+                    var scene = new SharedScene_1.SharedScene();
                     scene.add(Sphere_1.Sphere.newSphere(new Vector3_1.Vector3(1.5, 1, 0), 1, new SpecularMaterial_1.SpecularMaterial(Color_1.Color.hexColor(0x334D5C), 2)));
                     scene.add(Sphere_1.Sphere.newSphere(new Vector3_1.Vector3(-1, 1, 2), 1, new SpecularMaterial_1.SpecularMaterial(Color_1.Color.hexColor(0xEFC94C), 2)));
                     scene.add(Cube_1.Cube.newCube(new Vector3_1.Vector3(-100, -1, -100), new Vector3_1.Vector3(100, 0, 100), new DiffuseMaterial_1.DiffuseMaterial(new Color_1.Color(1, 1, 1))));
@@ -66,14 +66,14 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                     var cameraSamples = 4;
                     var hitSamples = 16;
                     var bounces = 4;
-                    this.pixels = this.renderer.initParallelRender(scene, camera, this.width, this.height, cameraSamples, hitSamples, bounces);
+                    this.pixels = this.renderer.initParallelRender(scene, camera, this.i_width, this.i_height, cameraSamples, hitSamples, bounces);
                     this.drawPixels(this.pixels, { x: 0, y: 0, width: this.i_width, height: this.i_height });
                     requestAnimationFrame(this.render.bind(this));
                 };
                 Example1.prototype.render = function () {
                     if (!this.paused) {
                         this.renderer.iterateParallel();
-                        this.updatePixels(this.pixels);
+                        this.updatePixels(this.pixels, this.renderer.iterations);
                         requestAnimationFrame(this.render.bind(this));
                     }
                 };

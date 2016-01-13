@@ -21,6 +21,7 @@ export abstract class CanvasDisplay {
         this.canvas = <HTMLCanvasElement>document.getElementById("viewport");
         if(this.canvas){
             self.init.call(self);
+            return;
         }
         window.onload = function(){
             self.init.call(self);

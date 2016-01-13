@@ -16,6 +16,7 @@ System.register([], function(exports_1) {
                     this.canvas = document.getElementById("viewport");
                     if (this.canvas) {
                         self.init.call(self);
+                        return;
                     }
                     window.onload = function () {
                         self.init.call(self);

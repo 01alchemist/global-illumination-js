@@ -45,14 +45,6 @@ export class TraceWorker {
         var self = this;
         console.log("Worker init");
 
-        /*this.scene = new Scene();
-        this.scene.add(Sphere.newSphere(new Vector3(1.5, 1, 0), 1, new SpecularMaterial(Color.hexColor(0x334D5C), 2)));
-        this.scene.add(Sphere.newSphere(new Vector3(-1, 1, 2), 1, new SpecularMaterial(Color.hexColor(0xEFC94C), 2)));
-        this.scene.add(Cube.newCube(new Vector3(-100, -1, -100), new Vector3(100, 0, 100), new DiffuseMaterial(new Color(1, 1, 1))));
-        this.scene.add(Sphere.newSphere(new Vector3(-1, 4, -1), 0.5, new LightMaterial(new Color(1, 1, 1), 3, new LinearAttenuation(1))));
-        this.scene.compile();*/
-        //this.camera = Camera.lookAt(new Vector3(0, 2, -5), new Vector3(0, 0, 3), new Vector3(0, 1, 0), 45);
-
         addEventListener('message', (e:any) => {
 
             if (self.command == null) {
@@ -121,6 +113,8 @@ export class TraceWorker {
                 var _x:number = x - this.xoffset;
                 var _y:number = y - this.yoffset;
 
+
+
                 var c:Color = new Color();
 
                 if (this.cameraSamples <= 0) {
@@ -129,7 +123,6 @@ export class TraceWorker {
                         var fu = Math.random();
                         var fv = Math.random();
                         var ray = this.camera.castRay(x, y, this.full_width, this.full_height, fu, fv);
-                        //var ray = this.camera.castRay(_x, _y, this.width, this.height, fu, fv);
                         c = c.add(this.scene.sample(ray, true, this.hitSamples, this.bounces))
                     }
                     c = c.divScalar(this.absCameraSamples)
@@ -141,7 +134,6 @@ export class TraceWorker {
                             var fu = (u + 0.5) / n;
                             var fv = (v + 0.5) / n;
                             var ray:Ray = this.camera.castRay(x, y, this.full_width, this.full_height, fu, fv);
-                            //var ray = this.camera.castRay(_x, _y, this.width, this.height, fu, fv);
                             c = c.add(this.scene.sample(ray, true, this.hitSamples, this.bounces));
                         }
                     }

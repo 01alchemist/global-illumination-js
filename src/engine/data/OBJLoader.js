@@ -39,6 +39,9 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                             if (self.hasMaterials && self.materialLoaded) {
                                 onLoad(self.lastMesh);
                             }
+                            else if (!self.hasMaterials) {
+                                onLoad(self.lastMesh);
+                            }
                             else {
                                 self.pendingCallback = onLoad;
                             }

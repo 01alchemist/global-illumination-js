@@ -12,6 +12,7 @@ import {OBJLoader} from "../src/engine/data/OBJLoader";
 import {CanvasDisplay} from "./CanvasDisplay";
 import {DiffuseMaterial} from "../src/engine/scene/materials/DiffuseMaterial";
 import {LinearAttenuation} from "../src/engine/scene/materials/Attenuation";
+import {SharedScene} from "../src/engine/scene/SharedScene";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
@@ -28,7 +29,7 @@ export class Example1 extends CanvasDisplay {
 
     onInit() {
         console.info("onInit");
-        var scene:Scene = new Scene();
+        var scene:Scene = new SharedScene();
         scene.add(Sphere.newSphere(new Vector3(1.5, 1, 0), 1, new SpecularMaterial(Color.hexColor(0x334D5C), 2)));
         scene.add(Sphere.newSphere(new Vector3(-1, 1, 2), 1, new SpecularMaterial(Color.hexColor(0xEFC94C), 2)));
         scene.add(Cube.newCube(new Vector3(-100, -1, -100), new Vector3(100, 0, 100), new DiffuseMaterial(new Color(1, 1, 1))));
@@ -46,7 +47,7 @@ export class Example1 extends CanvasDisplay {
          console.log("Render completed:");
          );*/
         this.pixels = this.renderer.initParallelRender(
-            scene, camera, this.width, this.height, cameraSamples, hitSamples, bounces
+            scene, camera, this.i_width, this.i_height, cameraSamples, hitSamples, bounces
         );
         this.drawPixels(this.pixels, {x: 0, y: 0, width: this.i_width, height: this.i_height});
 
@@ -57,7 +58,7 @@ export class Example1 extends CanvasDisplay {
     render() {
         if (!this.paused) {
             this.renderer.iterateParallel();
-            this.updatePixels(this.pixels);
+            this.updatePixels(this.pixels, this.renderer.iterations);
             requestAnimationFrame(this.render.bind(this));
         }
     }

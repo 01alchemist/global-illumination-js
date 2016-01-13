@@ -26,6 +26,7 @@ export class SharedScene extends Scene{
         var offset:number = 0;
         //write materials first
         offset = Material.writeToMemory(memory, offset);
+
         //write scene
         memory[offset++] = this.shapes.length;
         offset = this.color.writeToMemory(memory, offset);

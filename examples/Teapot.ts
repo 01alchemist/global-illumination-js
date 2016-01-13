@@ -10,6 +10,7 @@ import {Cube} from "../src/engine/scene/shapes/Cube";
 import {NoAttenuation} from "../src/engine/scene/materials/Attenuation";
 import {OBJLoader} from "../src/engine/data/OBJLoader";
 import {CanvasDisplay} from "./CanvasDisplay";
+import {SharedScene} from "../src/engine/scene/SharedScene";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
@@ -18,7 +19,6 @@ export class Teapot extends CanvasDisplay {
     private renderer:Renderer;
     private pixels:Uint8ClampedArray;
     public paused:boolean = false;
-    private info;
 
     constructor() {
         super();
@@ -26,9 +26,7 @@ export class Teapot extends CanvasDisplay {
 
     onInit() {
 
-        this.info = document.getElementById("info");
-
-        var scene:Scene = new Scene();
+        var scene:Scene = new SharedScene(new Color(0.24,0.25,0.26));
         scene.add(Sphere.newSphere(new Vector3(-2, 5, -3), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
         scene.add(Sphere.newSphere(new Vector3(5, 5, -3), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
         scene.add(Cube.newCube(new Vector3(-30, -1, -30), new Vector3(30, 0, 30), new SpecularMaterial(Color.hexColor(0xFCFAE1), 2)));
@@ -38,10 +36,10 @@ export class Teapot extends CanvasDisplay {
         var self = this;
         var mesh;
         this.renderer = new Renderer();
-        //this.i_width = 2560 / 2;
-        //this.i_height = 1440 / 2;
-        this.i_width = 1280;
-        this.i_height = 720;
+        this.i_width = 2560 / 4;
+        this.i_height = 1440 / 4;
+        //this.i_width = 1280;
+        //this.i_height = 720;
         var cameraSamples:number = 4;
         var hitSamples:number = 16/16;
         var bounces:number = 4;
@@ -56,7 +54,7 @@ export class Teapot extends CanvasDisplay {
                 scene.add(mesh);
 
                 self.pixels = self.renderer.initParallelRender(
-                    scene, camera, self.width, self.height, cameraSamples, hitSamples, bounces
+                    scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples, bounces
                 );
                 self.drawPixels(self.pixels, {x: 0, y: 0, width: self.i_width, height: self.i_height});
 
@@ -68,9 +66,8 @@ export class Teapot extends CanvasDisplay {
 
     render() {
         if (!this.paused) {
-            this.info.innerHTML = "Iterations:"+this.renderer.iterations;
             this.renderer.iterateParallel();
-            this.updatePixels(this.pixels);
+            this.updatePixels(this.pixels, this.renderer.iterations);
             requestAnimationFrame(this.render.bind(this));
         }
     }

@@ -20,10 +20,11 @@ System.register(["../shapes/Box", "./Node", "../../math/Hit"], function(exports_
                 }
                 Tree.newTree = function (shapes, box) {
                     if (box === void 0) { box = null; }
-                    console.log("Building k-d tree (" + shapes.length + " shapes)... ");
+                    console.time("Building k-d tree (" + shapes.length + " shapes)... ");
                     var box = box ? box : Box_1.Box.boxForShapes(shapes);
                     var node = Node_1.Node.newNode(shapes);
                     node.split(0);
+                    console.timeEnd("Building k-d tree (" + shapes.length + " shapes)... ");
                     return new Tree(box, node);
                 };
                 Tree.prototype.intersect = function (r) {

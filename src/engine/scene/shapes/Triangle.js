@@ -269,6 +269,7 @@ System.register(["../materials/Material", "./Box", "../../math/Vector3", "../../
                     return offset;
                 };
                 Triangle.prototype.read = function (memory, offset) {
+                    offset++;
                     var materialIndex = memory[offset++];
                     var material = Material_1.Material.map[materialIndex];
                     if (material) {

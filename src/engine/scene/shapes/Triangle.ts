@@ -268,7 +268,7 @@ export class Triangle implements Shape {
     }
 
     read(memory:Float32Array, offset:number):number {
-
+        offset++;//type
         var materialIndex:number = memory[offset++];
         var material:Material = Material.map[materialIndex];
         if (material) {
