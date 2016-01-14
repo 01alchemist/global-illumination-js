@@ -1,5 +1,6 @@
 import {TraceWorker} from "./TraceWorker";
 import {Thread} from "./Thread";
+import {SharedArrayBuffer} from "./TraceWorkerManager";
 
 export class TraceJob {
 
@@ -11,7 +12,7 @@ export class TraceJob {
     public finished:boolean;
     public thread:Thread;
 
-    constructor(pixelMemory:Uint8Array, sceneMemory:Float32Array, param) {
+    constructor(pixelMemory:Uint8Array, sceneMemory:Float32Array, kdTreeMemory:SharedArrayBuffer, param) {
         this.width = param.width;
         this.height = param.height;
         this.xoffset = param.xoffset;
@@ -34,6 +35,7 @@ export class TraceJob {
             id: this.id,
             pixelMemory: pixelMemory.buffer,
             sceneMemory: sceneMemory.buffer,
+            kdTreeMemory: kdTreeMemory,
             camera: param.camera,
             cameraSamples: param.cameraSamples,
             hitSamples: param.hitSamples,
@@ -44,7 +46,7 @@ export class TraceJob {
             height: param.height,
             xoffset: param.xoffset,
             yoffset: param.yoffset
-        },[pixelMemory.buffer, sceneMemory.buffer]);
+        },[pixelMemory.buffer, sceneMemory.buffer, kdTreeMemory]);
     }
 
     run(iterations:number):void {

@@ -9,14 +9,16 @@ System.register(["./TraceJob"], function(exports_1) {
         execute: function() {
             TraceWorkerManager = (function () {
                 function TraceWorkerManager() {
-                    this.propertySize = 512;
                     this.iterations = 0;
                 }
                 TraceWorkerManager.prototype.configure = function (param) {
                     console.log("configure");
                     var width = param.width;
                     var height = param.height;
-                    this.sceneMemory = param.scene.getMemory();
+                    var scene = param.scene;
+                    this.sceneMemory = scene.getMemory();
+                    var _kdTreeMemory = scene.getKDTreeMemory();
+                    this.kdTreeMemory = SharedArrayBuffer.transfer(_kdTreeMemory);
                     this.pixelMemory = new Uint8ClampedArray(new SharedArrayBuffer(width * height * 3));
                     this.jobs = [];
                     var num_threads = param.num_threads;
@@ -24,7 +26,7 @@ System.register(["./TraceJob"], function(exports_1) {
                         num_threads = navigator["hardwareConcurrency"] || 2;
                     }
                     num_threads = num_threads > 2 ? 2 : num_threads;
-                    num_threads = 4;
+                    num_threads = 2;
                     console.info("hardwareConcurrency:" + num_threads);
                     this.jobs = [];
                     var thread_id = 0;
@@ -33,7 +35,7 @@ System.register(["./TraceJob"], function(exports_1) {
                         var _height = height / num_threads;
                         for (var j = 0; j < num_threads; j++) {
                             for (var i = 0; i < num_threads; i++) {
-                                this.jobs.push(new TraceJob_1.TraceJob(this.pixelMemory, this.sceneMemory, {
+                                this.jobs.push(new TraceJob_1.TraceJob(this.pixelMemory, this.sceneMemory, this.kdTreeMemory, {
                                     camera: param.camera,
                                     cameraSamples: param.cameraSamples,
                                     hitSamples: param.hitSamples,
@@ -50,7 +52,7 @@ System.register(["./TraceJob"], function(exports_1) {
                         }
                     }
                     else {
-                        this.jobs.push(new TraceJob_1.TraceJob(this.pixelMemory, this.sceneMemory, {
+                        this.jobs.push(new TraceJob_1.TraceJob(this.pixelMemory, this.sceneMemory, this.kdTreeMemory, {
                             camera: param.camera,
                             cameraSamples: param.cameraSamples,
                             hitSamples: param.hitSamples,

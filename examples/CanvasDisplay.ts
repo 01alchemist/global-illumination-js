@@ -46,6 +46,8 @@ export abstract class CanvasDisplay {
     drawPixels(pixels:Uint8ClampedArray, rect:{x:number,y:number,width:number,height:number}):void {
         this.i_width = rect.width;
         this.i_height = rect.height;
+        this.canvas.width = rect.width;
+        this.canvas.height = rect.height;
         this.imageData = this.ctx.getImageData(rect.x, rect.y, rect.width, rect.height);
         this.data = this.imageData.data;
         for (var y = 0; y < rect.height; y++) {

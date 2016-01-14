@@ -1,4 +1,5 @@
 import {TraceJob} from "./TraceJob";
+import {SharedScene} from "../../scene/SharedScene";
 /**
  * Created by Nidin on 4/1/2016.
  */
@@ -11,9 +12,8 @@ export interface SharedArrayBuffer extends ArrayBuffer {
 
 export class TraceWorkerManager {
 
-    private propertySize:number = 512;
-    private propertyMemory:Uint8Array;
     private sceneMemory:Float32Array;
+    private kdTreeMemory:SharedArrayBuffer;
     private pixelMemory:Uint8ClampedArray;
 
     private jobs:Array<TraceJob>;
@@ -29,7 +29,12 @@ export class TraceWorkerManager {
         var height:number = param.height;
 
         //this.sceneMemory = new Float32Array(new SharedArrayBuffer(param.scene.size * Float32Array.BYTES_PER_ELEMENT));
-        this.sceneMemory = param.scene.getMemory();
+        var scene:SharedScene = param.scene;
+        this.sceneMemory = scene.getMemory();
+        var _kdTreeMemory = scene.getKDTreeMemory();
+        //this.kdTreeMemory = new Uint8Array(new SharedArrayBuffer(_kdTreeMemory.buffer.byteLength));
+        this.kdTreeMemory = SharedArrayBuffer.transfer(_kdTreeMemory);
+
         this.pixelMemory = new Uint8ClampedArray(new SharedArrayBuffer(width * height * 3));
 
         this.jobs = [];
@@ -42,7 +47,7 @@ export class TraceWorkerManager {
 
         num_threads = num_threads > 2 ? 2 : num_threads;
 
-        num_threads = 4;//debug temp
+        num_threads = 2;//debug temp
 
         console.info("hardwareConcurrency:" + num_threads);
 
@@ -60,6 +65,7 @@ export class TraceWorkerManager {
                         new TraceJob(
                             this.pixelMemory,
                             this.sceneMemory,
+                            this.kdTreeMemory,
                             {
                                 camera: param.camera,
                                 cameraSamples: param.cameraSamples,
@@ -81,6 +87,7 @@ export class TraceWorkerManager {
                 new TraceJob(
                     this.pixelMemory,
                     this.sceneMemory,
+                    this.kdTreeMemory,
                     {
                         camera: param.camera,
                         cameraSamples: param.cameraSamples,

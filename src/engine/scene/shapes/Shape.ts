@@ -21,6 +21,8 @@ export enum ShapeType{
 }
 export interface Shape {
 
+    index:number;
+    /*id:number;*/
     type:ShapeType;
     size:number;
     box:Box;

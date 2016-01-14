@@ -68,8 +68,8 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                     var self = this;
                     var mesh;
                     this.renderer = new Renderer_1.Renderer();
-                    this.i_width = 2560 / 2;
-                    this.i_height = 1440 / 2;
+                    this.i_width = 2560 / 4;
+                    this.i_height = 1440 / 4;
                     var cameraSamples = 1;
                     var hitSamples = 1;
                     var bounces = 5;
@@ -82,9 +82,8 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                             console.log("Obj file loaded");
                             mesh = _mesh;
                             scene.add(mesh);
-                            console.time("compile");
-                            mesh.compile();
-                            console.timeEnd("compile");
+                            self.pixels = self.renderer.initParallelRender(scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples, bounces);
+                            self.drawPixels(self.pixels, { x: 0, y: 0, width: self.i_width, height: self.i_height });
                         }
                     });
                 };

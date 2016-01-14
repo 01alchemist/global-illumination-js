@@ -161,10 +161,11 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                     memory[offset++] = this.type;
                     offset = this.box.writeToMemory(memory, offset);
                     memory[offset++] = this.triangles.length;
-                    this.triangles.forEach(function (t) {
+                    this.triangles.forEach(function (t, index) {
+                        t.index = index;
                         offset = t.writeToMemory(memory, offset);
                     });
-                    offset = SharedTree_1.SharedTree.compileAndWriteToMemory(memory, this.triangles, offset);
+                    this.tree = SharedTree_1.SharedTree.newTree(this.triangles, this.box);
                     return offset;
                 };
                 Mesh.prototype.read = function (memory, offset) {

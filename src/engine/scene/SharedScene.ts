@@ -4,10 +4,19 @@ import {Shape} from "./shapes/Shape";
 import {Scene} from "./Scene";
 import {Material} from "./materials/Material";
 import {restoreShape} from "./shapes/Shape";
+import {SharedTree} from "./tree/SharedTree";
+import {ShapeType} from "./shapes/Shape";
+import {Mesh} from "./shapes/Mesh";
 /**
  * Created by r3f on 13/1/2016.
  */
+interface TextEncoder{
+    new();
+    encode(value:string):Uint8Array;
+}
 export class SharedScene extends Scene{
+
+    sharedTreeMap:SharedTree[];
 
     constructor(color:Color = new Color(),
                 shapes:Shape[] = [],
@@ -31,15 +40,29 @@ export class SharedScene extends Scene{
         memory[offset++] = this.shapes.length;
         offset = this.color.writeToMemory(memory, offset);
 
-        this.shapes.forEach(function(shape:Shape){
+        var self = this;
+
+        this.shapes.forEach(function(shape:Shape, index:number){
+
             offset = shape.writeToMemory(memory, offset);
+
+            if(shape.type == ShapeType.MESH){
+                if(self.sharedTreeMap == null){
+                    self.sharedTreeMap = [];
+                }
+                self.sharedTreeMap[index] = <SharedTree>(<Mesh>shape).tree;
+            }
         });
 
         console.timeEnd("getMemory");
         return memory;
     }
-    static getScene(memory:Float32Array):Scene{
+    getKDTreeMemory():Uint8Array{
+        return new TextEncoder().encode(JSON.stringify(this.sharedTreeMap));
+    }
+    static getScene(memory:Float32Array, tree:SharedTree[]=null):Scene{
         console.time("getScene");
+        console.log(tree);
         var scene:Scene = new Scene();
 
         var offset:number = Material.restore(memory);
@@ -51,7 +74,11 @@ export class SharedScene extends Scene{
 
         for (var i = 0; i < numShapes; i++) {
             offset = restoreShape(memory, offset, shapes);
-            scene.add(shapes[i]);
+            var shape:Shape = shapes[i];
+            scene.add(shape);
+            if(shape.type == ShapeType.MESH){
+                (<Mesh>shape).tree = SharedTree.fromJson(tree[i], <Mesh>shape);
+            }
         }
         console.timeEnd("getScene");
         return scene;

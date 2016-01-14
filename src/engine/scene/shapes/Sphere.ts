@@ -15,6 +15,7 @@ export class Sphere implements Shape {
 
     type:ShapeType = ShapeType.SPHERE;
     size:number = Vector3.SIZE + 3;// center, radius, material index
+    index:number;
 
     constructor(public center:Vector3 = new Vector3(),
                 public radius:number=1,

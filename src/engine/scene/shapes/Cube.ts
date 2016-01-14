@@ -16,6 +16,7 @@ export class Cube implements Shape {
 
     type:ShapeType = ShapeType.CUBE;
     size:number = (Vector3.SIZE * 2) + 2;// min, max, material index
+    index:number;
 
     constructor(public min:Vector3 = new Vector3(),
                 public max:Vector3 = new Vector3(),
