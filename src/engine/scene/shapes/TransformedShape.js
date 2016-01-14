@@ -74,7 +74,7 @@ System.register(["../../math/Matrix4", "../../math/Hit", "./Shape"], function(ex
                     return this.matrix.mulPosition(this.shape.getRandomPoint());
                 };
                 TransformedShape.prototype.writeToMemory = function (mem, offset) {
-                    console.log("something wrong");
+                    console.error("Method TransformedShape::writeToMemory not implementation");
                     return offset;
                 };
                 TransformedShape.prototype.read = function (memory, offset) {

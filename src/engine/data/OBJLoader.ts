@@ -14,7 +14,7 @@ export class OBJLoader {
     lastMesh:Mesh;
     materials:Map;
     private hasMaterials:boolean=false;
-    private materialLoaded:boolean=false;
+    private materialsLoaded:boolean=false;
     private pendingCallback:Function=null;
 
     constructor() {
@@ -30,7 +30,7 @@ export class OBJLoader {
             self.lastMesh = self.loadOBJ(xhr.response);
             self.lastMesh.smoothNormals();
             if (onLoad) {
-                if(self.hasMaterials && self.materialLoaded){
+                if(self.hasMaterials && self.materialsLoaded){
                     onLoad(self.lastMesh);
                 }else if(!self.hasMaterials){
                     onLoad(self.lastMesh);
@@ -51,7 +51,7 @@ export class OBJLoader {
         return n;
     }
 
-    static getEntry(line:string):{keyword:string, value:string[]} {
+    static parseLine(line:string):{keyword:string, value:string[]} {
         try {
             var _str = line.match(/^(\S+)\s(.*)/).slice(1);
         } catch (e) {
@@ -73,6 +73,9 @@ export class OBJLoader {
 
     loadOBJ(data:string):Mesh {
 
+        this.hasMaterials = false;
+        this.materialsLoaded = false;
+
         var vs:Vector3[] = [null]; //1024 // 1-based indexing
         var vts:Vector3[] = [null]; // 1-based indexing
         var vns:Vector3[] = [null]; // 1-based indexing
@@ -86,14 +89,14 @@ export class OBJLoader {
             if (line.length == 0) {
                 continue;
             }
-            let item = OBJLoader.getEntry(line);
+            let item = OBJLoader.parseLine(line);
             let f:number[];
             let v:Vector3;
 
             switch (item.keyword) {
                 case "mtllib":
                     this.hasMaterials = true;
-                    this.materialLoaded = false;
+                    this.materialsLoaded = false;
                     this.loadMTL(item.value[0]);
                     break;
 
@@ -180,7 +183,7 @@ export class OBJLoader {
                 if (line.length == 0) {
                     continue;
                 }
-                let item = OBJLoader.getEntry(line);
+                let item = OBJLoader.parseLine(line);
                 var material:Material;
                 switch (item.keyword) {
                     case "newmtl":
@@ -197,7 +200,7 @@ export class OBJLoader {
                         break;
                 }
             }
-            self.materialLoaded = true;
+            self.materialsLoaded = true;
             if(self.pendingCallback){
                 self.pendingCallback(self.lastMesh);
                 self.pendingCallback = null;

@@ -25,7 +25,7 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
             OBJLoader = (function () {
                 function OBJLoader() {
                     this.hasMaterials = false;
-                    this.materialLoaded = false;
+                    this.materialsLoaded = false;
                     this.pendingCallback = null;
                 }
                 OBJLoader.prototype.load = function (url, onLoad) {
@@ -37,7 +37,7 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                         self.lastMesh = self.loadOBJ(xhr.response);
                         self.lastMesh.smoothNormals();
                         if (onLoad) {
-                            if (self.hasMaterials && self.materialLoaded) {
+                            if (self.hasMaterials && self.materialsLoaded) {
                                 onLoad(self.lastMesh);
                             }
                             else if (!self.hasMaterials) {
@@ -58,7 +58,7 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                     }
                     return n;
                 };
-                OBJLoader.getEntry = function (line) {
+                OBJLoader.parseLine = function (line) {
                     try {
                         var _str = line.match(/^(\S+)\s(.*)/).slice(1);
                     }
@@ -78,6 +78,8 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                     return floats;
                 };
                 OBJLoader.prototype.loadOBJ = function (data) {
+                    this.hasMaterials = false;
+                    this.materialsLoaded = false;
                     var vs = [null];
                     var vts = [null];
                     var vns = [null];
@@ -90,13 +92,13 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                         if (line.length == 0) {
                             continue;
                         }
-                        var item = OBJLoader.getEntry(line);
+                        var item = OBJLoader.parseLine(line);
                         var f = void 0;
                         var v = void 0;
                         switch (item.keyword) {
                             case "mtllib":
                                 this.hasMaterials = true;
-                                this.materialLoaded = false;
+                                this.materialsLoaded = false;
                                 this.loadMTL(item.value[0]);
                                 break;
                             case "usemtl":
@@ -173,7 +175,7 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                             if (line.length == 0) {
                                 continue;
                             }
-                            var item = OBJLoader.getEntry(line);
+                            var item = OBJLoader.parseLine(line);
                             var material;
                             switch (item.keyword) {
                                 case "newmtl":
@@ -190,7 +192,7 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                                     break;
                             }
                         }
-                        self.materialLoaded = true;
+                        self.materialsLoaded = true;
                         if (self.pendingCallback) {
                             self.pendingCallback(self.lastMesh);
                             self.pendingCallback = null;

@@ -77,12 +77,13 @@ export class TransformedShape implements Shape {
     }
 
     writeToMemory(mem:Float32Array, offset:number):number {
-        console.log("something wrong");
         //TODO: implementation
+        console.error("Method TransformedShape::writeToMemory not implementation");
         return offset;
     }
 
     read(memory:Float32Array, offset:number):number {
+        //TODO: implementation
         return offset;
     }
 }
