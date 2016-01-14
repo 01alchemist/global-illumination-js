@@ -1,10 +1,10 @@
-System.register(["../src/engine/math/Color", "../src/engine/scene/materials/LightMaterial", "../src/engine/math/Vector3", "../src/engine/scene/shapes/Sphere", "../src/engine/scene/materials/SpecularMaterial", "../src/engine/scene/Camera", "../src/engine/renderer/Renderer", "../src/engine/scene/shapes/Cube", "./CanvasDisplay", "../src/engine/scene/materials/DiffuseMaterial", "../src/engine/scene/materials/Attenuation", "../src/engine/scene/SharedScene"], function(exports_1) {
+System.register(["../src/engine/math/Color", "../src/engine/scene/materials/LightMaterial", "../src/engine/math/Vector3", "../src/engine/scene/shapes/Sphere", "../src/engine/scene/materials/SpecularMaterial", "../src/engine/scene/Camera", "../src/engine/renderer/Renderer", "../src/engine/scene/shapes/Cube", "./CanvasDisplay", "../src/engine/scene/materials/DiffuseMaterial", "../src/engine/scene/materials/Attenuation", "../src/engine/scene/SharedScene", "../src/engine/utils/MathUtils", "../src/engine/scene/materials/GlossyMaterial"], function(exports_1) {
     var __extends = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
-    var Color_1, LightMaterial_1, Vector3_1, Sphere_1, SpecularMaterial_1, Camera_1, Renderer_1, Cube_1, CanvasDisplay_1, DiffuseMaterial_1, Attenuation_1, SharedScene_1;
+    var Color_1, LightMaterial_1, Vector3_1, Sphere_1, SpecularMaterial_1, Camera_1, Renderer_1, Cube_1, CanvasDisplay_1, DiffuseMaterial_1, Attenuation_1, SharedScene_1, MathUtils_1, GlossyMaterial_1;
     var Example1;
     return {
         setters:[
@@ -43,6 +43,12 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
             },
             function (SharedScene_1_1) {
                 SharedScene_1 = SharedScene_1_1;
+            },
+            function (MathUtils_1_1) {
+                MathUtils_1 = MathUtils_1_1;
+            },
+            function (GlossyMaterial_1_1) {
+                GlossyMaterial_1 = GlossyMaterial_1_1;
             }],
         execute: function() {
             Example1 = (function (_super) {
@@ -55,17 +61,19 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                 Example1.prototype.onInit = function () {
                     console.info("onInit");
                     var scene = new SharedScene_1.SharedScene();
+                    var glass = new GlossyMaterial_1.GlossyMaterial(new Color_1.Color(1, 0, 0), 1.5, MathUtils_1.MathUtils.radians(0));
+                    scene.add(Sphere_1.Sphere.newSphere(new Vector3_1.Vector3(-1, 0.5, 1), 0.5, glass));
                     scene.add(Sphere_1.Sphere.newSphere(new Vector3_1.Vector3(1.5, 1, 0), 1, new SpecularMaterial_1.SpecularMaterial(Color_1.Color.hexColor(0x334D5C), 2)));
                     scene.add(Sphere_1.Sphere.newSphere(new Vector3_1.Vector3(-1, 1, 2), 1, new SpecularMaterial_1.SpecularMaterial(Color_1.Color.hexColor(0xEFC94C), 2)));
                     scene.add(Cube_1.Cube.newCube(new Vector3_1.Vector3(-100, -1, -100), new Vector3_1.Vector3(100, 0, 100), new DiffuseMaterial_1.DiffuseMaterial(new Color_1.Color(1, 1, 1))));
                     scene.add(Sphere_1.Sphere.newSphere(new Vector3_1.Vector3(-1, 4, -1), 0.5, new LightMaterial_1.LightMaterial(new Color_1.Color(1, 1, 1), 3, new Attenuation_1.LinearAttenuation(1))));
                     var camera = Camera_1.Camera.lookAt(new Vector3_1.Vector3(0, 2, -5), new Vector3_1.Vector3(0, 0, 3), new Vector3_1.Vector3(0, 1, 0), 45);
                     this.renderer = new Renderer_1.Renderer();
-                    this.i_width = 2560 / 4;
-                    this.i_height = 1440 / 4;
-                    var cameraSamples = 4;
-                    var hitSamples = 16;
-                    var bounces = 4;
+                    this.i_width = 2560 / 2;
+                    this.i_height = 1440 / 2;
+                    var cameraSamples = 2;
+                    var hitSamples = 4;
+                    var bounces = 5;
                     this.pixels = this.renderer.initParallelRender(scene, camera, this.i_width, this.i_height, cameraSamples, hitSamples, bounces);
                     this.drawPixels(this.pixels, { x: 0, y: 0, width: this.i_width, height: this.i_height });
                     requestAnimationFrame(this.render.bind(this));

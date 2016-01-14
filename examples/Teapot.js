@@ -64,8 +64,8 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                     this.i_width = 2560 / 4;
                     this.i_height = 1440 / 4;
                     var cameraSamples = 4;
-                    var hitSamples = 16 / 16;
-                    var bounces = 4;
+                    var hitSamples = 16;
+                    var bounces = 5;
                     var camera = Camera_1.Camera.lookAt(new Vector3_1.Vector3(2, 5, -6), new Vector3_1.Vector3(0.5, 1, 0), new Vector3_1.Vector3(0, 1, 0), 45);
                     loader.load("teapot.obj", function (_mesh) {
                         if (!_mesh) {

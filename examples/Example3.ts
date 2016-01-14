@@ -13,13 +13,13 @@ import {CanvasDisplay} from "./CanvasDisplay";
 import {DiffuseMaterial} from "../src/engine/scene/materials/DiffuseMaterial";
 import {LinearAttenuation} from "../src/engine/scene/materials/Attenuation";
 import {SharedScene} from "../src/engine/scene/SharedScene";
-import {ClearMaterial} from "../src/engine/scene/materials/ClearMaterial";
-import {MathUtils} from "../src/engine/utils/MathUtils";
 import {GlossyMaterial} from "../src/engine/scene/materials/GlossyMaterial";
+import {MathUtils} from "../src/engine/utils/MathUtils";
+import {QuadraticAttenuation} from "../src/engine/scene/materials/Attenuation";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
-export class Example1 extends CanvasDisplay {
+export class Example3 extends CanvasDisplay {
 
     private renderer:Renderer;
     private pixels:Uint8ClampedArray;
@@ -33,16 +33,24 @@ export class Example1 extends CanvasDisplay {
     onInit() {
         console.info("onInit");
         var scene:Scene = new SharedScene();
-        //var glass = new ClearMaterial(5.5, MathUtils.radians(30));
-        var glass = new GlossyMaterial(new Color(1,0,0), 1.5, MathUtils.radians(0));
-        //glass.transparent = true;
-        scene.add(Sphere.newSphere(new Vector3(-1, 0.5, 1), 0.5, glass));
-        scene.add(Sphere.newSphere(new Vector3(1.5, 1, 0), 1, new SpecularMaterial(Color.hexColor(0x334D5C), 2)));
-        scene.add(Sphere.newSphere(new Vector3(-1, 1, 2), 1, new SpecularMaterial(Color.hexColor(0xEFC94C), 2)));
-        scene.add(Cube.newCube(new Vector3(-100, -1, -100), new Vector3(100, 0, 100), new DiffuseMaterial(new Color(1, 1, 1))));
-        scene.add(Sphere.newSphere(new Vector3(-1, 4, -1), 0.5, new LightMaterial(new Color(1, 1, 1), 3, new LinearAttenuation(1))));
 
-        var camera:Camera = Camera.lookAt(new Vector3(0, 2, -5), new Vector3(0, 0, 3), new Vector3(0, 1, 0), 45);
+        var material = new DiffuseMaterial(Color.hexColor(0xFCFAE1));
+        scene.add(Cube.newCube(new Vector3(-1000, -1, -1000), new Vector3(1000, 0, 1000), material));
+        for(var x = -20; x <= 20; x++){
+            for(var z = -20; z <= 20; z++){
+                if((x+z)%2 == 0){
+                    continue;
+                }
+                var s = 0.1;
+                var min = new Vector3(x - s, 0, z - s);
+            var max = new Vector3(x + s, 2, z + s);
+                scene.add(Cube.newCube(min, max, material));
+            }
+        }
+        scene.add(Cube.newCube(new Vector3(-5, 10, -5), new Vector3(5, 11, 5), new LightMaterial(new Color(1, 1, 1), 5, new QuadraticAttenuation(0.05))));
+        var camera:Camera = Camera.lookAt(new Vector3(20, 10, 0), new Vector3(8, 0, 0), new Vector3(0, 1, 0), 45);
+        
+        
         this.renderer = new Renderer();
         this.i_width = 2560 / 2;
         this.i_height = 1440 / 2;
@@ -68,4 +76,4 @@ export class Example1 extends CanvasDisplay {
     }
 
 }
-new Example1();
+new Example3();
