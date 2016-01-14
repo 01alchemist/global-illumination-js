@@ -70,8 +70,8 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                     this.renderer = new Renderer_1.Renderer();
                     this.i_width = 2560 / 2;
                     this.i_height = 1440 / 2;
-                    var cameraSamples = 1;
-                    var hitSamples = 1;
+                    var cameraSamples = 4;
+                    var hitSamples = 24;
                     var bounces = 5;
                     var camera = Camera_1.Camera.lookAt(new Vector3_1.Vector3(8, 3, 0.5), new Vector3_1.Vector3(-1, 2.5, 0.5), new Vector3_1.Vector3(0, 1, 0), 45);
                     loader.load("gopher.obj", function (_mesh) {

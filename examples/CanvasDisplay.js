@@ -10,6 +10,7 @@ System.register([], function(exports_1) {
                     this.width = width;
                     this.height = height;
                     this.time = 0;
+                    this.totalTime = 0;
                     this.delta = 0;
                     this.iterations = 0;
                     var self = this;
@@ -69,9 +70,10 @@ System.register([], function(exports_1) {
                         var _time = this.time;
                         this.time = performance.now();
                         this.delta = Math.round(this.time - _time) / 1000;
+                        this.totalTime += this.delta;
                         this.iterations = iterations;
                     }
-                    this.info.innerHTML = "Iterations:" + iterations + ", time:" + this.delta + " sec";
+                    this.info.innerHTML = "Iterations:" + iterations + ", time/iteration:" + this.delta + " sec, total time:" + this.totalTime.toFixed(2) + " sec";
                 };
                 return CanvasDisplay;
             })();

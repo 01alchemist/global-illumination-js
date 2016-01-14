@@ -11,6 +11,7 @@ export abstract class CanvasDisplay {
     i_height:number;
     info;
     time:number=0;
+    totalTime:number=0;
     delta:number=0;
     iterations:number=0;
 
@@ -84,8 +85,9 @@ export abstract class CanvasDisplay {
             var _time = this.time;
             this.time = performance.now();
             this.delta = Math.round(this.time - _time) / 1000;
+            this.totalTime += this.delta;
             this.iterations = iterations;
         }
-        this.info.innerHTML = "Iterations:"+ iterations +", time:" + this.delta +" sec";
+        this.info.innerHTML = "Iterations:"+ iterations +", time/iteration:" + this.delta +" sec, total time:"+this.totalTime.toFixed(2)+" sec";
     }
 }

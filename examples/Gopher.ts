@@ -48,8 +48,8 @@ export class Gopher extends CanvasDisplay {
         this.i_height = 1440 / 2;
         //this.i_width = 1280;
         //this.i_height = 720;
-        var cameraSamples:number = 1;
-        var hitSamples:number = 1;
+        var cameraSamples:number = 4;
+        var hitSamples:number = 24;
         var bounces:number = 5;
         var camera:Camera = Camera.lookAt(new Vector3(8, 3, 0.5), new Vector3(-1, 2.5, 0.5), new Vector3(0, 1, 0), 45);
 
