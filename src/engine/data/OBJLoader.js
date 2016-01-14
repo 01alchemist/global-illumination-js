@@ -35,6 +35,7 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                     xhr.open('GET', url, true);
                     xhr.onload = function () {
                         self.lastMesh = self.loadOBJ(xhr.response);
+                        self.lastMesh.smoothNormals();
                         if (onLoad) {
                             if (self.hasMaterials && self.materialLoaded) {
                                 onLoad(self.lastMesh);

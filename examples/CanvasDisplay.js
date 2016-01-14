@@ -5,8 +5,8 @@ System.register([], function(exports_1) {
         execute: function() {
             CanvasDisplay = (function () {
                 function CanvasDisplay(width, height) {
-                    if (width === void 0) { width = 1280; }
-                    if (height === void 0) { height = 720; }
+                    if (width === void 0) { width = 2560; }
+                    if (height === void 0) { height = 1440; }
                     this.width = width;
                     this.height = height;
                     this.time = 0;
@@ -26,8 +26,6 @@ System.register([], function(exports_1) {
                 CanvasDisplay.prototype.init = function () {
                     console.info("init");
                     this.canvas = document.getElementById("viewport");
-                    this.canvas.width = this.width;
-                    this.canvas.height = this.height;
                     this.ctx = this.canvas.getContext("2d");
                     this.info = document.getElementById("info");
                     if (this.onInit) {
@@ -37,6 +35,8 @@ System.register([], function(exports_1) {
                 CanvasDisplay.prototype.drawPixels = function (pixels, rect) {
                     this.i_width = rect.width;
                     this.i_height = rect.height;
+                    this.canvas.width = rect.width;
+                    this.canvas.height = rect.height;
                     this.imageData = this.ctx.getImageData(rect.x, rect.y, rect.width, rect.height);
                     this.data = this.imageData.data;
                     for (var y = 0; y < rect.height; y++) {

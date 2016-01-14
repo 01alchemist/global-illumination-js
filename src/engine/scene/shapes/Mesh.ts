@@ -109,6 +109,15 @@ export class Mesh implements Shape{
         //var lookup = make(map[Vector3]Vector3)
         var lookup:Map = new Map();
         m.triangles.forEach(function (t:Triangle) {
+            if(!lookup[t.v1]){
+                lookup[t.v1] = new Vector3();
+            }
+            if(!lookup[t.v2]){
+                lookup[t.v2] = new Vector3();
+            }
+            if(!lookup[t.v3]){
+                lookup[t.v3] = new Vector3();
+            }
             lookup[t.v1] = lookup[t.v1].add(t.n1);
             lookup[t.v2] = lookup[t.v2].add(t.n2);
             lookup[t.v3] = lookup[t.v3].add(t.n3);
