@@ -61,11 +61,11 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                     scene.add(Sphere_1.Sphere.newSphere(new Vector3_1.Vector3(-1, 4, -1), 0.5, new LightMaterial_1.LightMaterial(new Color_1.Color(1, 1, 1), 3, new Attenuation_1.LinearAttenuation(1))));
                     var camera = Camera_1.Camera.lookAt(new Vector3_1.Vector3(0, 2, -5), new Vector3_1.Vector3(0, 0, 3), new Vector3_1.Vector3(0, 1, 0), 45);
                     this.renderer = new Renderer_1.Renderer();
-                    this.i_width = 2560 / 4;
-                    this.i_height = 1440 / 4;
-                    var cameraSamples = 4;
-                    var hitSamples = 16;
-                    var bounces = 4;
+                    this.i_width = 2560 / 2;
+                    this.i_height = 1440 / 2;
+                    var cameraSamples = 2;
+                    var hitSamples = 4;
+                    var bounces = 5;
                     this.pixels = this.renderer.initParallelRender(scene, camera, this.i_width, this.i_height, cameraSamples, hitSamples, bounces);
                     this.drawPixels(this.pixels, { x: 0, y: 0, width: this.i_width, height: this.i_height });
                     requestAnimationFrame(this.render.bind(this));

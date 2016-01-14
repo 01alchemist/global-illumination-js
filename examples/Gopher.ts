@@ -50,7 +50,7 @@ export class Gopher extends CanvasDisplay {
         //this.i_height = 720;
         var cameraSamples:number = 1;
         var hitSamples:number = 1;
-        var bounces:number = 5;
+        var bounces:number = 3;
         var camera:Camera = Camera.lookAt(new Vector3(8, 3, 0.5), new Vector3(-1, 2.5, 0.5), new Vector3(0, 1, 0), 45);
 
         loader.load("gopher.obj", function (_mesh) {

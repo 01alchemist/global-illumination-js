@@ -37,15 +37,12 @@ export class Example1 extends CanvasDisplay {
 
         var camera:Camera = Camera.lookAt(new Vector3(0, 2, -5), new Vector3(0, 0, 3), new Vector3(0, 1, 0), 45);
         this.renderer = new Renderer();
-        this.i_width = 2560 / 4;
-        this.i_height = 1440 / 4;
-        var cameraSamples:number = 4;
-        var hitSamples:number = 16;
-        var bounces:number = 4;
-        /*var pixels:Uint8ClampedArray = renderer.render(
-         scene, camera, w, h, cameraSamples, hitSamples, bounces
-         console.log("Render completed:");
-         );*/
+        this.i_width = 2560 / 2;
+        this.i_height = 1440 / 2;
+        var cameraSamples:number = 2;
+        var hitSamples:number = 4;
+        var bounces:number = 5;
+
         this.pixels = this.renderer.initParallelRender(
             scene, camera, this.i_width, this.i_height, cameraSamples, hitSamples, bounces
         );
