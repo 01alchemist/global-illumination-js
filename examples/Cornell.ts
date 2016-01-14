@@ -13,13 +13,13 @@ import {CanvasDisplay} from "./CanvasDisplay";
 import {DiffuseMaterial} from "../src/engine/scene/materials/DiffuseMaterial";
 import {LinearAttenuation} from "../src/engine/scene/materials/Attenuation";
 import {SharedScene} from "../src/engine/scene/SharedScene";
-import {ClearMaterial} from "../src/engine/scene/materials/ClearMaterial";
-import {MathUtils} from "../src/engine/utils/MathUtils";
 import {GlossyMaterial} from "../src/engine/scene/materials/GlossyMaterial";
+import {MathUtils} from "../src/engine/utils/MathUtils";
+import {QuadraticAttenuation} from "../src/engine/scene/materials/Attenuation";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
-export class Example1 extends CanvasDisplay {
+export class Cornell extends CanvasDisplay {
 
     private renderer:Renderer;
     private pixels:Uint8ClampedArray;
@@ -27,22 +27,32 @@ export class Example1 extends CanvasDisplay {
 
     constructor() {
         super();
-        console.info("Example1");
+        console.info("Cornell");
     }
 
     onInit() {
         console.info("onInit");
         var scene:Scene = new SharedScene();
-        //var glass = new ClearMaterial(5.5, MathUtils.radians(30));
-        var glass = new GlossyMaterial(new Color(1,0,0), 1.5, MathUtils.radians(0));
-        //glass.transparent = true;
-        scene.add(Sphere.newSphere(new Vector3(-1, 0.5, 1), 0.5, glass));
-        scene.add(Sphere.newSphere(new Vector3(1.5, 1, 0), 1, new SpecularMaterial(Color.hexColor(0x334D5C), 2)));
-        scene.add(Sphere.newSphere(new Vector3(-1, 1, 2), 1, new SpecularMaterial(Color.hexColor(0xEFC94C), 2)));
-        scene.add(Cube.newCube(new Vector3(-100, -1, -100), new Vector3(100, 0, 100), new DiffuseMaterial(new Color(1, 1, 1))));
-        scene.add(Sphere.newSphere(new Vector3(-1, 4, -1), 0.5, new LightMaterial(new Color(1, 1, 1), 3, new LinearAttenuation(1))));
 
-        var camera:Camera = Camera.lookAt(new Vector3(0, 2, -5), new Vector3(0, 0, 3), new Vector3(0, 1, 0), 45);
+        white := new DiffuseMaterial(pt.Color{0.740, 0.742, 0.734})
+        red := new DiffuseMaterial(pt.Color{0.366, 0.037, 0.042})
+        green := new DiffuseMaterial(pt.Color{0.163, 0.409, 0.083})
+        light := new LightMaterial(pt.Color{0.780, 0.780, 0.776}, 10, pt.QuadraticAttenuation(0.1))
+        scene := pt.Scene{}
+        n := 10.0
+        scene.Add(pt.NewCube(pt.Vector{-n, -11, -n}, pt.Vector{n, -10, n}, white))
+        scene.Add(pt.NewCube(pt.Vector{-n, 10, -n}, pt.Vector{n, 11, n}, white))
+        scene.Add(pt.NewCube(pt.Vector{-n, -n, 10}, pt.Vector{n, n, 11}, white))
+        scene.Add(pt.NewCube(pt.Vector{-11, -n, -n}, pt.Vector{-10, n, n}, red))
+        scene.Add(pt.NewCube(pt.Vector{10, -n, -n}, pt.Vector{11, n, n}, green))
+        scene.Add(pt.NewSphere(pt.Vector{3, -7, -3}, 3, white))
+        cube := pt.NewCube(pt.Vector{-3, -4, -3}, pt.Vector{3, 4, 3}, white)
+        transform := pt.Rotate(pt.Vector{0, 1, 0}, pt.Radians(30)).Translate(pt.Vector{-3, -6, 4})
+        scene.Add(pt.NewTransformedShape(cube, transform))
+        scene.Add(pt.NewCube(pt.Vector{-2, 9.8, -2}, pt.Vector{2, 10, 2}, light))
+        camera := pt.LookAt(pt.Vector{0, 0, -20}, pt.Vector{0, 0, 1}, pt.Vector{0, 1, 0}, 65)
+        
+        
         this.renderer = new Renderer();
         this.i_width = 2560 / 2;
         this.i_height = 1440 / 2;
@@ -68,4 +78,4 @@ export class Example1 extends CanvasDisplay {
     }
 
 }
-new Example1();
+new Cornell();

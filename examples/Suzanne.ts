@@ -14,6 +14,7 @@ import {GlossyMaterial} from "../src/engine/scene/materials/GlossyMaterial";
 import {MathUtils} from "../src/engine/utils/MathUtils";
 import {SharedScene} from "../src/engine/scene/SharedScene";
 import {DiffuseMaterial} from "../src/engine/scene/materials/DiffuseMaterial";
+import {ClearMaterial} from "../src/engine/scene/materials/ClearMaterial";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
@@ -32,11 +33,13 @@ export class Suzanne extends CanvasDisplay {
         var scene:SharedScene = new SharedScene();
         var material = new DiffuseMaterial(Color.hexColor(0x334D5C));
         scene.add(Sphere.newSphere(new Vector3(0.5, 1, 3), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
-        scene.add(Sphere.newSphere(new Vector3(1.5, 1, 3), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
+        scene.add(Sphere.newSphere(new Vector3(1.5, 5, -3), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
         scene.add(Cube.newCube(new Vector3(-5, -5, -2), new Vector3(5, 5, -1), material));
 
         var loader:OBJLoader = new OBJLoader();
-        loader.parentMaterial = new SpecularMaterial(Color.hexColor(0xEFC94C), 2);
+        //loader.parentMaterial = new SpecularMaterial(Color.hexColor(0xEFC94C), 2);
+        loader.parentMaterial = new GlossyMaterial(new Color(1,0.2,0), 2, MathUtils.radians(45));
+        //loader.parentMaterial = new ClearMaterial(0.5, MathUtils.radians(30));
 
         var self = this;
         var mesh;
