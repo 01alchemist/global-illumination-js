@@ -1,5 +1,5 @@
-System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Triangle", "../utils/MapUtils", "../math/Color", "../scene/materials/Texture"], function(exports_1) {
-    var Mesh_1, Vector3_1, Triangle_1, MapUtils_1, Color_1, Texture_1;
+System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Triangle", "../utils/MapUtils", "../math/Color"], function(exports_1) {
+    var Mesh_1, Vector3_1, Triangle_1, MapUtils_1, Color_1;
     var OBJLoader;
     return {
         setters:[
@@ -17,15 +17,13 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
             },
             function (Color_1_1) {
                 Color_1 = Color_1_1;
-            },
-            function (Texture_1_1) {
-                Texture_1 = Texture_1_1;
             }],
         execute: function() {
             OBJLoader = (function () {
                 function OBJLoader() {
                     this.hasMaterials = false;
                     this.materialsLoaded = false;
+                    this.materialsLoading = false;
                     this.pendingCallback = null;
                 }
                 OBJLoader.prototype.load = function (url, onLoad) {
@@ -80,6 +78,7 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                 OBJLoader.prototype.loadOBJ = function (data) {
                     this.hasMaterials = false;
                     this.materialsLoaded = false;
+                    this.materialsLoading = false;
                     var vs = [null];
                     var vts = [null];
                     var vns = [null];
@@ -164,6 +163,10 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                     }
                 };
                 OBJLoader.prototype.loadMTL = function (url) {
+                    if (this.materialsLoaded || this.materialsLoading) {
+                        return;
+                    }
+                    this.materialsLoading = true;
                     console.log("Loading MTL:" + url);
                     var self = this;
                     var xhr = new XMLHttpRequest();
@@ -188,7 +191,6 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                                     material.color = new Color_1.Color(c[0], c[1], c[2]);
                                     break;
                                 case "map_Kd":
-                                    material.texture = Texture_1.Texture.getTexture(item.value[0]);
                                     break;
                             }
                         }

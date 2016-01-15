@@ -15,6 +15,7 @@ export class OBJLoader {
     materials:Map;
     private hasMaterials:boolean=false;
     private materialsLoaded:boolean=false;
+    private materialsLoading:boolean=false;
     private pendingCallback:Function=null;
 
     constructor() {
@@ -75,6 +76,7 @@ export class OBJLoader {
 
         this.hasMaterials = false;
         this.materialsLoaded = false;
+        this.materialsLoading = false;
 
         var vs:Vector3[] = [null]; //1024 // 1-based indexing
         var vts:Vector3[] = [null]; // 1-based indexing
@@ -170,7 +172,10 @@ export class OBJLoader {
     }
 
     loadMTL(url:string) {
-
+        if(this.materialsLoaded || this.materialsLoading){
+            return;
+        }
+        this.materialsLoading = true;
         console.log("Loading MTL:" + url);
         var self = this;
         var xhr:XMLHttpRequest = new XMLHttpRequest();
@@ -196,7 +201,7 @@ export class OBJLoader {
                         material.color = new Color(c[0], c[1], c[2]);
                         break;
                     case "map_Kd":
-                        material.texture = Texture.getTexture(item.value[0]);
+                        //material.texture = Texture.getTexture(item.value[0]);
                         break;
                 }
             }
