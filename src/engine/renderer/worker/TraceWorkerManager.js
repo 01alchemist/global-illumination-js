@@ -24,7 +24,7 @@ System.register(["./TraceJob"], function(exports_1) {
                         num_threads = navigator["hardwareConcurrency"] || 2;
                     }
                     num_threads = num_threads > 2 ? 2 : num_threads;
-                    num_threads = 4;
+                    num_threads = 2;
                     console.info("hardwareConcurrency:" + num_threads);
                     this.jobs = [];
                     var thread_id = 0;

@@ -13,10 +13,10 @@ export class OBJLoader {
     parentMaterial:Material;
     lastMesh:Mesh;
     materials:Map;
-    private hasMaterials:boolean=false;
-    private materialsLoaded:boolean=false;
-    private materialsLoading:boolean=false;
-    private pendingCallback:Function=null;
+    private hasMaterials:boolean = false;
+    private materialsLoaded:boolean = false;
+    private materialsLoading:boolean = false;
+    private pendingCallback:Function = null;
 
     constructor() {
 
@@ -31,11 +31,11 @@ export class OBJLoader {
             self.lastMesh = self.loadOBJ(xhr.response);
             self.lastMesh.smoothNormals();
             if (onLoad) {
-                if(self.hasMaterials && self.materialsLoaded){
+                if (self.hasMaterials && self.materialsLoaded) {
                     onLoad(self.lastMesh);
-                }else if(!self.hasMaterials){
+                } else if (!self.hasMaterials) {
                     onLoad(self.lastMesh);
-                }else{
+                } else {
                     self.pendingCallback = onLoad;
                 }
             }
@@ -57,11 +57,16 @@ export class OBJLoader {
             var _str = line.match(/^(\S+)\s(.*)/).slice(1);
         } catch (e) {
             console.log("Error in line:", line);
+            return null;
         }
-        return {
-            keyword: _str[0],
-            value: _str[1].split(/ {1,}/)
-        };
+        if (!_str) {
+            return null;
+        } else {
+            return {
+                keyword: _str[0],
+                value: _str[1].split(/ {1,}/)
+            };
+        }
     }
 
     static parseFloats(fs:string[]):number[] {
@@ -92,70 +97,72 @@ export class OBJLoader {
                 continue;
             }
             let item = OBJLoader.parseLine(line);
-            let f:number[];
-            let v:Vector3;
+            if (item) {
+                let f:number[];
+                let v:Vector3;
 
-            switch (item.keyword) {
-                case "mtllib":
-                    this.hasMaterials = true;
-                    this.materialsLoaded = false;
-                    this.loadMTL(item.value[0]);
-                    break;
+                switch (item.keyword) {
+                    case "mtllib":
+                        this.hasMaterials = true;
+                        this.materialsLoaded = false;
+                        this.loadMTL(item.value[0]);
+                        break;
 
-                case "usemtl":
-                    material = this.getMaterial(item.value[0]);
-                    break;
+                    case "usemtl":
+                        material = this.getMaterial(item.value[0]);
+                        break;
 
-                case "v":
-                    f = OBJLoader.parseFloats(item.value);
-                    v = new Vector3(f[0], f[1], f[2]);
-                    vs = append(vs, v);
-                    break;
+                    case "v":
+                        f = OBJLoader.parseFloats(item.value);
+                        v = new Vector3(f[0], f[1], f[2]);
+                        vs = append(vs, v);
+                        break;
 
-                case "vt":
-                    f = OBJLoader.parseFloats(item.value);
-                    v = new Vector3(f[0], f[1], 0);
-                    vts = append(vts, v);
-                    break;
+                    case "vt":
+                        f = OBJLoader.parseFloats(item.value);
+                        v = new Vector3(f[0], f[1], 0);
+                        vts = append(vts, v);
+                        break;
 
-                case "vn":
-                    f = OBJLoader.parseFloats(item.value);
-                    v = new Vector3(f[0], f[1], f[2]);
-                    vns = append(vns, v);
-                    break;
+                    case "vn":
+                        f = OBJLoader.parseFloats(item.value);
+                        v = new Vector3(f[0], f[1], f[2]);
+                        vns = append(vns, v);
+                        break;
 
-                case "f":
-                    var fvs:number[] = [];
-                    var fvts:number[] = [];
-                    var fvns:number[] = [];
+                    case "f":
+                        var fvs:number[] = [];
+                        var fvts:number[] = [];
+                        var fvns:number[] = [];
 
-                    item.value.forEach(function (str:string, i) {
-                        let vertex:string[] = str.split(/\/\/{1,}/);
-                        fvs[i] = OBJLoader.parseIndex(vertex[0], vs.length);
-                        fvts[i] = OBJLoader.parseIndex(vertex[1], vts.length);
-                        fvns[i] = OBJLoader.parseIndex(vertex[2], vns.length);
-                    });
+                        item.value.forEach(function (str:string, i) {
+                            let vertex:string[] = str.split(/\/\/{1,}/);
+                            fvs[i] = OBJLoader.parseIndex(vertex[0], vs.length);
+                            fvts[i] = OBJLoader.parseIndex(vertex[1], vts.length);
+                            fvns[i] = OBJLoader.parseIndex(vertex[2], vns.length);
+                        });
 
-                    for (let i:number = 1; i < fvs.length - 1; i++) {
-                        let i1 = 0;
-                        let i2 = i;
-                        let i3 = i + 1;
-                        let t:Triangle = new Triangle();
-                        t.material = material;
-                        t.v1 = vs[fvs[i1]];
-                        t.v2 = vs[fvs[i2]];
-                        t.v3 = vs[fvs[i3]];
-                        t.t1 = vts[fvts[i1]];
-                        t.t2 = vts[fvts[i2]];
-                        t.t3 = vts[fvts[i3]];
-                        t.n1 = vns[fvns[i1]];
-                        t.n2 = vns[fvns[i2]];
-                        t.n3 = vns[fvns[i3]];
-                        t.updateBox();
-                        t.fixNormals();
-                        triangles = append(triangles, t);
-                    }
-                    break;
+                        for (let i:number = 1; i < fvs.length - 1; i++) {
+                            let i1 = 0;
+                            let i2 = i;
+                            let i3 = i + 1;
+                            let t:Triangle = new Triangle();
+                            t.material = material;
+                            t.v1 = vs[fvs[i1]];
+                            t.v2 = vs[fvs[i2]];
+                            t.v3 = vs[fvs[i3]];
+                            t.t1 = vts[fvts[i1]];
+                            t.t2 = vts[fvts[i2]];
+                            t.t3 = vts[fvts[i3]];
+                            t.n1 = vns[fvns[i1]];
+                            t.n2 = vns[fvns[i2]];
+                            t.n3 = vns[fvns[i3]];
+                            t.updateBox();
+                            t.fixNormals();
+                            triangles = append(triangles, t);
+                        }
+                        break;
+                }
             }
         }
         return Mesh.newMesh(triangles);
@@ -172,7 +179,7 @@ export class OBJLoader {
     }
 
     loadMTL(url:string) {
-        if(this.materialsLoaded || this.materialsLoading){
+        if (this.materialsLoaded || this.materialsLoading) {
             return;
         }
         this.materialsLoading = true;
@@ -189,24 +196,26 @@ export class OBJLoader {
                     continue;
                 }
                 let item = OBJLoader.parseLine(line);
-                var material:Material;
-                switch (item.keyword) {
-                    case "newmtl":
-                        material = self.materials[item.value[0]];
-                        material = material ? material : self.parentMaterial.clone();
-                        self.materials[item.value[0]] = material;
-                        break;
-                    case "Kd":
-                        var c:number[] = OBJLoader.parseFloats(item.value);
-                        material.color = new Color(c[0], c[1], c[2]);
-                        break;
-                    case "map_Kd":
-                        //material.texture = Texture.getTexture(item.value[0]);
-                        break;
+                if (item) {
+                    var material:Material;
+                    switch (item.keyword) {
+                        case "newmtl":
+                            material = self.materials[item.value[0]];
+                            material = material ? material : self.parentMaterial.clone();
+                            self.materials[item.value[0]] = material;
+                            break;
+                        case "Kd":
+                            var c:number[] = OBJLoader.parseFloats(item.value);
+                            material.color = new Color(c[0], c[1], c[2]);
+                            break;
+                        case "map_Kd":
+                            //material.texture = Texture.getTexture(item.value[0]);
+                            break;
+                    }
                 }
             }
             self.materialsLoaded = true;
-            if(self.pendingCallback){
+            if (self.pendingCallback) {
                 self.pendingCallback(self.lastMesh);
                 self.pendingCallback = null;
             }

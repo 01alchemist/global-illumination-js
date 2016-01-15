@@ -42,7 +42,7 @@ export class TraceWorkerManager {
 
         num_threads = num_threads > 2 ? 2 : num_threads;
 
-        num_threads = 4;//debug temp
+        num_threads = 2;//debug temp
 
         console.info("hardwareConcurrency:" + num_threads);
 

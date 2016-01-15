@@ -40,9 +40,9 @@ export class Teapot extends CanvasDisplay {
         this.i_height = 1440/4;
         //this.i_width = 1920;
         //this.i_height = 1080;
-        var cameraSamples:number = 16;
-        var hitSamples:number = 16;
-        var bounces:number = 3;
+        var cameraSamples:number = 1;
+        var hitSamples:number = 1;
+        var bounces:number = 2;
         var camera:Camera = Camera.lookAt(new Vector3(2, 5, -6), new Vector3(0.5, 1, 0), new Vector3(0, 1, 0), 45);
 
         loader.load("teapot.obj", function (_mesh) {

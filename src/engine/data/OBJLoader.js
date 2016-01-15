@@ -62,11 +62,17 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                     }
                     catch (e) {
                         console.log("Error in line:", line);
+                        return null;
                     }
-                    return {
-                        keyword: _str[0],
-                        value: _str[1].split(/ {1,}/)
-                    };
+                    if (!_str) {
+                        return null;
+                    }
+                    else {
+                        return {
+                            keyword: _str[0],
+                            value: _str[1].split(/ {1,}/)
+                        };
+                    }
                 };
                 OBJLoader.parseFloats = function (fs) {
                     var floats = [];
@@ -92,62 +98,64 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                             continue;
                         }
                         var item = OBJLoader.parseLine(line);
-                        var f = void 0;
-                        var v = void 0;
-                        switch (item.keyword) {
-                            case "mtllib":
-                                this.hasMaterials = true;
-                                this.materialsLoaded = false;
-                                this.loadMTL(item.value[0]);
-                                break;
-                            case "usemtl":
-                                material = this.getMaterial(item.value[0]);
-                                break;
-                            case "v":
-                                f = OBJLoader.parseFloats(item.value);
-                                v = new Vector3_1.Vector3(f[0], f[1], f[2]);
-                                vs = MapUtils_1.append(vs, v);
-                                break;
-                            case "vt":
-                                f = OBJLoader.parseFloats(item.value);
-                                v = new Vector3_1.Vector3(f[0], f[1], 0);
-                                vts = MapUtils_1.append(vts, v);
-                                break;
-                            case "vn":
-                                f = OBJLoader.parseFloats(item.value);
-                                v = new Vector3_1.Vector3(f[0], f[1], f[2]);
-                                vns = MapUtils_1.append(vns, v);
-                                break;
-                            case "f":
-                                var fvs = [];
-                                var fvts = [];
-                                var fvns = [];
-                                item.value.forEach(function (str, i) {
-                                    var vertex = str.split(/\/\/{1,}/);
-                                    fvs[i] = OBJLoader.parseIndex(vertex[0], vs.length);
-                                    fvts[i] = OBJLoader.parseIndex(vertex[1], vts.length);
-                                    fvns[i] = OBJLoader.parseIndex(vertex[2], vns.length);
-                                });
-                                for (var i_1 = 1; i_1 < fvs.length - 1; i_1++) {
-                                    var i1 = 0;
-                                    var i2 = i_1;
-                                    var i3 = i_1 + 1;
-                                    var t = new Triangle_1.Triangle();
-                                    t.material = material;
-                                    t.v1 = vs[fvs[i1]];
-                                    t.v2 = vs[fvs[i2]];
-                                    t.v3 = vs[fvs[i3]];
-                                    t.t1 = vts[fvts[i1]];
-                                    t.t2 = vts[fvts[i2]];
-                                    t.t3 = vts[fvts[i3]];
-                                    t.n1 = vns[fvns[i1]];
-                                    t.n2 = vns[fvns[i2]];
-                                    t.n3 = vns[fvns[i3]];
-                                    t.updateBox();
-                                    t.fixNormals();
-                                    triangles = MapUtils_1.append(triangles, t);
-                                }
-                                break;
+                        if (item) {
+                            var f = void 0;
+                            var v = void 0;
+                            switch (item.keyword) {
+                                case "mtllib":
+                                    this.hasMaterials = true;
+                                    this.materialsLoaded = false;
+                                    this.loadMTL(item.value[0]);
+                                    break;
+                                case "usemtl":
+                                    material = this.getMaterial(item.value[0]);
+                                    break;
+                                case "v":
+                                    f = OBJLoader.parseFloats(item.value);
+                                    v = new Vector3_1.Vector3(f[0], f[1], f[2]);
+                                    vs = MapUtils_1.append(vs, v);
+                                    break;
+                                case "vt":
+                                    f = OBJLoader.parseFloats(item.value);
+                                    v = new Vector3_1.Vector3(f[0], f[1], 0);
+                                    vts = MapUtils_1.append(vts, v);
+                                    break;
+                                case "vn":
+                                    f = OBJLoader.parseFloats(item.value);
+                                    v = new Vector3_1.Vector3(f[0], f[1], f[2]);
+                                    vns = MapUtils_1.append(vns, v);
+                                    break;
+                                case "f":
+                                    var fvs = [];
+                                    var fvts = [];
+                                    var fvns = [];
+                                    item.value.forEach(function (str, i) {
+                                        var vertex = str.split(/\/\/{1,}/);
+                                        fvs[i] = OBJLoader.parseIndex(vertex[0], vs.length);
+                                        fvts[i] = OBJLoader.parseIndex(vertex[1], vts.length);
+                                        fvns[i] = OBJLoader.parseIndex(vertex[2], vns.length);
+                                    });
+                                    for (var i_1 = 1; i_1 < fvs.length - 1; i_1++) {
+                                        var i1 = 0;
+                                        var i2 = i_1;
+                                        var i3 = i_1 + 1;
+                                        var t = new Triangle_1.Triangle();
+                                        t.material = material;
+                                        t.v1 = vs[fvs[i1]];
+                                        t.v2 = vs[fvs[i2]];
+                                        t.v3 = vs[fvs[i3]];
+                                        t.t1 = vts[fvts[i1]];
+                                        t.t2 = vts[fvts[i2]];
+                                        t.t3 = vts[fvts[i3]];
+                                        t.n1 = vns[fvns[i1]];
+                                        t.n2 = vns[fvns[i2]];
+                                        t.n3 = vns[fvns[i3]];
+                                        t.updateBox();
+                                        t.fixNormals();
+                                        triangles = MapUtils_1.append(triangles, t);
+                                    }
+                                    break;
+                            }
                         }
                     }
                     return Mesh_1.Mesh.newMesh(triangles);
@@ -179,19 +187,21 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                                 continue;
                             }
                             var item = OBJLoader.parseLine(line);
-                            var material;
-                            switch (item.keyword) {
-                                case "newmtl":
-                                    material = self.materials[item.value[0]];
-                                    material = material ? material : self.parentMaterial.clone();
-                                    self.materials[item.value[0]] = material;
-                                    break;
-                                case "Kd":
-                                    var c = OBJLoader.parseFloats(item.value);
-                                    material.color = new Color_1.Color(c[0], c[1], c[2]);
-                                    break;
-                                case "map_Kd":
-                                    break;
+                            if (item) {
+                                var material;
+                                switch (item.keyword) {
+                                    case "newmtl":
+                                        material = self.materials[item.value[0]];
+                                        material = material ? material : self.parentMaterial.clone();
+                                        self.materials[item.value[0]] = material;
+                                        break;
+                                    case "Kd":
+                                        var c = OBJLoader.parseFloats(item.value);
+                                        material.color = new Color_1.Color(c[0], c[1], c[2]);
+                                        break;
+                                    case "map_Kd":
+                                        break;
+                                }
                             }
                         }
                         self.materialsLoaded = true;
