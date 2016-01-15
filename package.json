@@ -19,6 +19,7 @@
 
   "dependencies": {
     "typescript": "^1.7.5",
-    "systemjs": "0.19.6"
+    "systemjs": "0.19.6",
+    "bytearray": "latest"
   }
 }
