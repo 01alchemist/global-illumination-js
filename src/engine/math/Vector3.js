@@ -11,6 +11,7 @@ System.register([], function(exports_1) {
                     this.x = x;
                     this.y = y;
                     this.z = z;
+                    this.memorySize = Vector3.SIZE;
                 }
                 Vector3.fromJson = function (v) {
                     if (v) {
@@ -106,17 +107,29 @@ System.register([], function(exports_1) {
                 Vector3.prototype.equals = function (v) {
                     return this.x == v.x && this.y == v.y && this.z == v.z;
                 };
-                Vector3.prototype.writeToMemory = function (memory, offset) {
+                Vector3.prototype.directWrite = function (memory, offset) {
                     memory[offset++] = this.x;
                     memory[offset++] = this.y;
                     memory[offset++] = this.z;
                     return offset;
                 };
-                Vector3.prototype.read = function (memory, offset) {
+                Vector3.prototype.directRead = function (memory, offset) {
                     this.x = memory[offset++];
                     this.y = memory[offset++];
                     this.z = memory[offset++];
                     return offset;
+                };
+                Vector3.prototype.read = function (memory) {
+                    this.x = memory.readFloat();
+                    this.y = memory.readFloat();
+                    this.z = memory.readFloat();
+                    return memory.position;
+                };
+                Vector3.prototype.write = function (memory) {
+                    memory.writeFloat(this.x);
+                    memory.writeFloat(this.y);
+                    memory.writeFloat(this.z);
+                    return memory.position;
                 };
                 Vector3.SIZE = 3;
                 return Vector3;

@@ -37,8 +37,44 @@ System.register(["../../math/Vector3", "../materials/Material", "./Box", "../../
                     this.material = material;
                     this.box = box;
                     this.type = Shape_1.ShapeType.CUBE;
-                    this.size = (Vector3_1.Vector3.SIZE * 2) + 2;
+                    this.memorySize = (Vector3_1.Vector3.SIZE * 2) + 2;
                 }
+                Cube.prototype.write = function (memory) {
+                    memory.writeByte(this.type);
+                    this.min.write(memory);
+                    this.max.write(memory);
+                    memory.writeInt(this.material.index);
+                    return memory.position;
+                };
+                Cube.prototype.read = function (memory) {
+                    this.min.read(memory);
+                    this.max.read(memory);
+                    var materialIndex = memory.readInt();
+                    this.box = new Box_1.Box(this.min, this.max);
+                    var material = Material_1.Material.map[materialIndex];
+                    if (material) {
+                        this.material = material;
+                    }
+                    return memory.position;
+                };
+                Cube.prototype.directWrite = function (memory, offset) {
+                    memory[offset++] = this.type;
+                    offset = this.min.directWrite(memory, offset);
+                    offset = this.max.directWrite(memory, offset);
+                    memory[offset++] = this.material.index;
+                    return offset;
+                };
+                Cube.prototype.directRead = function (memory, offset) {
+                    offset = this.min.directRead(memory, offset);
+                    offset = this.max.directRead(memory, offset);
+                    this.box = new Box_1.Box(this.min, this.max);
+                    this.material.index = memory[offset++];
+                    var material = Material_1.Material.map[this.material.index];
+                    if (material) {
+                        this.material = material;
+                    }
+                    return offset;
+                };
                 Cube.fromJson = function (shape) {
                     return new Cube(Vector3_1.Vector3.fromJson(shape.min), Vector3_1.Vector3.fromJson(shape.max), MaterialUtils_1.MaterialUtils.fromJson(shape.material), Box_1.Box.fromJson(shape.box));
                 };
@@ -93,27 +129,6 @@ System.register(["../../math/Vector3", "../materials/Material", "./Box", "../../
                     var y = this.min.y + Math.random() * (this.max.y - this.min.y);
                     var z = this.min.z + Math.random() * (this.max.z - this.min.z);
                     return new Vector3_1.Vector3(x, y, z);
-                };
-                Cube.prototype.writeToMemory = function (memory, offset) {
-                    memory[offset++] = this.type;
-                    offset = this.min.writeToMemory(memory, offset);
-                    offset = this.max.writeToMemory(memory, offset);
-                    memory[offset++] = this.material.materialIndex;
-                    return offset;
-                };
-                Cube.prototype.read = function (memory, offset) {
-                    offset = this.min.read(memory, offset);
-                    offset = this.max.read(memory, offset);
-                    this.box = new Box_1.Box(this.min, this.max);
-                    var materialIndex = memory[offset++];
-                    var material = Material_1.Material.map[materialIndex];
-                    if (material) {
-                        this.material = material;
-                    }
-                    else {
-                        throw "Null Material in Cube, materialIndex:" + materialIndex + ", memory:" + memory.length + ", offset:" + offset;
-                    }
-                    return offset;
                 };
                 return Cube;
             })();

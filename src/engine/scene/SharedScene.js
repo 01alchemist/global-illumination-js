@@ -41,12 +41,12 @@ System.register(["../math/Color", "./Scene", "./materials/Material", "./shapes/S
                     var memorySize = this.estimatedMemory + Material_1.Material.estimatedMemory;
                     var memory = new Float32Array(new SharedArrayBuffer(memorySize * Float32Array.BYTES_PER_ELEMENT));
                     var offset = 0;
-                    offset = Material_1.Material.writeToMemory(memory, offset);
+                    offset = Material_1.Material.directWrite(memory, offset);
                     memory[offset++] = this.shapes.length;
-                    offset = this.color.writeToMemory(memory, offset);
+                    offset = this.color.directWrite(memory, offset);
                     var self = this;
                     this.shapes.forEach(function (shape, index) {
-                        offset = shape.writeToMemory(memory, offset);
+                        offset = shape.directWrite(memory, offset);
                         if (shape.type == Shape_2.ShapeType.MESH) {
                             if (self.sharedTreeMap == null) {
                                 self.sharedTreeMap = [];
@@ -67,7 +67,7 @@ System.register(["../math/Color", "./Scene", "./materials/Material", "./shapes/S
                     var scene = new Scene_1.Scene();
                     var offset = Material_1.Material.restore(memory);
                     var numShapes = memory[offset++];
-                    offset = scene.color.read(memory, offset);
+                    offset = scene.color.directRead(memory, offset);
                     var shapes = [];
                     for (var i = 0; i < numShapes; i++) {
                         offset = Shape_1.restoreShape(memory, offset, shapes);

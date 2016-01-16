@@ -34,13 +34,53 @@ System.register(["../../math/Vector3", "../materials/Material", "./Box", "../../
                     this.material = material;
                     this.box = box;
                     this.type = Shape_1.ShapeType.SPHERE;
-                    this.size = Vector3_1.Vector3.SIZE + 3;
+                    this.memorySize = Vector3_1.Vector3.SIZE + 3;
                     if (!box && center) {
                         var min = new Vector3_1.Vector3(center.x - radius, center.y - radius, center.z - radius);
                         var max = new Vector3_1.Vector3(center.x + radius, center.y + radius, center.z + radius);
                         this.box = new Box_1.Box(min, max);
                     }
                 }
+                Sphere.prototype.directRead = function (memory, offset) {
+                    offset = this.center.directRead(memory, offset);
+                    this.radius = memory[offset++];
+                    var min = new Vector3_1.Vector3(this.center.x - this.radius, this.center.y - this.radius, this.center.z - this.radius);
+                    var max = new Vector3_1.Vector3(this.center.x + this.radius, this.center.y + this.radius, this.center.z + this.radius);
+                    this.box = new Box_1.Box(min, max);
+                    var materialIndex = memory[offset++];
+                    var material = Material_1.Material.map[materialIndex];
+                    if (material) {
+                        this.material = material;
+                    }
+                    return offset;
+                };
+                Sphere.prototype.directWrite = function (memory, offset) {
+                    memory[offset++] = this.type;
+                    offset = this.center.directWrite(memory, offset);
+                    memory[offset++] = this.radius;
+                    memory[offset++] = this.material.index;
+                    return offset;
+                };
+                Sphere.prototype.read = function (memory) {
+                    this.center.read(memory);
+                    this.radius = memory.readFloat();
+                    var min = new Vector3_1.Vector3(this.center.x - this.radius, this.center.y - this.radius, this.center.z - this.radius);
+                    var max = new Vector3_1.Vector3(this.center.x + this.radius, this.center.y + this.radius, this.center.z + this.radius);
+                    this.box = new Box_1.Box(min, max);
+                    var materialIndex = memory.readInt();
+                    var material = Material_1.Material.map[materialIndex];
+                    if (material) {
+                        this.material = material;
+                    }
+                    return memory.position;
+                };
+                Sphere.prototype.write = function (memory) {
+                    memory.writeByte(this.type);
+                    this.center.write(memory);
+                    memory.writeFloat(this.radius);
+                    memory.writeInt(this.material.index);
+                    return memory.position;
+                };
                 Sphere.fromJson = function (sphere) {
                     return new Sphere(Vector3_1.Vector3.fromJson(sphere.center), sphere.radius, MaterialUtils_1.MaterialUtils.fromJson(sphere.material), Box_1.Box.fromJson(sphere.box));
                 };
@@ -92,26 +132,6 @@ System.register(["../../math/Vector3", "../materials/Material", "./Box", "../../
                             return v.mulScalar(this.radius).add(this.center);
                         }
                     }
-                };
-                Sphere.prototype.writeToMemory = function (memory, offset) {
-                    memory[offset++] = this.type;
-                    offset = this.center.writeToMemory(memory, offset);
-                    memory[offset++] = this.radius;
-                    memory[offset++] = this.material.materialIndex;
-                    return offset;
-                };
-                Sphere.prototype.read = function (memory, offset) {
-                    offset = this.center.read(memory, offset);
-                    this.radius = memory[offset++];
-                    var min = new Vector3_1.Vector3(this.center.x - this.radius, this.center.y - this.radius, this.center.z - this.radius);
-                    var max = new Vector3_1.Vector3(this.center.x + this.radius, this.center.y + this.radius, this.center.z + this.radius);
-                    this.box = new Box_1.Box(min, max);
-                    var materialIndex = memory[offset++];
-                    var material = Material_1.Material.map[materialIndex];
-                    if (material) {
-                        this.material = material;
-                    }
-                    return offset;
                 };
                 return Sphere;
             })();

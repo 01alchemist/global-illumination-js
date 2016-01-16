@@ -9,6 +9,8 @@ import {Sphere} from "./Sphere";
 import {Mesh} from "./Mesh";
 import {Triangle} from "./Triangle";
 import {TransformedShape} from "./TransformedShape";
+import {IPointer} from "../../../pointer/IPointer";
+import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -19,12 +21,11 @@ export enum ShapeType{
     MESH,
     TRANSFORMED_SHAPE
 }
-export interface Shape {
+export interface Shape extends IPointer{
 
     index:number;
     /*id:number;*/
     type:ShapeType;
-    size:number;
     box:Box;
     compile();
     intersect(r:Ray):Hit;
@@ -32,8 +33,7 @@ export interface Shape {
     getMaterial(p:Vector3):Material;
     getNormal(p:Vector3):Vector3;
     getRandomPoint():Vector3;
-    writeToMemory(memory:Float32Array, offset:number):number;
-    read(memory:Float32Array, offset:number):number;
+    directWrite(memory:Float32Array, offset:number):number;
 }
 export function ShapesfromJson(shapes:Shape[]):Shape[] {
     var _shapes:Shape[] = [];
@@ -79,37 +79,63 @@ export function ShapefromJson(shape:Shape):Shape {
             break;
     }
 }
-export function restoreShape(memory:Float32Array, offset:number, container:Shape[]):number {
+export function directRestoreShape(memory:Float32Array, offset:number, container:Shape[]):number {
     var type:ShapeType = memory[offset++];
-    var shape:Shape;
     switch (type) {
         case ShapeType.CUBE:
-            shape = new Cube();
-            offset = shape.read(memory, offset);
+            var cube = new Cube();
+            container.push(cube);
+            return cube.directRead(memory, offset);
             break;
         case ShapeType.SPHERE:
-            shape = new Sphere();
-            offset = shape.read(memory, offset);
+            var sphere = new Sphere();
+            container.push(sphere);
+            return sphere.directRead(memory, offset);
             break;
         case ShapeType.MESH:
-            shape = new Mesh();
-            offset = shape.read(memory, offset);
+            var mesh = new Mesh();
+            container.push(mesh);
+            return mesh.directRead(memory, offset);
             break;
-        case ShapeType.TRANSFORMED_SHAPE:
-            shape = new TransformedShape();
-            offset = shape.read(memory, offset);
-            break;
+        /*case ShapeType.TRANSFORMED_SHAPE:
+            var shape = new TransformedShape();
+            container.push(shape);
+            return shape.directRead(memory, offset);
+            break;*/
         case ShapeType.TRIANGLE:
-            shape = new Triangle();
-            offset = shape.read(memory, offset);
-            break;
-        default:
-            throw "Unknown shape";
+            var triangle = new Triangle();
+            container.push(triangle);
+            return triangle.directRead(memory, offset);
             break;
     }
-
-    if(container){
-        container.push(shape);
+}
+export function restoreShape(memory:ByteArrayBase, container:Shape[]):number {
+    var type:ShapeType = memory.readByte();
+    switch (type) {
+        case ShapeType.CUBE:
+            var cube = new Cube();
+            container.push(cube);
+            return cube.read(memory);
+            break;
+        case ShapeType.SPHERE:
+            var sphere = new Sphere();
+            container.push(sphere);
+            return sphere.read(memory);
+            break;
+        case ShapeType.MESH:
+            var mesh = new Mesh();
+            container.push(mesh);
+            return mesh.read(memory);
+            break;
+        /*case ShapeType.TRANSFORMED_SHAPE:
+            var shape = new TransformedShape();
+            container.push(shape);
+            return shape.directRead(memory);
+            break;*/
+        case ShapeType.TRIANGLE:
+            var triangle = new Triangle();
+            container.push(triangle);
+            return triangle.read(memory);
+            break;
     }
-    return offset;
 }

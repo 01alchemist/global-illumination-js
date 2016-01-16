@@ -1,6 +1,7 @@
 import {Vector3} from "./Vector3";
 import {Box} from "../scene/shapes/Box";
 import {Ray} from "./Ray";
+import {ByteArrayBase} from "../../pointer/ByteArrayBase";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -17,7 +18,28 @@ export class Matrix4 {
         this.m = new Float32Array(16);
     }
 
-    writeToMemory(memory:Float32Array, offset:number):number {
+    directRead(memory:Float32Array, offset:number):number {
+        var m:Matrix4 = this;
+        m.x00 = memory[offset++];
+        m.x01 = memory[offset++];
+        m.x02 = memory[offset++];
+        m.x03 = memory[offset++];
+        m.x10 = memory[offset++];
+        m.x11 = memory[offset++];
+        m.x12 = memory[offset++];
+        m.x13 = memory[offset++];
+        m.x20 = memory[offset++];
+        m.x21 = memory[offset++];
+        m.x22 = memory[offset++];
+        m.x23 = memory[offset++];
+        m.x30 = memory[offset++];
+        m.x31 = memory[offset++];
+        m.x32 = memory[offset++];
+        m.x33 = memory[offset++];
+        return offset;
+    }
+
+    directWrite(memory:Float32Array, offset:number):number {
         var m:Matrix4 = this;
         memory[offset++] = m.x00;
         memory[offset++] = m.x01;
@@ -37,25 +59,45 @@ export class Matrix4 {
         memory[offset++] = m.x33;
         return offset;
     }
-    read(memory:Float32Array, offset:number):number {
-        var m:Matrix4 = this;
-        m.x00 = memory[offset++];
-        m.x01 = memory[offset++];
-        m.x02 = memory[offset++];
-        m.x03 = memory[offset++];
-        m.x10 = memory[offset++];
-        m.x11 = memory[offset++];
-        m.x12 = memory[offset++];
-        m.x13 = memory[offset++];
-        m.x20 = memory[offset++];
-        m.x21 = memory[offset++];
-        m.x22 = memory[offset++];
-        m.x23 = memory[offset++];
-        m.x30 = memory[offset++];
-        m.x31 = memory[offset++];
-        m.x32 = memory[offset++];
-        m.x33 = memory[offset++];
-        return offset;
+
+    read(memory:ByteArrayBase):number {
+        this.x00 = memory.readFloat();
+        this.x01 = memory.readFloat();
+        this.x02 = memory.readFloat();
+        this.x03 = memory.readFloat();
+        this.x10 = memory.readFloat();
+        this.x11 = memory.readFloat();
+        this.x12 = memory.readFloat();
+        this.x13 = memory.readFloat();
+        this.x20 = memory.readFloat();
+        this.x21 = memory.readFloat();
+        this.x22 = memory.readFloat();
+        this.x23 = memory.readFloat();
+        this.x30 = memory.readFloat();
+        this.x31 = memory.readFloat();
+        this.x32 = memory.readFloat();
+        this.x33 = memory.readFloat();
+        return memory.position;
+    }
+
+    write(memory:ByteArrayBase):number {
+        memory.writeFloat(this.x00);
+        memory.writeFloat(this.x01);
+        memory.writeFloat(this.x02);
+        memory.writeFloat(this.x03);
+        memory.writeFloat(this.x10);
+        memory.writeFloat(this.x11);
+        memory.writeFloat(this.x12);
+        memory.writeFloat(this.x13);
+        memory.writeFloat(this.x20);
+        memory.writeFloat(this.x21);
+        memory.writeFloat(this.x22);
+        memory.writeFloat(this.x23);
+        memory.writeFloat(this.x30);
+        memory.writeFloat(this.x31);
+        memory.writeFloat(this.x32);
+        memory.writeFloat(this.x33);
+        return memory.position;
     }
 
     static fromJson(m:Matrix4):Matrix4 {

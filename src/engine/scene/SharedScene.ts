@@ -34,17 +34,17 @@ export class SharedScene extends Scene{
         //var memory:Float32Array = new Float32Array(new ArrayBuffer(memorySize * Float32Array.BYTES_PER_ELEMENT));
         var offset:number = 0;
         //write materials first
-        offset = Material.writeToMemory(memory, offset);
+        offset = Material.directWrite(memory, offset);
 
         //write scene
         memory[offset++] = this.shapes.length;
-        offset = this.color.writeToMemory(memory, offset);
+        offset = this.color.directWrite(memory, offset);
 
         var self = this;
 
         this.shapes.forEach(function(shape:Shape, index:number){
 
-            offset = shape.writeToMemory(memory, offset);
+            offset = shape.directWrite(memory, offset);
 
             if(shape.type == ShapeType.MESH){
                 if(self.sharedTreeMap == null){
@@ -68,7 +68,7 @@ export class SharedScene extends Scene{
         var offset:number = Material.restore(memory);
 
         var numShapes:number = memory[offset++];
-        offset = scene.color.read(memory, offset);
+        offset = scene.color.directRead(memory, offset);
 
         var shapes:Shape[] = [];
 

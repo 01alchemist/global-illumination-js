@@ -19,7 +19,7 @@ export class Material {
     static map:Array<Material> = [];
 
     type:MaterialType = MaterialType.GENERIC;
-    materialIndex:number;
+    index:number;
 
     /**
      *
@@ -46,7 +46,7 @@ export class Material {
                 public gloss?:number,
                 public tint?:number,
                 public transparent?:boolean) {
-        this.materialIndex = Material.map.push(this) - 1;
+        this.index = Material.map.push(this) - 1;
     }
 
     clone():Material {
@@ -68,10 +68,10 @@ export class Material {
     }
 
     read(memory:Float32Array, offset:number):number {
-        offset = this.color.read(memory, offset);
+        offset = this.color.directRead(memory, offset);
         this.bumpMultiplier = memory[offset++];
         this.emittance = memory[offset++];
-        offset = this.attenuation.read(memory, offset);
+        offset = this.attenuation.directRead(memory, offset);
         this.index = memory[offset++];
         this.gloss = memory[offset++];
         this.tint = memory[offset++];
@@ -79,11 +79,11 @@ export class Material {
         return offset;
     }
 
-    writeToMemory(memory:Float32Array, offset:number):number {
-        offset = this.color.writeToMemory(memory, offset);
+    directWrite(memory:Float32Array, offset:number):number {
+        offset = this.color.directWrite(memory, offset);
         memory[offset++] = this.bumpMultiplier;
         memory[offset++] = this.emittance;
-        offset = this.attenuation.writeToMemory(memory, offset);
+        offset = this.attenuation.directWrite(memory, offset);
         memory[offset++] = this.index;
         memory[offset++] = this.gloss;
         memory[offset++] = this.tint;
@@ -96,10 +96,10 @@ export class Material {
         return Material.SIZE * Material.map.length + 1;
     };
 
-    static writeToMemory(memory:Float32Array, offset:number):number {
+    static directWrite(memory:Float32Array, offset:number):number {
         memory[offset++] = Material.map.length;
         Material.map.forEach(function (material:Material) {
-            offset = material.writeToMemory(memory, offset);
+            offset = material.directWrite(memory, offset);
         });
         return offset;
     }
@@ -107,7 +107,7 @@ export class Material {
     static restore(memory:Float32Array, offset:number = 0):number {
         var numMaterials:number = memory[offset++];
         for (var i = 0; i < numMaterials; i++) {
-            offset = new Material().read(memory, offset);
+            offset = new Material().directRead(memory, offset);
         }
         console.info(numMaterials+" Materials restored");
         return offset;

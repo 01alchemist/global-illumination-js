@@ -1,4 +1,3 @@
-import {Shape} from "./Shape";
 import {Matrix4} from "../../math/Matrix4";
 import {Box} from "./Box";
 import {Hit} from "../../math/Hit";
@@ -6,10 +5,8 @@ import {Ray} from "../../math/Ray";
 import {Vector3} from "../../math/Vector3";
 import {Material} from "../materials/Material";
 import {Color} from "../../math/Color";
-import {ShapeType} from "./Shape";
-import {ShapesfromJson} from "./Shape";
-import {ShapefromJson} from "./Shape";
-import {restoreShape} from "./Shape";
+import {Shape, ShapeType, ShapesfromJson, directRestoreShape, ShapefromJson, restoreShape} from "./Shape";
+import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
@@ -18,9 +15,9 @@ export class TransformedShape implements Shape {
     type:ShapeType = ShapeType.TRANSFORMED_SHAPE;
     index:number;
 
-    get size():number {
+    get memorySize():number {
         if (this.shape) {
-            return this.shape.size + Matrix4.SIZE + 1;// store only one matrix
+            return this.shape.memorySize + Matrix4.SIZE + 1;// store only one matrix
         } else {
             return 0;
         }
@@ -28,7 +25,41 @@ export class TransformedShape implements Shape {
 
     constructor(public shape:Shape = null,
                 public matrix:Matrix4 = new Matrix4(),
-                public inverse?:Matrix4) {
+                public inverse:Matrix4 = new Matrix4()) {
+    }
+
+    directRead(memory:Float32Array, offset:number):number {
+        offset = this.matrix.directRead(memory, offset);
+        this.inverse = this.matrix.inverse();
+        var container:Shape[] = [];
+        offset = directRestoreShape(memory, offset, container);
+        this.shape = container[0];
+        container = null;
+        return offset;
+    }
+
+    directWrite(memory:Float32Array, offset:number):number {
+        memory[offset++] = this.type;
+        offset = this.matrix.directWrite(memory, offset);
+        offset = this.shape.directWrite(memory, offset);
+        return offset;
+    }
+
+    read(memory:ByteArrayBase):number{
+        this.matrix.read(memory);
+        this.inverse = this.matrix.inverse();
+        var container:Shape[] = [];
+        restoreShape(memory, container);
+        this.shape = container[0];
+        container = null;
+        return memory.position;
+    }
+
+    write(memory:ByteArrayBase):number{
+        memory.writeByte(this.type);
+        this.matrix.write(memory);
+        this.shape.write(memory);
+        return memory.position;
     }
 
     static fromJson(transformedShape:TransformedShape):TransformedShape {
@@ -78,20 +109,4 @@ export class TransformedShape implements Shape {
         return this.matrix.mulPosition(this.shape.getRandomPoint());
     }
 
-    writeToMemory(memory:Float32Array, offset:number):number {
-        memory[offset++] = this.type;
-        offset = this.matrix.writeToMemory(memory, offset);
-        offset = this.shape.writeToMemory(memory, offset);
-        return offset;
-    }
-
-    read(memory:Float32Array, offset:number):number {
-        offset = this.matrix.read(memory, offset);
-        this.inverse = this.matrix.inverse();
-        var container:Shape[] = [];
-        offset = restoreShape(memory, offset, container);
-        this.shape = container[0];
-        container = null;
-        return offset;
-    }
 }

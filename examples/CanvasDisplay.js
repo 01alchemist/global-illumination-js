@@ -28,6 +28,11 @@ System.register([], function(exports_1) {
                     this.canvas = document.getElementById("viewport");
                     this.ctx = this.canvas.getContext("2d");
                     this.info = document.getElementById("info");
+                    if (!window["SharedArrayBuffer"]) {
+                        this.info.innerHTML = "Oops! Your browser does not supported. If you want to try this app go and get Firefox Nightly 46 from <a href='https://nightly.mozilla.org/'>Here</a>";
+                        throw "Oops! Your browser does not supported. If you want to try this app go and get Firefox Nightly 46 https://nightly.mozilla.org";
+                        return;
+                    }
                     if (this.onInit) {
                         this.onInit();
                     }

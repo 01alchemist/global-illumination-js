@@ -49,7 +49,27 @@ System.register(["./Vector3", "../scene/shapes/Box", "./Ray"], function(exports_
                     this.x33 = x33;
                     this.m = new Float32Array(16);
                 }
-                Matrix4.prototype.writeToMemory = function (memory, offset) {
+                Matrix4.prototype.directRead = function (memory, offset) {
+                    var m = this;
+                    m.x00 = memory[offset++];
+                    m.x01 = memory[offset++];
+                    m.x02 = memory[offset++];
+                    m.x03 = memory[offset++];
+                    m.x10 = memory[offset++];
+                    m.x11 = memory[offset++];
+                    m.x12 = memory[offset++];
+                    m.x13 = memory[offset++];
+                    m.x20 = memory[offset++];
+                    m.x21 = memory[offset++];
+                    m.x22 = memory[offset++];
+                    m.x23 = memory[offset++];
+                    m.x30 = memory[offset++];
+                    m.x31 = memory[offset++];
+                    m.x32 = memory[offset++];
+                    m.x33 = memory[offset++];
+                    return offset;
+                };
+                Matrix4.prototype.directWrite = function (memory, offset) {
                     var m = this;
                     memory[offset++] = m.x00;
                     memory[offset++] = m.x01;
@@ -69,25 +89,43 @@ System.register(["./Vector3", "../scene/shapes/Box", "./Ray"], function(exports_
                     memory[offset++] = m.x33;
                     return offset;
                 };
-                Matrix4.prototype.read = function (memory, offset) {
-                    var m = this;
-                    m.x00 = memory[offset++];
-                    m.x01 = memory[offset++];
-                    m.x02 = memory[offset++];
-                    m.x03 = memory[offset++];
-                    m.x10 = memory[offset++];
-                    m.x11 = memory[offset++];
-                    m.x12 = memory[offset++];
-                    m.x13 = memory[offset++];
-                    m.x20 = memory[offset++];
-                    m.x21 = memory[offset++];
-                    m.x22 = memory[offset++];
-                    m.x23 = memory[offset++];
-                    m.x30 = memory[offset++];
-                    m.x31 = memory[offset++];
-                    m.x32 = memory[offset++];
-                    m.x33 = memory[offset++];
-                    return offset;
+                Matrix4.prototype.read = function (memory) {
+                    this.x00 = memory.readFloat();
+                    this.x01 = memory.readFloat();
+                    this.x02 = memory.readFloat();
+                    this.x03 = memory.readFloat();
+                    this.x10 = memory.readFloat();
+                    this.x11 = memory.readFloat();
+                    this.x12 = memory.readFloat();
+                    this.x13 = memory.readFloat();
+                    this.x20 = memory.readFloat();
+                    this.x21 = memory.readFloat();
+                    this.x22 = memory.readFloat();
+                    this.x23 = memory.readFloat();
+                    this.x30 = memory.readFloat();
+                    this.x31 = memory.readFloat();
+                    this.x32 = memory.readFloat();
+                    this.x33 = memory.readFloat();
+                    return memory.position;
+                };
+                Matrix4.prototype.write = function (memory) {
+                    memory.writeFloat(this.x00);
+                    memory.writeFloat(this.x01);
+                    memory.writeFloat(this.x02);
+                    memory.writeFloat(this.x03);
+                    memory.writeFloat(this.x10);
+                    memory.writeFloat(this.x11);
+                    memory.writeFloat(this.x12);
+                    memory.writeFloat(this.x13);
+                    memory.writeFloat(this.x20);
+                    memory.writeFloat(this.x21);
+                    memory.writeFloat(this.x22);
+                    memory.writeFloat(this.x23);
+                    memory.writeFloat(this.x30);
+                    memory.writeFloat(this.x31);
+                    memory.writeFloat(this.x32);
+                    memory.writeFloat(this.x33);
+                    return memory.position;
                 };
                 Matrix4.fromJson = function (m) {
                     return new Matrix4(m.x00, m.x01, m.x02, m.x03, m.x10, m.x11, m.x12, m.x13, m.x20, m.x21, m.x22, m.x23, m.x30, m.x31, m.x32, m.x33);

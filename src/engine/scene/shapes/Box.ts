@@ -3,15 +3,43 @@ import {Axis} from "../Axis";
 import {Triangle} from "./Triangle";
 import {Shape} from "./Shape";
 import {Ray} from "../../math/Ray";
+import {IPointer} from "../../../pointer/IPointer";
+import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
-export class Box {
+export class Box implements IPointer{
 
     static SIZE:number = Vector3.SIZE * 2;
 
+    memorySize:number = Box.SIZE;
+
     constructor(public min:Vector3 = new Vector3(), public max:Vector3 = new Vector3()) {
 
+    }
+
+    directWrite(memory:Float32Array, offset:number):number {
+        offset = this.min.directWrite(memory, offset);
+        offset = this.max.directWrite(memory, offset);
+        return offset;
+    }
+
+    directRead(memory:Float32Array, offset:number):number {
+        offset = this.min.directRead(memory, offset);
+        offset = this.max.directRead(memory, offset);
+        return offset;
+    }
+
+    read(memory:ByteArrayBase):number {
+        this.min.read(memory);
+        this.max.read(memory);
+        return memory.position;
+    }
+
+    write(memory:ByteArrayBase):number {
+        this.min.write(memory);
+        this.max.write(memory);
+        return memory.position;
     }
 
     static fromJson(box:Box):Box {
@@ -108,18 +136,6 @@ export class Box {
                 break;
         }
         return {left: left, right: right};
-    }
-
-    writeToMemory(memory:Float32Array, offset:number):number {
-        offset = this.min.writeToMemory(memory, offset);
-        offset = this.max.writeToMemory(memory, offset);
-        return offset;
-    }
-
-    read(memory:Float32Array, offset:number):number {
-        offset = this.min.read(memory, offset);
-        offset = this.max.read(memory, offset);
-        return offset;
     }
 }
 

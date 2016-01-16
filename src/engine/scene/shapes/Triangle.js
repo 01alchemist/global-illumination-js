@@ -1,5 +1,5 @@
-System.register(["../materials/Material", "./Box", "../../math/Vector3", "../../math/Hit", "../../math/Constants", "../../math/Matrix4", "./Shape", "../materials/MaterialUtils"], function(exports_1) {
-    var Material_1, Box_1, Vector3_1, Hit_1, Constants_1, Hit_2, Matrix4_1, Shape_1, MaterialUtils_1;
+System.register(["../materials/Material", "./Box", "../../math/Vector3", "../../math/Hit", "../../math/Constants", "../../math/Matrix4", "./Shape", "../materials/MaterialUtils", "../../../pointer/ByteArrayBase"], function(exports_1) {
+    var Material_1, Box_1, Vector3_1, Hit_1, Constants_1, Hit_2, Matrix4_1, Shape_1, MaterialUtils_1, ByteArrayBase_1;
     var Triangle;
     return {
         setters:[
@@ -27,6 +27,9 @@ System.register(["../materials/Material", "./Box", "../../math/Vector3", "../../
             },
             function (MaterialUtils_1_1) {
                 MaterialUtils_1 = MaterialUtils_1_1;
+            },
+            function (ByteArrayBase_1_1) {
+                ByteArrayBase_1 = ByteArrayBase_1_1;
             }],
         execute: function() {
             Triangle = (function () {
@@ -54,8 +57,138 @@ System.register(["../materials/Material", "./Box", "../../math/Vector3", "../../
                     this.t2 = t2;
                     this.t3 = t3;
                     this.type = Shape_1.ShapeType.TRIANGLE;
-                    this.size = Triangle.SIZE;
+                    this.memorySize = Triangle.SIZE;
                 }
+                Triangle.prototype.directRead = function (memory, offset) {
+                    offset++;
+                    var materialIndex = memory[offset++];
+                    var material = Material_1.Material.map[materialIndex];
+                    if (material) {
+                        this.material = material;
+                    }
+                    this.index = memory[offset++];
+                    offset = this.v1.directRead(memory, offset);
+                    offset = this.v2.directRead(memory, offset);
+                    offset = this.v3.directRead(memory, offset);
+                    offset = this.n1.directRead(memory, offset);
+                    offset = this.n2.directRead(memory, offset);
+                    offset = this.n3.directRead(memory, offset);
+                    if (this.t1) {
+                        offset = this.t1.directRead(memory, offset);
+                    }
+                    else {
+                        offset = offset + Vector3_1.Vector3.SIZE;
+                    }
+                    if (this.t2) {
+                        offset = this.t2.directRead(memory, offset);
+                    }
+                    else {
+                        offset = offset + Vector3_1.Vector3.SIZE;
+                    }
+                    if (this.t3) {
+                        offset = this.t3.directRead(memory, offset);
+                    }
+                    else {
+                        offset = offset + Vector3_1.Vector3.SIZE;
+                    }
+                    this.updateBox();
+                    return offset;
+                };
+                Triangle.prototype.directWrite = function (memory, offset) {
+                    memory[offset++] = this.type;
+                    memory[offset++] = this.material.index;
+                    memory[offset++] = this.index;
+                    offset = this.v1.directWrite(memory, offset);
+                    offset = this.v2.directWrite(memory, offset);
+                    offset = this.v3.directWrite(memory, offset);
+                    offset = this.n1.directWrite(memory, offset);
+                    offset = this.n2.directWrite(memory, offset);
+                    offset = this.n3.directWrite(memory, offset);
+                    if (this.t1) {
+                        offset = this.t1.directWrite(memory, offset);
+                    }
+                    else {
+                        offset = offset + Vector3_1.Vector3.SIZE;
+                    }
+                    if (this.t2) {
+                        offset = this.t2.directWrite(memory, offset);
+                    }
+                    else {
+                        offset = offset + Vector3_1.Vector3.SIZE;
+                    }
+                    if (this.t3) {
+                        offset = this.t3.directWrite(memory, offset);
+                    }
+                    else {
+                        offset = offset + Vector3_1.Vector3.SIZE;
+                    }
+                    return offset;
+                };
+                Triangle.prototype.read = function (memory) {
+                    memory.position += ByteArrayBase_1.ByteArrayBase.SIZE_OF_UINT8;
+                    var materialIndex = memory.readInt();
+                    var material = Material_1.Material.map[materialIndex];
+                    if (material) {
+                        this.material = material;
+                    }
+                    this.index = memory.readInt();
+                    this.v1.read(memory);
+                    this.v2.read(memory);
+                    this.v3.read(memory);
+                    this.n1.read(memory);
+                    this.n2.read(memory);
+                    this.n3.read(memory);
+                    if (this.t1) {
+                        this.t1.read(memory);
+                    }
+                    else {
+                        memory.position += Vector3_1.Vector3.SIZE;
+                    }
+                    if (this.t2) {
+                        this.t2.read(memory);
+                    }
+                    else {
+                        memory.position += Vector3_1.Vector3.SIZE;
+                    }
+                    if (this.t3) {
+                        this.t3.read(memory);
+                    }
+                    else {
+                        memory.position += Vector3_1.Vector3.SIZE;
+                    }
+                    this.updateBox();
+                    return memory.position;
+                };
+                Triangle.prototype.write = function (memory) {
+                    memory.writeByte(this.type);
+                    memory.writeInt(this.material.index);
+                    memory.writeInt(this.index);
+                    this.v1.write(memory);
+                    this.v2.write(memory);
+                    this.v3.write(memory);
+                    this.n1.write(memory);
+                    this.n2.write(memory);
+                    this.n3.write(memory);
+                    if (this.t1) {
+                        this.t1.write(memory);
+                    }
+                    else {
+                        memory.position += Vector3_1.Vector3.SIZE;
+                    }
+                    if (this.t2) {
+                        this.t2.write(memory);
+                    }
+                    else {
+                        memory.position += Vector3_1.Vector3.SIZE;
+                    }
+                    if (this.t3) {
+                        this.t3.write(memory);
+                    }
+                    else {
+                        memory.position += Vector3_1.Vector3.SIZE;
+                    }
+                    return memory.position;
+                };
                 Triangle.fromJson = function (triangles) {
                     if (triangles instanceof Triangle) {
                         var t = triangles;
@@ -238,71 +371,6 @@ System.register(["../materials/Material", "./Box", "../../math/Vector3", "../../
                     if (t.n3 == undefined || t.n3.equals(zero)) {
                         t.n3 = n;
                     }
-                };
-                Triangle.prototype.writeToMemory = function (memory, offset) {
-                    memory[offset++] = this.type;
-                    memory[offset++] = this.material.materialIndex;
-                    memory[offset++] = this.index;
-                    offset = this.v1.writeToMemory(memory, offset);
-                    offset = this.v2.writeToMemory(memory, offset);
-                    offset = this.v3.writeToMemory(memory, offset);
-                    offset = this.n1.writeToMemory(memory, offset);
-                    offset = this.n2.writeToMemory(memory, offset);
-                    offset = this.n3.writeToMemory(memory, offset);
-                    if (this.t1) {
-                        offset = this.t1.writeToMemory(memory, offset);
-                    }
-                    else {
-                        offset = offset + Vector3_1.Vector3.SIZE;
-                    }
-                    if (this.t2) {
-                        offset = this.t2.writeToMemory(memory, offset);
-                    }
-                    else {
-                        offset = offset + Vector3_1.Vector3.SIZE;
-                    }
-                    if (this.t3) {
-                        offset = this.t3.writeToMemory(memory, offset);
-                    }
-                    else {
-                        offset = offset + Vector3_1.Vector3.SIZE;
-                    }
-                    return offset;
-                };
-                Triangle.prototype.read = function (memory, offset) {
-                    offset++;
-                    var materialIndex = memory[offset++];
-                    var material = Material_1.Material.map[materialIndex];
-                    if (material) {
-                        this.material = material;
-                    }
-                    this.index = memory[offset++];
-                    offset = this.v1.read(memory, offset);
-                    offset = this.v2.read(memory, offset);
-                    offset = this.v3.read(memory, offset);
-                    offset = this.n1.read(memory, offset);
-                    offset = this.n2.read(memory, offset);
-                    offset = this.n3.read(memory, offset);
-                    if (this.t1) {
-                        offset = this.t1.read(memory, offset);
-                    }
-                    else {
-                        offset = offset + Vector3_1.Vector3.SIZE;
-                    }
-                    if (this.t2) {
-                        offset = this.t2.read(memory, offset);
-                    }
-                    else {
-                        offset = offset + Vector3_1.Vector3.SIZE;
-                    }
-                    if (this.t3) {
-                        offset = this.t3.read(memory, offset);
-                    }
-                    else {
-                        offset = offset + Vector3_1.Vector3.SIZE;
-                    }
-                    this.updateBox();
-                    return offset;
                 };
                 Triangle.SIZE = Box_1.Box.SIZE + (Vector3_1.Vector3.SIZE * 9) + 2;
                 return Triangle;

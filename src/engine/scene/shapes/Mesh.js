@@ -44,18 +44,54 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                     this.tree = tree;
                     this.type = Shape_1.ShapeType.MESH;
                 }
-                Object.defineProperty(Mesh.prototype, "size", {
+                Object.defineProperty(Mesh.prototype, "memorySize", {
                     get: function () {
                         if (this.box && this.triangles) {
                             return Box_1.Box.SIZE + this.triangles.length * Triangle_1.Triangle.SIZE + 2;
                         }
                         else {
-                            return 0;
+                            throw "Box or Triangles are missing, box:" + this.box + ", triangles:" + this.triangles.length;
                         }
                     },
                     enumerable: true,
                     configurable: true
                 });
+                Mesh.prototype.directRead = function (memory, offset) {
+                    this.box = new Box_1.Box();
+                    offset = this.box.directRead(memory, offset);
+                    var numTriangles = memory[offset++];
+                    for (var i = 0; i < numTriangles; i++) {
+                        var triangle = new Triangle_1.Triangle();
+                        offset = triangle.directRead(memory, offset);
+                        this.triangles.push(triangle);
+                    }
+                    return offset;
+                };
+                Mesh.prototype.directWrite = function (memory, offset) {
+                    memory[offset++] = this.type;
+                    offset = this.box.directWrite(memory, offset);
+                    memory[offset++] = this.triangles.length;
+                    this.triangles.forEach(function (t, index) {
+                        t.index = index;
+                        offset = t.directWrite(memory, offset);
+                    });
+                    this.tree = SharedTree_1.SharedTree.newTree(this.triangles, this.box);
+                    return offset;
+                };
+                Mesh.prototype.read = function (memory) {
+                    return memory.position;
+                };
+                Mesh.prototype.write = function (memory) {
+                    memory.writeByte(this.type);
+                    this.box.write(memory);
+                    memory.writeInt(this.triangles.length);
+                    this.triangles.forEach(function (t, index) {
+                        t.index = index;
+                        t.write(memory);
+                    });
+                    SharedTree_1.SharedTree.buildAndWrite(memory, this.triangles, this.box);
+                    return memory.position;
+                };
                 Mesh.fromJson = function (mesh) {
                     return new Mesh(Box_1.Box.fromJson(mesh.box), Triangle_1.Triangle.fromJson(mesh.triangles));
                 };
@@ -115,18 +151,9 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                     var m = this;
                     var lookup = new Map();
                     m.triangles.forEach(function (t) {
-                        if (!lookup[t.v1]) {
-                            lookup[t.v1] = new Vector3_1.Vector3();
-                        }
-                        if (!lookup[t.v2]) {
-                            lookup[t.v2] = new Vector3_1.Vector3();
-                        }
-                        if (!lookup[t.v3]) {
-                            lookup[t.v3] = new Vector3_1.Vector3();
-                        }
-                        lookup[t.v1] = lookup[t.v1].add(t.n1);
-                        lookup[t.v2] = lookup[t.v2].add(t.n2);
-                        lookup[t.v3] = lookup[t.v3].add(t.n3);
+                        lookup[t.v1] = lookup[t.v1] ? lookup[t.v1].add(t.n1) : t.n1;
+                        lookup[t.v2] = lookup[t.v2] ? lookup[t.v2].add(t.n2) : t.v2;
+                        lookup[t.v3] = lookup[t.v3] ? lookup[t.v3].add(t.n3) : t.v3;
                     });
                     lookup.forEach(function (v, k) {
                         lookup[k] = v.normalize();
@@ -165,28 +192,6 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                     });
                     m.updateBox();
                     m.tree = null;
-                };
-                Mesh.prototype.writeToMemory = function (memory, offset) {
-                    memory[offset++] = this.type;
-                    offset = this.box.writeToMemory(memory, offset);
-                    memory[offset++] = this.triangles.length;
-                    this.triangles.forEach(function (t, index) {
-                        t.index = index;
-                        offset = t.writeToMemory(memory, offset);
-                    });
-                    this.tree = SharedTree_1.SharedTree.newTree(this.triangles, this.box);
-                    return offset;
-                };
-                Mesh.prototype.read = function (memory, offset) {
-                    this.box = new Box_1.Box();
-                    offset = this.box.read(memory, offset);
-                    var numTriangles = memory[offset++];
-                    for (var i = 0; i < numTriangles; i++) {
-                        var triangle = new Triangle_1.Triangle();
-                        offset = triangle.read(memory, offset);
-                        this.triangles.push(triangle);
-                    }
-                    return offset;
                 };
                 return Mesh;
             })();

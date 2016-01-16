@@ -16,7 +16,28 @@ System.register(["../../math/Vector3", "../Axis"], function(exports_1) {
                     if (max === void 0) { max = new Vector3_1.Vector3(); }
                     this.min = min;
                     this.max = max;
+                    this.memorySize = Box.SIZE;
                 }
+                Box.prototype.directWrite = function (memory, offset) {
+                    offset = this.min.directWrite(memory, offset);
+                    offset = this.max.directWrite(memory, offset);
+                    return offset;
+                };
+                Box.prototype.directRead = function (memory, offset) {
+                    offset = this.min.directRead(memory, offset);
+                    offset = this.max.directRead(memory, offset);
+                    return offset;
+                };
+                Box.prototype.read = function (memory) {
+                    this.min.read(memory);
+                    this.max.read(memory);
+                    return memory.position;
+                };
+                Box.prototype.write = function (memory) {
+                    this.min.write(memory);
+                    this.max.write(memory);
+                    return memory.position;
+                };
                 Box.fromJson = function (box) {
                     return new Box(Vector3_1.Vector3.fromJson(box.min), Vector3_1.Vector3.fromJson(box.max));
                 };
@@ -96,16 +117,6 @@ System.register(["../../math/Vector3", "../Axis"], function(exports_1) {
                             break;
                     }
                     return { left: left, right: right };
-                };
-                Box.prototype.writeToMemory = function (memory, offset) {
-                    offset = this.min.writeToMemory(memory, offset);
-                    offset = this.max.writeToMemory(memory, offset);
-                    return offset;
-                };
-                Box.prototype.read = function (memory, offset) {
-                    offset = this.min.read(memory, offset);
-                    offset = this.max.read(memory, offset);
-                    return offset;
                 };
                 Box.SIZE = Vector3_1.Vector3.SIZE * 2;
                 return Box;

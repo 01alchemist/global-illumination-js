@@ -45,38 +45,56 @@ System.register(["./Cube", "./Sphere", "./Mesh", "./Triangle", "./TransformedSha
         }
     }
     exports_1("ShapefromJson", ShapefromJson);
-    function restoreShape(memory, offset, container) {
+    function directRestoreShape(memory, offset, container) {
         var type = memory[offset++];
-        var shape;
         switch (type) {
             case ShapeType.CUBE:
-                shape = new Cube_1.Cube();
-                offset = shape.read(memory, offset);
+                var cube = new Cube_1.Cube();
+                container.push(cube);
+                return cube.directRead(memory, offset);
                 break;
             case ShapeType.SPHERE:
-                shape = new Sphere_1.Sphere();
-                offset = shape.read(memory, offset);
+                var sphere = new Sphere_1.Sphere();
+                container.push(sphere);
+                return sphere.directRead(memory, offset);
                 break;
             case ShapeType.MESH:
-                shape = new Mesh_1.Mesh();
-                offset = shape.read(memory, offset);
-                break;
-            case ShapeType.TRANSFORMED_SHAPE:
-                shape = new TransformedShape_1.TransformedShape();
-                offset = shape.read(memory, offset);
+                var mesh = new Mesh_1.Mesh();
+                container.push(mesh);
+                return mesh.directRead(memory, offset);
                 break;
             case ShapeType.TRIANGLE:
-                shape = new Triangle_1.Triangle();
-                offset = shape.read(memory, offset);
-                break;
-            default:
-                throw "Unknown shape";
+                var triangle = new Triangle_1.Triangle();
+                container.push(triangle);
+                return triangle.directRead(memory, offset);
                 break;
         }
-        if (container) {
-            container.push(shape);
+    }
+    exports_1("directRestoreShape", directRestoreShape);
+    function restoreShape(memory, container) {
+        var type = memory.readByte();
+        switch (type) {
+            case ShapeType.CUBE:
+                var cube = new Cube_1.Cube();
+                container.push(cube);
+                return cube.read(memory);
+                break;
+            case ShapeType.SPHERE:
+                var sphere = new Sphere_1.Sphere();
+                container.push(sphere);
+                return sphere.read(memory);
+                break;
+            case ShapeType.MESH:
+                var mesh = new Mesh_1.Mesh();
+                container.push(mesh);
+                return mesh.read(memory);
+                break;
+            case ShapeType.TRIANGLE:
+                var triangle = new Triangle_1.Triangle();
+                container.push(triangle);
+                return triangle.read(memory);
+                break;
         }
-        return offset;
     }
     exports_1("restoreShape", restoreShape);
     return {

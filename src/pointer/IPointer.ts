@@ -4,6 +4,7 @@ import {ByteArrayBase} from "./ByteArrayBase";
  */
 export interface IPointer{
 
-    size:number;
-    write(memory:ByteArrayBase, offset:number):number;
+    memorySize:number;
+    write(memory:ByteArrayBase):number;
+    read(memory:ByteArrayBase):number;
 }

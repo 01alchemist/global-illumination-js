@@ -31,9 +31,6 @@ export class TraceWorkerManager {
         //this.sceneMemory = new Float32Array(new SharedArrayBuffer(param.scene.size * Float32Array.BYTES_PER_ELEMENT));
         var scene:SharedScene = param.scene;
         this.sceneMemory = scene.getMemory();
-        var _kdTreeMemory = scene.getKDTreeMemory();
-        //this.kdTreeMemory = new Uint8Array(new SharedArrayBuffer(_kdTreeMemory.buffer.byteLength));
-        this.kdTreeMemory = SharedArrayBuffer.transfer(_kdTreeMemory);
 
         this.pixelMemory = new Uint8ClampedArray(new SharedArrayBuffer(width * height * 3));
 
@@ -65,7 +62,6 @@ export class TraceWorkerManager {
                         new TraceJob(
                             this.pixelMemory,
                             this.sceneMemory,
-                            this.kdTreeMemory,
                             {
                                 camera: param.camera,
                                 cameraSamples: param.cameraSamples,
@@ -87,7 +83,6 @@ export class TraceWorkerManager {
                 new TraceJob(
                     this.pixelMemory,
                     this.sceneMemory,
-                    this.kdTreeMemory,
                     {
                         camera: param.camera,
                         cameraSamples: param.cameraSamples,

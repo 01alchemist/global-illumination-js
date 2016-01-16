@@ -1,7 +1,7 @@
 {
-  "name": "ParallelRayJS",
+  "name": "global-illumination-js",
   "version": "0.0.1",
-  "description": "ParallelRayJS",
+  "description": "Global Illumination using parallel path tracing",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

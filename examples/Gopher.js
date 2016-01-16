@@ -73,8 +73,8 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                     var self = this;
                     var mesh;
                     this.renderer = new Renderer_1.Renderer();
-                    this.i_width = 2560 / 2;
-                    this.i_height = 1440 / 2;
+                    this.i_width = 2560 / 4;
+                    this.i_height = 1440 / 4;
                     var cameraSamples = 4;
                     var hitSamples = 16;
                     var bounces = 8;
@@ -89,7 +89,6 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                             scene.add(mesh);
                             self.pixels = self.renderer.initParallelRender(scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples, bounces);
                             self.drawPixels(self.pixels, { x: 0, y: 0, width: self.i_width, height: self.i_height });
-                            requestAnimationFrame(self.render.bind(self));
                         }
                     });
                 };

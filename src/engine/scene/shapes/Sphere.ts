@@ -8,13 +8,14 @@ import {NoHit} from "../../math/Hit";
 import {Color} from "../../math/Color";
 import {ShapeType} from "./Shape";
 import {MaterialUtils} from "../materials/MaterialUtils";
+import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
 export class Sphere implements Shape {
 
     type:ShapeType = ShapeType.SPHERE;
-    size:number = Vector3.SIZE + 3;// center, radius, material index
+    memorySize:number = Vector3.SIZE + 3;// center, radius, material index, type
     index:number;
 
     constructor(public center:Vector3 = new Vector3(),
@@ -26,6 +27,54 @@ export class Sphere implements Shape {
             var max = new Vector3(center.x + radius, center.y + radius, center.z + radius);
             this.box = new Box(min, max);
         }
+    }
+
+    directRead(memory:Float32Array, offset:number):number {
+        offset = this.center.directRead(memory, offset);
+        this.radius = memory[offset++];
+
+        var min = new Vector3(this.center.x - this.radius, this.center.y - this.radius, this.center.z - this.radius);
+        var max = new Vector3(this.center.x + this.radius, this.center.y + this.radius, this.center.z + this.radius);
+        this.box = new Box(min, max);
+
+        var materialIndex:number = memory[offset++];
+        var material:Material = Material.map[materialIndex];
+        if(material){
+            this.material = material;
+        }
+        return offset;
+    }
+
+    directWrite(memory:Float32Array, offset:number):number {
+        memory[offset++] = this.type;
+        offset = this.center.directWrite(memory, offset);
+        memory[offset++] = this.radius;
+        memory[offset++] = this.material.index;
+        return offset;
+    }
+
+    read(memory:ByteArrayBase):number{
+        this.center.read(memory);
+        this.radius = memory.readFloat();
+
+        var min = new Vector3(this.center.x - this.radius, this.center.y - this.radius, this.center.z - this.radius);
+        var max = new Vector3(this.center.x + this.radius, this.center.y + this.radius, this.center.z + this.radius);
+        this.box = new Box(min, max);
+
+        var materialIndex:number = memory.readInt();
+        var material:Material = Material.map[materialIndex];
+        if(material){
+            this.material = material;
+        }
+        return memory.position;
+    }
+
+    write(memory:ByteArrayBase):number{
+        memory.writeByte(this.type);
+        this.center.write(memory);
+        memory.writeFloat(this.radius);
+        memory.writeInt(this.material.index);
+        return memory.position;
     }
 
     static fromJson(sphere:Sphere):Sphere {
@@ -96,29 +145,5 @@ export class Sphere implements Shape {
                 return v.mulScalar(this.radius).add(this.center);
             }
         }
-    }
-
-    writeToMemory(memory:Float32Array, offset:number):number {
-        memory[offset++] = this.type;
-        offset = this.center.writeToMemory(memory, offset);
-        memory[offset++] = this.radius;
-        memory[offset++] = this.material.materialIndex;
-        return offset;
-    }
-
-    read(memory:Float32Array, offset:number):number {
-        offset = this.center.read(memory, offset);
-        this.radius = memory[offset++];
-
-        var min = new Vector3(this.center.x - this.radius, this.center.y - this.radius, this.center.z - this.radius);
-        var max = new Vector3(this.center.x + this.radius, this.center.y + this.radius, this.center.z + this.radius);
-        this.box = new Box(min, max);
-
-        var materialIndex:number = memory[offset++];
-        var material:Material = Material.map[materialIndex];
-        if(material){
-            this.material = material;
-        }
-        return offset;
     }
 }

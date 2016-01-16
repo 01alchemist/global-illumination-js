@@ -9,16 +9,24 @@ import {sortAscending} from "../../utils/MapUtils";
 import {MathUtils} from "../../utils/MathUtils";
 import {Mesh} from "../shapes/Mesh";
 import {IPointer} from "../../../pointer/IPointer";
+import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
-export class SharedNode implements IPointer{
+enum NodeMarker{
+    LEFT = 0xEE0011,
+    RIGHT = 0x1100EE,
+    LEAF = 0xEE00EE,
+    EON = 0xEEEEEE
+}
+export class SharedNode{
 
     static map:Array<SharedNode> = [];
 
     index:number;
     mesh:Mesh;
     size:number=0;
+    memory:ByteArrayBase;
 
     constructor(public axis:Axis,
                 public point:number,
@@ -29,11 +37,6 @@ export class SharedNode implements IPointer{
 
         this.index = SharedNode.map.push(this) - 1;
     }
-
-    write(memory:DataView, offset:number):number{
-        return offset;
-    }
-
     static newNode(shapes:Shape[]):SharedNode {
         return new SharedNode(Axis.AxisNone, 0, shapes, [], null, null);
     }
@@ -52,15 +55,15 @@ export class SharedNode implements IPointer{
                 return this.intersectShapes(node, r);
             case Axis.AxisX:
                 tsplit = (node.point - r.origin.x) / r.direction.x;
-                leftFirst = (r.origin.x < node.point) || (r.origin.x == node.point && r.direction.x <= 0)
+                leftFirst = (r.origin.x < node.point) || (r.origin.x == node.point && r.direction.x <= 0);
                 break;
             case Axis.AxisY:
                 tsplit = (node.point - r.origin.y) / r.direction.y;
-                leftFirst = (r.origin.y < node.point) || (r.origin.y == node.point && r.direction.y <= 0)
+                leftFirst = (r.origin.y < node.point) || (r.origin.y == node.point && r.direction.y <= 0);
                 break;
             case Axis.AxisZ:
                 tsplit = (node.point - r.origin.z) / r.direction.z;
-                leftFirst = (r.origin.z < node.point) || (r.origin.z == node.point && r.direction.z <= 0)
+                leftFirst = (r.origin.z < node.point) || (r.origin.z == node.point && r.direction.z <= 0);
                 break;
         }
         var first:SharedNode;
@@ -232,6 +235,11 @@ export class SharedNode implements IPointer{
             bestPoint = mz;
         }
         if (bestAxis == Axis.AxisNone) {
+            if(this.memory) {
+                this.memory.writeUnsignedInt(NodeMarker.LEAF);
+                this.memory.writeByte(bestAxis);
+                this.memory.writeFloat(bestPoint);
+            }
             var shapes:Shape[] = <Shape[]>node.shapes;
             var shapeIndices:number[] = [];
             //for shared node we only need shape indices
@@ -248,9 +256,24 @@ export class SharedNode implements IPointer{
         node.left = SharedNode.newNode(p.left);
         node.right = SharedNode.newNode(p.right);
 
+        if(this.memory) {
+            this.memory.writeByte(bestAxis);
+            this.memory.writeFloat(bestPoint);
+            this.memory.writeUnsignedInt(NodeMarker.LEFT);
+        }
+
         node.left.split(depth + 1);
+
+        if(this.memory) {
+            this.memory.writeUnsignedInt(NodeMarker.RIGHT);
+        }
+
         node.right.split(depth + 1);
 
+        if(this.memory) {
+            this.memory.writeUnsignedInt(0);// shapes only needed at leaf nodes
+            this.memory.writeUnsignedInt(NodeMarker.EON);
+        }
         node.shapes = null; // only needed at leaf nodes
     }
 }

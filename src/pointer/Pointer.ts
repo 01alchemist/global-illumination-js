@@ -20,11 +20,19 @@ export class Pointer{
     private beginLocation:number;
     private currentLocation:number;
 
-    constructor(obj:IPointer){
+    constructor(private reference:IPointer){
         if(!Pointer.heap){
             Pointer.init();
         }
-        Pointer.offset = obj.write(Pointer.memory, Pointer.offset);
-
+        this.beginLocation = Pointer.offset;
+        this.currentLocation = Pointer.offset;
+        Pointer.offset = reference.write(Pointer.memory, Pointer.offset);
     }
+    read():IPointer{
+        Pointer.offset = this.reference.read(Pointer.memory, Pointer.offset);
+        return this.reference;
+    }
+}
+export function sizeof(ptr:IPointer):number{
+    return ptr.size;
 }

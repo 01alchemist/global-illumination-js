@@ -36,7 +36,7 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
                     this.tint = tint;
                     this.transparent = transparent;
                     this.type = MaterialType.GENERIC;
-                    this.materialIndex = Material.map.push(this) - 1;
+                    this.index = Material.map.push(this) - 1;
                 }
                 Material.prototype.clone = function () {
                     var material = new Material(this.color.clone(), this.texture, this.normalTexture, this.bumpTexture, this.bumpMultiplier, this.emittance, this.attenuation.clone(), this.index, this.gloss, this.tint, this.transparent);
@@ -44,21 +44,21 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
                     return material;
                 };
                 Material.prototype.read = function (memory, offset) {
-                    offset = this.color.read(memory, offset);
+                    offset = this.color.directRead(memory, offset);
                     this.bumpMultiplier = memory[offset++];
                     this.emittance = memory[offset++];
-                    offset = this.attenuation.read(memory, offset);
+                    offset = this.attenuation.directRead(memory, offset);
                     this.index = memory[offset++];
                     this.gloss = memory[offset++];
                     this.tint = memory[offset++];
                     this.transparent = memory[offset++] == 1;
                     return offset;
                 };
-                Material.prototype.writeToMemory = function (memory, offset) {
-                    offset = this.color.writeToMemory(memory, offset);
+                Material.prototype.directWrite = function (memory, offset) {
+                    offset = this.color.directWrite(memory, offset);
                     memory[offset++] = this.bumpMultiplier;
                     memory[offset++] = this.emittance;
-                    offset = this.attenuation.writeToMemory(memory, offset);
+                    offset = this.attenuation.directWrite(memory, offset);
                     memory[offset++] = this.index;
                     memory[offset++] = this.gloss;
                     memory[offset++] = this.tint;
@@ -73,10 +73,10 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
                     configurable: true
                 });
                 ;
-                Material.writeToMemory = function (memory, offset) {
+                Material.directWrite = function (memory, offset) {
                     memory[offset++] = Material.map.length;
                     Material.map.forEach(function (material) {
-                        offset = material.writeToMemory(memory, offset);
+                        offset = material.directWrite(memory, offset);
                     });
                     return offset;
                 };
@@ -84,7 +84,7 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
                     if (offset === void 0) { offset = 0; }
                     var numMaterials = memory[offset++];
                     for (var i = 0; i < numMaterials; i++) {
-                        offset = new Material().read(memory, offset);
+                        offset = new Material().directRead(memory, offset);
                     }
                     console.info(numMaterials + " Materials restored");
                     return offset;

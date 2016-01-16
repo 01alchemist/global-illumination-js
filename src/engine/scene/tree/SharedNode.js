@@ -1,6 +1,6 @@
 System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../utils/MathUtils"], function(exports_1) {
     var Axis_1, Hit_1, MapUtils_1, MapUtils_2, MathUtils_1;
-    var SharedNode;
+    var NodeMarker, SharedNode;
     return {
         setters:[
             function (Axis_1_1) {
@@ -17,6 +17,12 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                 MathUtils_1 = MathUtils_1_1;
             }],
         execute: function() {
+            (function (NodeMarker) {
+                NodeMarker[NodeMarker["LEFT"] = 15597585] = "LEFT";
+                NodeMarker[NodeMarker["RIGHT"] = 1114350] = "RIGHT";
+                NodeMarker[NodeMarker["LEAF"] = 15597806] = "LEAF";
+                NodeMarker[NodeMarker["EON"] = 15658734] = "EON";
+            })(NodeMarker || (NodeMarker = {}));
             SharedNode = (function () {
                 function SharedNode(axis, point, shapes, shapeIndices, left, right) {
                     if (shapes === void 0) { shapes = null; }
@@ -32,9 +38,6 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                     this.size = 0;
                     this.index = SharedNode.map.push(this) - 1;
                 }
-                SharedNode.prototype.write = function (memory, offset) {
-                    return offset;
-                };
                 SharedNode.newNode = function (shapes) {
                     return new SharedNode(Axis_1.Axis.AxisNone, 0, shapes, [], null, null);
                 };
@@ -233,6 +236,11 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                         bestPoint = mz;
                     }
                     if (bestAxis == Axis_1.Axis.AxisNone) {
+                        if (this.memory) {
+                            this.memory.writeUnsignedInt(NodeMarker.LEAF);
+                            this.memory.writeByte(bestAxis);
+                            this.memory.writeFloat(bestPoint);
+                        }
                         var shapes = node.shapes;
                         var shapeIndices = [];
                         shapes.forEach(function (shape) {
@@ -247,8 +255,20 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                     node.point = bestPoint;
                     node.left = SharedNode.newNode(p.left);
                     node.right = SharedNode.newNode(p.right);
+                    if (this.memory) {
+                        this.memory.writeByte(bestAxis);
+                        this.memory.writeFloat(bestPoint);
+                        this.memory.writeUnsignedInt(NodeMarker.LEFT);
+                    }
                     node.left.split(depth + 1);
+                    if (this.memory) {
+                        this.memory.writeUnsignedInt(NodeMarker.RIGHT);
+                    }
                     node.right.split(depth + 1);
+                    if (this.memory) {
+                        this.memory.writeUnsignedInt(0);
+                        this.memory.writeUnsignedInt(NodeMarker.EON);
+                    }
                     node.shapes = null;
                 };
                 SharedNode.map = [];

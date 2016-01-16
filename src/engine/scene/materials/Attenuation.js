@@ -32,7 +32,7 @@ System.register([], function(exports_1) {
                 Attenuation.prototype.clone = function () {
                     return new Attenuation(this.constant, this.linear, this.quadratic);
                 };
-                Attenuation.prototype.writeToMemory = function (mem, offset) {
+                Attenuation.prototype.directWrite = function (mem, offset) {
                     mem[offset++] = this.constant;
                     mem[offset++] = this.linear;
                     mem[offset++] = this.quadratic;

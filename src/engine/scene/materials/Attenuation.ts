@@ -36,7 +36,7 @@ export class Attenuation {
         );
     }
 
-    writeToMemory(mem:Float32Array, offset:number):number {
+    directWrite(mem:Float32Array, offset:number):number {
         mem[offset++] = this.constant;
         mem[offset++] = this.linear;
         mem[offset++] = this.quadratic;

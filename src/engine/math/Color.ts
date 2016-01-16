@@ -1,4 +1,5 @@
 import {Vector3} from "./Vector3";
+import {ByteArrayBase} from "../../pointer/ByteArrayBase";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -16,6 +17,33 @@ export class Color {
     constructor(public r:number = 0,
                 public g:number = 0,
                 public b:number = 0) {
+    }
+
+    directWrite(mem:Float32Array, offset:number):number {
+        mem[offset++] = this.r;
+        mem[offset++] = this.g;
+        mem[offset++] = this.b;
+        return offset;
+    }
+
+    directRead(mem:Float32Array, offset:number):number {
+        this.r = mem[offset++];
+        this.g = mem[offset++];
+        this.b = mem[offset++];
+        return offset;
+    }
+
+    read(memory:ByteArrayBase):number {
+        this.r = memory.readFloat();
+        this.g = memory.readFloat();
+        this.b = memory.readFloat();
+        return memory.position;
+    }
+    write(memory:ByteArrayBase):number {
+        memory.writeFloat(this.r);
+        memory.writeFloat(this.g);
+        memory.writeFloat(this.b);
+        return memory.position;
     }
 
     static fromJson(color:Color):Color {
@@ -94,19 +122,5 @@ export class Color {
             this.g,
             this.b
         );
-    }
-
-    writeToMemory(mem:Float32Array, offset:number):number {
-        mem[offset++] = this.r;
-        mem[offset++] = this.g;
-        mem[offset++] = this.b;
-        return offset;
-    }
-
-    read(mem:Float32Array, offset:number):number {
-        this.r = mem[offset++];
-        this.g = mem[offset++];
-        this.b = mem[offset++];
-        return offset;
     }
 }

@@ -10,6 +10,7 @@ import {Matrix4} from "../../math/Matrix4";
 import {Shape} from "./Shape";
 import {ShapeType} from "./Shape";
 import {MaterialUtils} from "../materials/MaterialUtils";
+import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -18,7 +19,7 @@ export class Triangle implements Shape {
     static SIZE:number = Box.SIZE + (Vector3.SIZE * 9) + 2;//+1 for material index
 
     type:ShapeType = ShapeType.TRIANGLE;
-    size:number = Triangle.SIZE;
+    memorySize:number = Triangle.SIZE;
     index:number;
 
     constructor(public material:Material = new Material(),
@@ -27,6 +28,140 @@ export class Triangle implements Shape {
                 public n1:Vector3 = new Vector3(), public n2:Vector3 = new Vector3(), public n3:Vector3 = new Vector3(),
                 public t1:Vector3 = new Vector3(), public t2:Vector3 = new Vector3(), public t3:Vector3 = new Vector3()) {
 
+    }
+
+    directRead(memory:Float32Array, offset:number):number {
+        offset++;//type
+        var materialIndex:number = memory[offset++];
+        var material:Material = Material.map[materialIndex];
+        if (material) {
+            this.material = material;
+        }
+
+        this.index = memory[offset++];
+        offset = this.v1.directRead(memory, offset);
+        offset = this.v2.directRead(memory, offset);
+        offset = this.v3.directRead(memory, offset);
+        offset = this.n1.directRead(memory, offset);
+        offset = this.n2.directRead(memory, offset);
+        offset = this.n3.directRead(memory, offset);
+
+        if (this.t1) {
+            offset = this.t1.directRead(memory, offset);
+        } else {
+            offset = offset + Vector3.SIZE;
+        }
+        if (this.t2) {
+            offset = this.t2.directRead(memory, offset);
+        } else {
+            offset = offset + Vector3.SIZE;
+        }
+        if (this.t3) {
+            offset = this.t3.directRead(memory, offset);
+        } else {
+            offset = offset + Vector3.SIZE;
+        }
+
+        this.updateBox();
+
+        return offset;
+    }
+
+    directWrite(memory:Float32Array, offset:number):number {
+        //Not writing box
+        memory[offset++] = this.type;
+        memory[offset++] = this.material.index;
+        memory[offset++] = this.index;
+        offset = this.v1.directWrite(memory, offset);
+        offset = this.v2.directWrite(memory, offset);
+        offset = this.v3.directWrite(memory, offset);
+        offset = this.n1.directWrite(memory, offset);
+        offset = this.n2.directWrite(memory, offset);
+        offset = this.n3.directWrite(memory, offset);
+
+        if (this.t1) {
+            offset = this.t1.directWrite(memory, offset);
+        } else {
+            offset = offset + Vector3.SIZE;
+        }
+        if (this.t2) {
+            offset = this.t2.directWrite(memory, offset);
+        } else {
+            offset = offset + Vector3.SIZE;
+        }
+        if (this.t3) {
+            offset = this.t3.directWrite(memory, offset);
+        } else {
+            offset = offset + Vector3.SIZE;
+        }
+
+        return offset;
+    }
+
+    read(memory:ByteArrayBase):number {
+        memory.position += ByteArrayBase.SIZE_OF_UINT8;//type
+        var materialIndex:number = memory.readInt();
+        var material:Material = Material.map[materialIndex];
+        if (material) {
+            this.material = material;
+        }
+
+        this.index = memory.readInt();
+        this.v1.read(memory);
+        this.v2.read(memory);
+        this.v3.read(memory);
+        this.n1.read(memory);
+        this.n2.read(memory);
+        this.n3.read(memory);
+
+        if (this.t1) {
+            this.t1.read(memory);
+        } else {
+            memory.position += Vector3.SIZE;
+        }
+        if (this.t2) {
+            this.t2.read(memory);
+        } else {
+            memory.position += Vector3.SIZE;
+        }
+        if (this.t3) {
+            this.t3.read(memory);
+        } else {
+            memory.position += Vector3.SIZE;
+        }
+
+        this.updateBox();
+
+        return memory.position;
+    }
+
+    write(memory:ByteArrayBase):number{
+        memory.writeByte(this.type);
+        memory.writeInt(this.material.index);
+        memory.writeInt(this.index);
+        this.v1.write(memory);
+        this.v2.write(memory);
+        this.v3.write(memory);
+        this.n1.write(memory);
+        this.n2.write(memory);
+        this.n3.write(memory);
+
+        if (this.t1) {
+            this.t1.write(memory);
+        } else {
+            memory.position += Vector3.SIZE;
+        }
+        if (this.t2) {
+            this.t2.write(memory);
+        } else {
+            memory.position += Vector3.SIZE;
+        }
+        if (this.t3) {
+            this.t3.write(memory);
+        } else {
+            memory.position += Vector3.SIZE;
+        }
+        return memory.position;
     }
 
     static fromJson(triangles:Triangle|Triangle[]):Triangle|Triangle[] {
@@ -236,73 +371,5 @@ export class Triangle implements Shape {
         if (t.n3 == undefined || t.n3.equals(zero)) {
             t.n3 = n;
         }
-    }
-
-    writeToMemory(memory:Float32Array, offset:number):number {
-        //Not writing box
-        memory[offset++] = this.type;
-        memory[offset++] = this.material.materialIndex;
-        memory[offset++] = this.index;
-        offset = this.v1.writeToMemory(memory, offset);
-        offset = this.v2.writeToMemory(memory, offset);
-        offset = this.v3.writeToMemory(memory, offset);
-        offset = this.n1.writeToMemory(memory, offset);
-        offset = this.n2.writeToMemory(memory, offset);
-        offset = this.n3.writeToMemory(memory, offset);
-
-        if (this.t1) {
-            offset = this.t1.writeToMemory(memory, offset);
-        } else {
-            offset = offset + Vector3.SIZE;
-        }
-        if (this.t2) {
-            offset = this.t2.writeToMemory(memory, offset);
-        } else {
-            offset = offset + Vector3.SIZE;
-        }
-        if (this.t3) {
-            offset = this.t3.writeToMemory(memory, offset);
-        } else {
-            offset = offset + Vector3.SIZE;
-        }
-
-        return offset;
-    }
-
-    read(memory:Float32Array, offset:number):number {
-        offset++;//type
-        var materialIndex:number = memory[offset++];
-        var material:Material = Material.map[materialIndex];
-        if (material) {
-            this.material = material;
-        }
-
-        this.index = memory[offset++];
-        offset = this.v1.read(memory, offset);
-        offset = this.v2.read(memory, offset);
-        offset = this.v3.read(memory, offset);
-        offset = this.n1.read(memory, offset);
-        offset = this.n2.read(memory, offset);
-        offset = this.n3.read(memory, offset);
-
-        if (this.t1) {
-            offset = this.t1.read(memory, offset);
-        } else {
-            offset = offset + Vector3.SIZE;
-        }
-        if (this.t2) {
-            offset = this.t2.read(memory, offset);
-        } else {
-            offset = offset + Vector3.SIZE;
-        }
-        if (this.t3) {
-            offset = this.t3.read(memory, offset);
-        } else {
-            offset = offset + Vector3.SIZE;
-        }
-
-        this.updateBox();
-
-        return offset;
     }
 }

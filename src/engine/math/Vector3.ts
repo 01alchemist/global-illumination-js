@@ -1,3 +1,4 @@
+import {ByteArrayBase} from "../../pointer/ByteArrayBase";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -5,6 +6,8 @@
 export class Vector3 {
 
     static SIZE:number = 3;
+
+    memorySize:number = Vector3.SIZE;
 
     constructor(public x:number = 0, public y:number = 0, public z:number = 0) {
 
@@ -122,17 +125,31 @@ export class Vector3 {
         return this.x == v.x && this.y == v.y && this.z == v.z;
     }
 
-    writeToMemory(memory:Float32Array, offset:number):number {
+    directWrite(memory:Float32Array, offset:number):number {
         memory[offset++] = this.x;
         memory[offset++] = this.y;
         memory[offset++] = this.z;
         return offset;
     }
 
-    read(memory:Float32Array, offset:number):number {
+    directRead(memory:Float32Array, offset:number):number {
         this.x = memory[offset++];
         this.y = memory[offset++];
         this.z = memory[offset++];
         return offset;
+    }
+
+    read(memory:ByteArrayBase):number {
+        this.x = memory.readFloat();
+        this.y = memory.readFloat();
+        this.z = memory.readFloat();
+        return memory.position;
+    }
+
+    write(memory:ByteArrayBase):number {
+        memory.writeFloat(this.x);
+        memory.writeFloat(this.y);
+        memory.writeFloat(this.z);
+        return memory.position;
     }
 }

@@ -12,6 +12,30 @@ System.register([], function(exports_1) {
                     this.g = g;
                     this.b = b;
                 }
+                Color.prototype.directWrite = function (mem, offset) {
+                    mem[offset++] = this.r;
+                    mem[offset++] = this.g;
+                    mem[offset++] = this.b;
+                    return offset;
+                };
+                Color.prototype.directRead = function (mem, offset) {
+                    this.r = mem[offset++];
+                    this.g = mem[offset++];
+                    this.b = mem[offset++];
+                    return offset;
+                };
+                Color.prototype.read = function (memory) {
+                    this.r = memory.readFloat();
+                    this.g = memory.readFloat();
+                    this.b = memory.readFloat();
+                    return memory.position;
+                };
+                Color.prototype.write = function (memory) {
+                    memory.writeFloat(this.r);
+                    memory.writeFloat(this.g);
+                    memory.writeFloat(this.b);
+                    return memory.position;
+                };
                 Color.fromJson = function (color) {
                     if (color) {
                         return new Color(color.r, color.g, color.b);
@@ -68,18 +92,6 @@ System.register([], function(exports_1) {
                 };
                 Color.prototype.clone = function () {
                     return new Color(this.r, this.g, this.b);
-                };
-                Color.prototype.writeToMemory = function (mem, offset) {
-                    mem[offset++] = this.r;
-                    mem[offset++] = this.g;
-                    mem[offset++] = this.b;
-                    return offset;
-                };
-                Color.prototype.read = function (mem, offset) {
-                    this.r = mem[offset++];
-                    this.g = mem[offset++];
-                    this.b = mem[offset++];
-                    return offset;
                 };
                 Color.SIZE = 3;
                 return Color;
