@@ -50,8 +50,8 @@ export class Gopher extends CanvasDisplay {
         var self = this;
         var mesh;
         this.renderer = new Renderer();
-        this.i_width = 2560 / 2;
-        this.i_height = 1440 / 2;
+        this.i_width = 2560 / 4;
+        this.i_height = 1440 / 4;
         //this.i_width = 1280;
         //this.i_height = 720;
         //this.i_width = 1920;
@@ -69,12 +69,16 @@ export class Gopher extends CanvasDisplay {
                 mesh = _mesh;
                 scene.add(mesh);
 
+                //console.time("compile");
+                //mesh.compile();
+                //console.timeEnd("compile");
+
                 self.pixels = self.renderer.initParallelRender(
                     scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples, bounces
                 );
                 self.drawPixels(self.pixels, {x: 0, y: 0, width: self.i_width, height: self.i_height});
 
-                requestAnimationFrame(self.render.bind(self));
+                /*requestAnimationFrame(self.render.bind(self));*/
             }
         });
     }

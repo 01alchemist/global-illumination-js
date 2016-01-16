@@ -35,8 +35,7 @@ System.register(["../../scene/Camera", "../../math/Color", "../Renderer", "../..
                                 self.camera = Camera_1.Camera.fromJson(e.data.camera);
                             }
                             if (!self.scene) {
-                                self.scene = SharedScene_1.SharedScene.getScene(self.sceneMemory);
-                                self.scene.compile();
+                                self.scene = SharedScene_1.SharedScene.getScene(self.sceneMemory, e.data.tree);
                             }
                             self.full_width = e.data.full_width;
                             self.full_height = e.data.full_height;

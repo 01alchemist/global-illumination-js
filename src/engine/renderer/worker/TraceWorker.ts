@@ -58,13 +58,12 @@ export class TraceWorker {
                 self.pixelMemory = new Uint8ClampedArray(e.data.pixelMemory);
                 self.sceneMemory = new Float32Array(e.data.sceneMemory);
 
-
                 if(!self.camera){
                     self.camera = Camera.fromJson(e.data.camera);
                 }
                 if(!self.scene){
-                    self.scene = SharedScene.getScene(self.sceneMemory);
-                    self.scene.compile();
+                    self.scene = SharedScene.getScene(self.sceneMemory, e.data.tree);
+                    /*self.scene.compile();*/
                 }
                 //this.scene.add(Sphere.newSphere(new Vector3(-1, 4, -1), 0.5, new LightMaterial(new Color(1, 1, 1), 3, new LinearAttenuation(1))));
                 //self.scene.rays = 0;

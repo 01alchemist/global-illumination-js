@@ -10,28 +10,31 @@ import {append} from "../../utils/MapUtils";
 import {Tree} from "../tree/Tree";
 import {Box} from "./Box";
 import {ShapeType} from "./Shape";
+import {SharedTree} from "../tree/SharedTree";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
-export class Mesh implements Shape{
+export class Mesh implements Shape {
 
     type:ShapeType = ShapeType.MESH;
-    get size():number{
-        if(this.box && this.triangles){
+    index:number;
+
+    get size():number {
+        if (this.box && this.triangles) {
             return Box.SIZE + this.triangles.length * Triangle.SIZE + 2;// 1 for length of triangles
-        }else{
+        } else {
             return 0;
         }
     }
 
-    constructor(public box:Box=null,
-                public triangles:Triangle[]=[],
-                public tree:Tree=null) {
+    constructor(public box:Box = null,
+                public triangles:Triangle[] = [],
+                public tree:Tree|SharedTree = null) {
 
     }
 
     static fromJson(mesh:Mesh):Mesh {
-       return new Mesh(
+        return new Mesh(
             Box.fromJson(mesh.box),
             <Triangle[]>Triangle.fromJson(mesh.triangles)
         )
@@ -46,9 +49,9 @@ export class Mesh implements Shape{
         var m:Mesh = this;
         if (m.tree == null) {
             /*var shapes:Shape[] = [];
-            m.triangles.forEach(function (triangle, i) {
-                shapes[i] = triangle;
-            });*/
+             m.triangles.forEach(function (triangle, i) {
+             shapes[i] = triangle;
+             });*/
             m.tree = Tree.newTree(m.triangles, m.box);
         }
     }
@@ -163,13 +166,19 @@ export class Mesh implements Shape{
         m.updateBox();
         m.tree = null; // dirty
     }
-    writeToMemory(memory:Float32Array, offset:number):number{
+
+    writeToMemory(memory:Float32Array, offset:number):number {
         memory[offset++] = this.type;
         offset = this.box.writeToMemory(memory, offset);
         memory[offset++] = this.triangles.length;
-        this.triangles.forEach(function (t:Triangle) {
+        this.triangles.forEach(function (t:Triangle, index:number) {
+            t.index = index;
             offset = t.writeToMemory(memory, offset);
         });
+
+        //serialize kd tree
+        this.tree = SharedTree.newTree(this.triangles, this.box);
+
         return offset;
     }
 

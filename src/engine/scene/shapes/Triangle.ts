@@ -19,6 +19,7 @@ export class Triangle implements Shape {
 
     type:ShapeType = ShapeType.TRIANGLE;
     size:number = Triangle.SIZE;
+    index:number;
 
     constructor(public material:Material = new Material(),
                 public box:Box = new Box(),
@@ -241,6 +242,7 @@ export class Triangle implements Shape {
         //Not writing box
         memory[offset++] = this.type;
         memory[offset++] = this.material.materialIndex;
+        memory[offset++] = this.index;
         offset = this.v1.writeToMemory(memory, offset);
         offset = this.v2.writeToMemory(memory, offset);
         offset = this.v3.writeToMemory(memory, offset);
@@ -275,6 +277,7 @@ export class Triangle implements Shape {
             this.material = material;
         }
 
+        this.index = memory[offset++];
         offset = this.v1.read(memory, offset);
         offset = this.v2.read(memory, offset);
         offset = this.v3.read(memory, offset);

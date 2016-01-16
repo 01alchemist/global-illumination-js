@@ -16,6 +16,7 @@ import {restoreShape} from "./Shape";
 export class TransformedShape implements Shape {
 
     type:ShapeType = ShapeType.TRANSFORMED_SHAPE;
+    index:number;
 
     get size():number {
         if (this.shape) {

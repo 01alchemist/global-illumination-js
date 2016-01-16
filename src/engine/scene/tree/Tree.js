@@ -21,7 +21,7 @@ System.register(["../shapes/Box", "./Node", "../../math/Hit"], function(exports_
                 Tree.newTree = function (shapes, box) {
                     if (box === void 0) { box = null; }
                     console.time("Building k-d tree (" + shapes.length + " shapes)... ");
-                    var box = box ? box : Box_1.Box.boxForShapes(shapes);
+                    box = box ? box : Box_1.Box.boxForShapes(shapes);
                     var node = Node_1.Node.newNode(shapes);
                     node.split(0);
                     console.timeEnd("Building k-d tree (" + shapes.length + " shapes)... ");

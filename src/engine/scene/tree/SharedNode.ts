@@ -7,36 +7,43 @@ import {append} from "../../utils/MapUtils";
 import {Box} from "../shapes/Box";
 import {sortAscending} from "../../utils/MapUtils";
 import {MathUtils} from "../../utils/MathUtils";
+import {Mesh} from "../shapes/Mesh";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
-export class Node {
+export class SharedNode {
 
-    static map:Array<Node> = [];
+    static map:Array<SharedNode> = [];
 
     index:number;
+    mesh:Mesh;
 
     constructor(public axis:Axis,
                 public point:number,
-                public shapes:Shape[],
-                public left:Node,
-                public right:Node) {
+                public shapes:Shape[]=null,
+                public shapeIndices:number[]=null,
+                public left:SharedNode=null,
+                public right:SharedNode=null) {
 
-        this.index = Node.map.push(this) - 1;
+        this.index = SharedNode.map.push(this) - 1;
     }
 
-    static newNode(shapes:Shape[]):Node {
-        return new Node(Axis.AxisNone, 0, shapes, null, null)
+    static newNode(shapes:Shape[]):SharedNode {
+        return new SharedNode(Axis.AxisNone, 0, shapes, [], null, null);
+    }
+
+    static fromJson(node:SharedNode):SharedNode {
+        return new SharedNode(node.axis, node.point, null, node.shapeIndices, node.left, node.right);
     }
 
     intersect(r:Ray, tmin:number, tmax:number):Hit {
-        var node:Node = this;
+        var node:SharedNode = this;
         var tsplit:number;
         var leftFirst:boolean;
 
         switch (node.axis) {
             case Axis.AxisNone:
-                return node.intersectShapes(r);
+                return this.intersectShapes(node, r);
             case Axis.AxisX:
                 tsplit = (node.point - r.origin.x) / r.direction.x;
                 leftFirst = (r.origin.x < node.point) || (r.origin.x == node.point && r.direction.x <= 0)
@@ -50,8 +57,8 @@ export class Node {
                 leftFirst = (r.origin.z < node.point) || (r.origin.z == node.point && r.direction.z <= 0)
                 break;
         }
-        var first:Node;
-        var second:Node;
+        var first:SharedNode;
+        var second:SharedNode;
         if (leftFirst) {
             first = node.left;
             second = node.right;
@@ -60,15 +67,15 @@ export class Node {
             second = node.left;
         }
         if (tsplit > tmax || tsplit <= 0) {
-            return first.intersect(r, tmin, tmax)
+            return this.intersectNode(first, r, tmin, tmax);
         } else if (tsplit < tmin) {
-            return second.intersect(r, tmin, tmax)
+            return this.intersectNode(second, r, tmin, tmax);
         } else {
-            var h1:Hit = first.intersect(r, tmin, tsplit);
+            var h1:Hit = this.intersectNode(first, r, tmin, tsplit);
             if (h1.T <= tsplit) {
                 return h1;
             }
-            var h2:Hit = second.intersect(r, tsplit, Math.min(tmax, h1.T));
+            var h2:Hit = this.intersectNode(second, r, tsplit, Math.min(tmax, h1.T));
             if (h1.T <= h2.T) {
                 return h1;
             } else {
@@ -76,12 +83,57 @@ export class Node {
             }
         }
     }
+    intersectNode(node:SharedNode, r:Ray, tmin:number, tmax:number):Hit{
+        var tsplit:number;
+        var leftFirst:boolean;
 
-    intersectShapes(r:Ray):Hit {
-        var node:Node = this;
+        switch (node.axis) {
+            case Axis.AxisNone:
+                return this.intersectShapes(node, r);
+            case Axis.AxisX:
+                tsplit = (node.point - r.origin.x) / r.direction.x;
+                leftFirst = (r.origin.x < node.point) || (r.origin.x == node.point && r.direction.x <= 0)
+                break;
+            case Axis.AxisY:
+                tsplit = (node.point - r.origin.y) / r.direction.y;
+                leftFirst = (r.origin.y < node.point) || (r.origin.y == node.point && r.direction.y <= 0)
+                break;
+            case Axis.AxisZ:
+                tsplit = (node.point - r.origin.z) / r.direction.z;
+                leftFirst = (r.origin.z < node.point) || (r.origin.z == node.point && r.direction.z <= 0)
+                break;
+        }
+        var first:SharedNode;
+        var second:SharedNode;
+        if (leftFirst) {
+            first = node.left;
+            second = node.right;
+        } else {
+            first = node.right;
+            second = node.left;
+        }
+        if (tsplit > tmax || tsplit <= 0) {
+            return this.intersectNode(first, r, tmin, tmax);
+        } else if (tsplit < tmin) {
+            return this.intersectNode(second, r, tmin, tmax);
+        } else {
+            var h1:Hit = this.intersectNode(first, r, tmin, tsplit);
+            if (h1.T <= tsplit) {
+                return h1;
+            }
+            var h2:Hit = this.intersectNode(second, r, tsplit, Math.min(tmax, h1.T));
+            if (h1.T <= h2.T) {
+                return h1;
+            } else {
+                return h2;
+            }
+        }
+    }
+    intersectShapes(node:SharedNode, r:Ray):Hit {
         var hit:Hit = NoHit;
-        node.shapes.forEach(function (shape:Shape) {
-            var h = shape.intersect(r);
+        var self = this;
+        node.shapeIndices.forEach(function (shapeIndex:number) {
+            var h = self.mesh.triangles[shapeIndex].intersect(r);
             if (h.T < hit.T) {
                 hit = h;
             }
@@ -90,7 +142,7 @@ export class Node {
     }
 
     partitionScore(axis:Axis, point:number):number {
-        var node:Node = this;
+        var node:SharedNode = this;
         var left = 0;
         var right = 0;
         node.shapes.forEach(function (shape) {
@@ -111,7 +163,7 @@ export class Node {
     }
 
     partition(size:number, axis:Axis, point:number):{left:Shape[], right:Shape[]} {
-        var node:Node = this;
+        var node:SharedNode = this;
         var left:Shape[] = [];
         var right:Shape[] = [];
         node.shapes.forEach(function (shape:Shape) {
@@ -174,15 +226,25 @@ export class Node {
             bestPoint = mz;
         }
         if (bestAxis == Axis.AxisNone) {
+            var shapes:Shape[] = <Shape[]>node.shapes;
+            var shapeIndices:number[] = [];
+            //for shared node we only need shape indices
+            shapes.forEach(function(shape:Shape){
+                shapeIndices.push(shape.index);
+            });
+            node.shapes = null;
+            node.shapeIndices = shapeIndices;
             return;
         }
         var p = node.partition(best, bestAxis, bestPoint);
         node.axis = bestAxis;
         node.point = bestPoint;
-        node.left = Node.newNode(p.left);
-        node.right = Node.newNode(p.right);
+        node.left = SharedNode.newNode(p.left);
+        node.right = SharedNode.newNode(p.right);
+
         node.left.split(depth + 1);
         node.right.split(depth + 1);
+
         node.shapes = null; // only needed at leaf nodes
     }
 }

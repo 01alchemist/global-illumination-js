@@ -24,6 +24,7 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                     this.shapes = shapes;
                     this.left = left;
                     this.right = right;
+                    this.index = Node.map.push(this) - 1;
                 }
                 Node.newNode = function (shapes) {
                     return new Node(Axis_1.Axis.AxisNone, 0, shapes, null, null);
@@ -182,6 +183,7 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                     node.right.split(depth + 1);
                     node.shapes = null;
                 };
+                Node.map = [];
                 return Node;
             })();
             exports_1("Node", Node);

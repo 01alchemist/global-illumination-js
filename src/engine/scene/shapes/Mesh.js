@@ -1,5 +1,5 @@
-System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../../math/Color", "../materials/Material", "../../utils/MapUtils", "../tree/Tree", "./Box", "./Shape"], function(exports_1) {
-    var Triangle_1, Matrix4_1, Vector3_1, Color_1, Material_1, MapUtils_1, Tree_1, Box_1, Shape_1;
+System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../../math/Color", "../materials/Material", "../../utils/MapUtils", "../tree/Tree", "./Box", "./Shape", "../tree/SharedTree"], function(exports_1) {
+    var Triangle_1, Matrix4_1, Vector3_1, Color_1, Material_1, MapUtils_1, Tree_1, Box_1, Shape_1, SharedTree_1;
     var Mesh;
     return {
         setters:[
@@ -29,6 +29,9 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
             },
             function (Shape_1_1) {
                 Shape_1 = Shape_1_1;
+            },
+            function (SharedTree_1_1) {
+                SharedTree_1 = SharedTree_1_1;
             }],
         execute: function() {
             Mesh = (function () {
@@ -167,9 +170,11 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                     memory[offset++] = this.type;
                     offset = this.box.writeToMemory(memory, offset);
                     memory[offset++] = this.triangles.length;
-                    this.triangles.forEach(function (t) {
+                    this.triangles.forEach(function (t, index) {
+                        t.index = index;
                         offset = t.writeToMemory(memory, offset);
                     });
+                    this.tree = SharedTree_1.SharedTree.newTree(this.triangles, this.box);
                     return offset;
                 };
                 Mesh.prototype.read = function (memory, offset) {

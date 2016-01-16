@@ -242,6 +242,7 @@ System.register(["../materials/Material", "./Box", "../../math/Vector3", "../../
                 Triangle.prototype.writeToMemory = function (memory, offset) {
                     memory[offset++] = this.type;
                     memory[offset++] = this.material.materialIndex;
+                    memory[offset++] = this.index;
                     offset = this.v1.writeToMemory(memory, offset);
                     offset = this.v2.writeToMemory(memory, offset);
                     offset = this.v3.writeToMemory(memory, offset);
@@ -275,6 +276,7 @@ System.register(["../materials/Material", "./Box", "../../math/Vector3", "../../
                     if (material) {
                         this.material = material;
                     }
+                    this.index = memory[offset++];
                     offset = this.v1.read(memory, offset);
                     offset = this.v2.read(memory, offset);
                     offset = this.v3.read(memory, offset);

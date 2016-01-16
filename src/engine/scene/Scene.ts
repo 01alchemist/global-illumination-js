@@ -64,9 +64,6 @@ export class Scene {
     }
 
     compile():Scene{
-        if(this.shared){
-            return;
-        }
         this.shapes.forEach(function (shape:Shape) {
             shape.compile();
         });
