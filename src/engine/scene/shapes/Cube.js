@@ -110,6 +110,9 @@ System.register(["../../math/Vector3", "../materials/Material", "./Box", "../../
                     if (material) {
                         this.material = material;
                     }
+                    else {
+                        throw "Null Material in Cube, materialIndex:" + materialIndex + ", memory:" + memory.length + ", offset:" + offset;
+                    }
                     return offset;
                 };
                 return Cube;

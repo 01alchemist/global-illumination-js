@@ -43,7 +43,8 @@ export class Dragon extends CanvasDisplay {
         scene.add(Sphere.newSphere(new Vector3(0, 10, 0), 1, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
 
         var loader:OBJLoader = new OBJLoader();
-        loader.parentMaterial = new TransparentMaterial(Color.hexColor(0xFFFFFF), 2, MathUtils.radians(20), 0);
+        //loader.parentMaterial = new TransparentMaterial(Color.hexColor(0xFFFFFF), 2, MathUtils.radians(20), 0);
+        loader.parentMaterial = new GlossyMaterial(new Color(),1.5, MathUtils.radians(30));
 
         var self = this;
         var mesh;
@@ -53,9 +54,10 @@ export class Dragon extends CanvasDisplay {
         //this.i_width = 1280;
         //this.i_height = 720;
         var cameraSamples:number = 1;
-        var hitSamples:number = 1;
-        var bounces:number = 2;
-        var camera:Camera = Camera.lookAt(new Vector3(-3, 2, -1), new Vector3(0, 0.5, 0), new Vector3(0, 1, 0), 35);
+        var hitSamples:number = 8;
+        var bounces:number = 4;
+        //var camera:Camera = Camera.lookAt(new Vector3(-3, 2, -1), new Vector3(0, 0.5, 0), new Vector3(0, 1, 0), 35);
+        var camera:Camera = Camera.lookAt(new Vector3(-3, 8, 8), new Vector3(0, 0.5, 0), new Vector3(0, 1, 0), 35);
 
         loader.load("dragon.obj", function (_mesh) {
             if (!_mesh) {
@@ -63,7 +65,7 @@ export class Dragon extends CanvasDisplay {
             } else {
                 console.log("Obj file loaded");
                 mesh = _mesh;
-                //mesh.fitInside(new Box(new Vector3(-1, 0, -1), new Vector3(1, 2, 1)), new Vector3(0.5, 0, 0.5));
+                mesh.fitInside(new Box(new Vector3(-1, 0, -1), new Vector3(1, 2, 1)), new Vector3(0.5, 0, 0.5));
                 scene.add(mesh);
 
                 //console.time("compile");

@@ -99,7 +99,8 @@ System.register(["../math/Color", "./tree/Tree", "../utils/MapUtils", "../math/V
                 };
                 Scene.prototype.add = function (shape) {
                     this.shapes = MapUtils_1.append(this.shapes, shape);
-                    if (shape.getMaterial(new Vector3_1.Vector3()).emittance > 0) {
+                    var mat = shape.getMaterial(new Vector3_1.Vector3());
+                    if (mat && mat.emittance > 0) {
                         this.lights = MapUtils_1.append(this.lights, shape);
                     }
                 };

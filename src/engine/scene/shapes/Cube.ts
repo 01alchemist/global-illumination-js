@@ -20,7 +20,7 @@ export class Cube implements Shape {
     constructor(public min:Vector3 = new Vector3(),
                 public max:Vector3 = new Vector3(),
                 public material:Material = null,
-                public box:Box=null) {
+                public box:Box = null) {
 
     }
 
@@ -91,7 +91,8 @@ export class Cube implements Shape {
         var z = this.min.z + Math.random() * (this.max.z - this.min.z);
         return new Vector3(x, y, z);
     }
-    writeToMemory(memory:Float32Array, offset:number):number{
+
+    writeToMemory(memory:Float32Array, offset:number):number {
         memory[offset++] = this.type;
         offset = this.min.writeToMemory(memory, offset);
         offset = this.max.writeToMemory(memory, offset);
@@ -107,8 +108,10 @@ export class Cube implements Shape {
 
         var materialIndex:number = memory[offset++];
         var material:Material = Material.map[materialIndex];
-        if(material){
+        if (material) {
             this.material = material;
+        } else {
+            throw "Null Material in Cube, materialIndex:" + materialIndex + ", memory:" + memory.length + ", offset:" + offset;
         }
         return offset;
     }

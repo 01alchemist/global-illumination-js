@@ -78,7 +78,8 @@ export class Scene {
 
     add(shape:Shape) {
         this.shapes = append(this.shapes, shape);
-        if (shape.getMaterial(new Vector3()).emittance > 0) {
+        var mat = shape.getMaterial(new Vector3());
+        if (mat && mat.emittance > 0) {
             this.lights = append(this.lights, shape)
         }
     }

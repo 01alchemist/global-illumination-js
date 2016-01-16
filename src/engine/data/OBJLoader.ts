@@ -17,6 +17,7 @@ export class OBJLoader {
     private materialsLoaded:boolean = false;
     private materialsLoading:boolean = false;
     private pendingCallback:Function = null;
+    private basePath:string;
 
     constructor() {
 
@@ -24,6 +25,7 @@ export class OBJLoader {
 
     load(url:string, onLoad:Function):Mesh {
         console.log("Loading OBJ:" + url);
+        this.basePath = url.substring(0, url.lastIndexOf("/"));
         var self = this;
         var xhr:XMLHttpRequest = new XMLHttpRequest();
         xhr.open('GET', url, true);
@@ -54,9 +56,14 @@ export class OBJLoader {
 
     static parseLine(line:string):{keyword:string, value:string[]} {
         try {
-            var _str = line.match(/^(\S+)\s(.*)/).slice(1);
+            var result = line.match(/^(\S+)\s(.*)/)
+            if (result) {
+                var _str = result.slice(1);
+            } else {
+                return null;
+            }
         } catch (e) {
-            console.log("Error in line:", line);
+            console.log("Error in line:", line, e);
             return null;
         }
         if (!_str) {
@@ -183,6 +190,7 @@ export class OBJLoader {
             return;
         }
         this.materialsLoading = true;
+        url = this.basePath + "/" + url;
         console.log("Loading MTL:" + url);
         var self = this;
         var xhr:XMLHttpRequest = new XMLHttpRequest();

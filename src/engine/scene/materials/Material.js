@@ -86,6 +86,7 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
                     for (var i = 0; i < numMaterials; i++) {
                         offset = new Material().read(memory, offset);
                     }
+                    console.info(numMaterials + " Materials restored");
                     return offset;
                 };
                 Material.SIZE = Color_1.Color.SIZE + Attenuation_1.Attenuation.SIZE + 6;

@@ -28,6 +28,7 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                 }
                 OBJLoader.prototype.load = function (url, onLoad) {
                     console.log("Loading OBJ:" + url);
+                    this.basePath = url.substring(0, url.lastIndexOf("/"));
                     var self = this;
                     var xhr = new XMLHttpRequest();
                     xhr.open('GET', url, true);
@@ -58,10 +59,16 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                 };
                 OBJLoader.parseLine = function (line) {
                     try {
-                        var _str = line.match(/^(\S+)\s(.*)/).slice(1);
+                        var result = line.match(/^(\S+)\s(.*)/);
+                        if (result) {
+                            var _str = result.slice(1);
+                        }
+                        else {
+                            return null;
+                        }
                     }
                     catch (e) {
-                        console.log("Error in line:", line);
+                        console.log("Error in line:", line, e);
                         return null;
                     }
                     if (!_str) {
@@ -175,6 +182,7 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                         return;
                     }
                     this.materialsLoading = true;
+                    url = this.basePath + "/" + url;
                     console.log("Loading MTL:" + url);
                     var self = this;
                     var xhr = new XMLHttpRequest();

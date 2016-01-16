@@ -8,13 +8,54 @@ export class Matrix4 {
 
     static SIZE:number = 16;
 
-    m:Float64Array;
+    m:Float32Array;
 
     constructor(public x00 = 0, public x01 = 0, public x02 = 0, public x03 = 0,
                 public x10 = 0, public x11 = 0, public x12 = 0, public x13 = 0,
                 public x20 = 0, public x21 = 0, public x22 = 0, public x23 = 0,
                 public x30 = 0, public x31 = 0, public x32 = 0, public x33 = 0) {
-        this.m = new Float64Array(16);
+        this.m = new Float32Array(16);
+    }
+
+    writeToMemory(memory:Float32Array, offset:number):number {
+        var m:Matrix4 = this;
+        memory[offset++] = m.x00;
+        memory[offset++] = m.x01;
+        memory[offset++] = m.x02;
+        memory[offset++] = m.x03;
+        memory[offset++] = m.x10;
+        memory[offset++] = m.x11;
+        memory[offset++] = m.x12;
+        memory[offset++] = m.x13;
+        memory[offset++] = m.x20;
+        memory[offset++] = m.x21;
+        memory[offset++] = m.x22;
+        memory[offset++] = m.x23;
+        memory[offset++] = m.x30;
+        memory[offset++] = m.x31;
+        memory[offset++] = m.x32;
+        memory[offset++] = m.x33;
+        return offset;
+    }
+    read(memory:Float32Array, offset:number):number {
+        var m:Matrix4 = this;
+        m.x00 = memory[offset++];
+        m.x01 = memory[offset++];
+        m.x02 = memory[offset++];
+        m.x03 = memory[offset++];
+        m.x10 = memory[offset++];
+        m.x11 = memory[offset++];
+        m.x12 = memory[offset++];
+        m.x13 = memory[offset++];
+        m.x20 = memory[offset++];
+        m.x21 = memory[offset++];
+        m.x22 = memory[offset++];
+        m.x23 = memory[offset++];
+        m.x30 = memory[offset++];
+        m.x31 = memory[offset++];
+        m.x32 = memory[offset++];
+        m.x33 = memory[offset++];
+        return offset;
     }
 
     static fromJson(m:Matrix4):Matrix4 {

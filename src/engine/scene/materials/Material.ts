@@ -109,6 +109,7 @@ export class Material {
         for (var i = 0; i < numMaterials; i++) {
             offset = new Material().read(memory, offset);
         }
+        console.info(numMaterials+" Materials restored");
         return offset;
     }
 }

@@ -9,6 +9,7 @@ import {Color} from "../../math/Color";
 import {ShapeType} from "./Shape";
 import {ShapesfromJson} from "./Shape";
 import {ShapefromJson} from "./Shape";
+import {restoreShape} from "./Shape";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
@@ -18,7 +19,7 @@ export class TransformedShape implements Shape {
 
     get size():number {
         if (this.shape) {
-            return this.shape.size + Matrix4.SIZE;// store only one matrix
+            return this.shape.size + Matrix4.SIZE + 1;// store only one matrix
         } else {
             return 0;
         }
@@ -26,7 +27,7 @@ export class TransformedShape implements Shape {
 
     constructor(public shape:Shape = null,
                 public matrix:Matrix4 = new Matrix4(),
-                public inverse:Matrix4 = new Matrix4()) {
+                public inverse?:Matrix4) {
     }
 
     static fromJson(transformedShape:TransformedShape):TransformedShape {
@@ -76,14 +77,20 @@ export class TransformedShape implements Shape {
         return this.matrix.mulPosition(this.shape.getRandomPoint());
     }
 
-    writeToMemory(mem:Float32Array, offset:number):number {
-        //TODO: implementation
-        console.error("Method TransformedShape::writeToMemory not implementation");
+    writeToMemory(memory:Float32Array, offset:number):number {
+        memory[offset++] = this.type;
+        offset = this.matrix.writeToMemory(memory, offset);
+        offset = this.shape.writeToMemory(memory, offset);
         return offset;
     }
 
     read(memory:Float32Array, offset:number):number {
-        //TODO: implementation
+        offset = this.matrix.read(memory, offset);
+        this.inverse = this.matrix.inverse();
+        var container:Shape[] = [];
+        offset = restoreShape(memory, offset, container);
+        this.shape = container[0];
+        container = null;
         return offset;
     }
 }
