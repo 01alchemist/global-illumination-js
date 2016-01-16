@@ -5,10 +5,13 @@ import {Ray} from "../../math/Ray";
 import {NoHit} from "../../math/Hit";
 import {SharedNode} from "./SharedNode";
 import {Mesh} from "../shapes/Mesh";
+import {IPointer} from "../../../pointer/IPointer";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
-export class SharedTree{
+export class SharedTree implements IPointer{
+
+    size:number;
 
     constructor(
         public box:Box,
@@ -16,6 +19,11 @@ export class SharedTree{
     ){
 
     }
+
+    write(memory:DataView, offset:number):number{
+        return offset;
+    }
+
     static newTree(shapes:Shape[], box:Box=null):SharedTree {
         console.time("Building k-d tree ("+shapes.length+" shapes)... ");
         box = box?box:Box.boxForShapes(shapes);

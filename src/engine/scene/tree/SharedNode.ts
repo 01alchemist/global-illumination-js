@@ -8,15 +8,17 @@ import {Box} from "../shapes/Box";
 import {sortAscending} from "../../utils/MapUtils";
 import {MathUtils} from "../../utils/MathUtils";
 import {Mesh} from "../shapes/Mesh";
+import {IPointer} from "../../../pointer/IPointer";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
-export class SharedNode {
+export class SharedNode implements IPointer{
 
     static map:Array<SharedNode> = [];
 
     index:number;
     mesh:Mesh;
+    size:number=0;
 
     constructor(public axis:Axis,
                 public point:number,
@@ -26,6 +28,10 @@ export class SharedNode {
                 public right:SharedNode=null) {
 
         this.index = SharedNode.map.push(this) - 1;
+    }
+
+    write(memory:DataView, offset:number):number{
+        return offset;
     }
 
     static newNode(shapes:Shape[]):SharedNode {
