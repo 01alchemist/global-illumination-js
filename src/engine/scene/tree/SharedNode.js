@@ -1,5 +1,5 @@
-System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../utils/MathUtils"], function(exports_1) {
-    var Axis_1, Hit_1, MapUtils_1, MapUtils_2, MathUtils_1;
+System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../utils/MathUtils", "../../../pointer/ByteArrayBase"], function(exports_1) {
+    var Axis_1, Hit_1, MapUtils_1, MapUtils_2, MathUtils_1, ByteArrayBase_1;
     var NodeMarker, SharedNode;
     return {
         setters:[
@@ -15,29 +15,124 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
             },
             function (MathUtils_1_1) {
                 MathUtils_1 = MathUtils_1_1;
+            },
+            function (ByteArrayBase_1_1) {
+                ByteArrayBase_1 = ByteArrayBase_1_1;
             }],
         execute: function() {
             (function (NodeMarker) {
+                NodeMarker[NodeMarker["ROOT"] = 1118481] = "ROOT";
                 NodeMarker[NodeMarker["LEFT"] = 15597585] = "LEFT";
                 NodeMarker[NodeMarker["RIGHT"] = 1114350] = "RIGHT";
                 NodeMarker[NodeMarker["LEAF"] = 15597806] = "LEAF";
                 NodeMarker[NodeMarker["EON"] = 15658734] = "EON";
             })(NodeMarker || (NodeMarker = {}));
+            exports_1("NodeMarker", NodeMarker);
             SharedNode = (function () {
-                function SharedNode(axis, point, shapes, shapeIndices, left, right) {
+                function SharedNode(axis, point, shapes, shapeIndices, _left, _right) {
+                    if (axis === void 0) { axis = null; }
+                    if (point === void 0) { point = null; }
                     if (shapes === void 0) { shapes = null; }
                     if (shapeIndices === void 0) { shapeIndices = null; }
-                    if (left === void 0) { left = null; }
-                    if (right === void 0) { right = null; }
+                    if (_left === void 0) { _left = null; }
+                    if (_right === void 0) { _right = null; }
                     this.axis = axis;
                     this.point = point;
                     this.shapes = shapes;
                     this.shapeIndices = shapeIndices;
-                    this.left = left;
-                    this.right = right;
+                    this._left = _left;
+                    this._right = _right;
                     this.size = 0;
+                    this.treeLength = 0;
+                    this.resolved = false;
                     this.index = SharedNode.map.push(this) - 1;
                 }
+                Object.defineProperty(SharedNode.prototype, "left", {
+                    get: function () {
+                        if (this._left) {
+                            return this._left;
+                        }
+                        else {
+                            this.readChild(this.memory, NodeMarker.LEFT);
+                        }
+                    },
+                    set: function (value) {
+                        this._left = value;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                Object.defineProperty(SharedNode.prototype, "right", {
+                    get: function () {
+                        if (this._right) {
+                            return this._right;
+                        }
+                        else {
+                            this.readChild(this.memory, NodeMarker.LEFT);
+                        }
+                    },
+                    set: function (value) {
+                        this._right = value;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+                SharedNode.prototype.readRoot = function (memory) {
+                    this.memory = memory;
+                    this.treeLength = memory.readUnsignedInt();
+                    this.marker = memory.readUnsignedInt();
+                    this.axis = memory.readByte();
+                    this.point = memory.readFloat();
+                    if (this.marker != NodeMarker.ROOT) {
+                        throw "Root marker not found!";
+                    }
+                    else {
+                        this.leftPtr = memory.readUnsignedInt();
+                        this.rightPtr = memory.readUnsignedInt();
+                    }
+                    this.resolved = true;
+                    return memory.position;
+                };
+                SharedNode.prototype.read = function (memory) {
+                    this.memory = memory;
+                    this.marker = memory.readUnsignedInt();
+                    this.axis = memory.readByte();
+                    this.point = memory.readFloat();
+                    if (this.marker == NodeMarker.LEAF) {
+                        var shapeLength = memory.readUnsignedInt();
+                        this.shapeIndices = [];
+                        for (var i = 0; i < shapeLength; i++) {
+                            var shapeIndex = memory.readUnsignedInt();
+                            this.shapeIndices.push(shapeIndex);
+                        }
+                        if (memory.readUnsignedInt() != NodeMarker.EON) {
+                            console.error("End marker not found on leaf node");
+                        }
+                    }
+                    else {
+                        this.leftPtr = memory.readUnsignedInt();
+                        this.rightPtr = memory.readUnsignedInt();
+                    }
+                    this.resolved = true;
+                    return memory.position;
+                };
+                SharedNode.prototype.readChild = function (memory, marker) {
+                    var node = new SharedNode();
+                    if (marker == NodeMarker.LEFT) {
+                        memory.position = this.leftPtr;
+                        node.read(memory);
+                        this.left = node;
+                    }
+                    else if (marker == NodeMarker.RIGHT) {
+                        memory.position = this.rightPtr;
+                        node.read(memory);
+                        this.right = node;
+                    }
+                    if (node.marker != marker) {
+                        console.error("Wrong marker found on child");
+                    }
+                    return memory.position;
+                };
                 SharedNode.newNode = function (shapes) {
                     return new SharedNode(Axis_1.Axis.AxisNone, 0, shapes, [], null, null);
                 };
@@ -236,16 +331,24 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                         bestPoint = mz;
                     }
                     if (bestAxis == Axis_1.Axis.AxisNone) {
+                        var shapes = node.shapes;
+                        var shapeIndices = [];
+                        var self_1 = this;
                         if (this.memory) {
                             this.memory.writeUnsignedInt(NodeMarker.LEAF);
                             this.memory.writeByte(bestAxis);
                             this.memory.writeFloat(bestPoint);
+                            this.memory.writeUnsignedInt(shapes.length);
                         }
-                        var shapes = node.shapes;
-                        var shapeIndices = [];
                         shapes.forEach(function (shape) {
                             shapeIndices.push(shape.index);
+                            if (self_1.memory) {
+                                self_1.memory.writeUnsignedInt(shape.index);
+                            }
                         });
+                        if (this.memory) {
+                            this.memory.writeUnsignedInt(NodeMarker.EON);
+                        }
                         node.shapes = null;
                         node.shapeIndices = shapeIndices;
                         return;
@@ -258,15 +361,22 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                     if (this.memory) {
                         this.memory.writeByte(bestAxis);
                         this.memory.writeFloat(bestPoint);
+                        var leftStartPosition = this.memory.position + (2 * ByteArrayBase_1.ByteArrayBase.SIZE_OF_UINT32);
+                        this.memory.writeUnsignedInt(leftStartPosition);
+                        var rightStartPosition = this.memory.position;
+                        this.memory.position += ByteArrayBase_1.ByteArrayBase.SIZE_OF_UINT32;
                         this.memory.writeUnsignedInt(NodeMarker.LEFT);
                     }
                     node.left.split(depth + 1);
                     if (this.memory) {
+                        var pos = this.memory.position;
+                        this.memory.position = rightStartPosition;
+                        this.memory.writeUnsignedInt(pos);
+                        this.memory.position = pos;
                         this.memory.writeUnsignedInt(NodeMarker.RIGHT);
                     }
                     node.right.split(depth + 1);
                     if (this.memory) {
-                        this.memory.writeUnsignedInt(0);
                         this.memory.writeUnsignedInt(NodeMarker.EON);
                     }
                     node.shapes = null;

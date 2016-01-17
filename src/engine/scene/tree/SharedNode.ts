@@ -13,7 +13,8 @@ import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
-enum NodeMarker{
+export enum NodeMarker{
+    ROOT = 0x111111,
     LEFT = 0xEE0011,
     RIGHT = 0x1100EE,
     LEAF = 0xEE00EE,
@@ -24,19 +25,105 @@ export class SharedNode{
     static map:Array<SharedNode> = [];
 
     index:number;
+    marker:NodeMarker;
     mesh:Mesh;
     size:number=0;
+    treeLength:number=0;
     memory:ByteArrayBase;
+    leftPtr:number;
+    rightPtr:number;
+    resolved:boolean=false;
 
-    constructor(public axis:Axis,
-                public point:number,
+    constructor(public axis:Axis=null,
+                public point:number=null,
                 public shapes:Shape[]=null,
                 public shapeIndices:number[]=null,
-                public left:SharedNode=null,
-                public right:SharedNode=null) {
+                private _left:SharedNode=null,
+                private _right:SharedNode=null) {
 
         this.index = SharedNode.map.push(this) - 1;
     }
+
+    get left():SharedNode{
+        if(this._left){
+           return this._left;
+        }else{
+            this.readChild(this.memory, NodeMarker.LEFT);
+        }
+    }
+    set left(value:SharedNode){
+        this._left = value;
+    }
+    get right():SharedNode{
+        if(this._right){
+            return this._right;
+        }else{
+            this.readChild(this.memory, NodeMarker.LEFT);
+        }
+    }
+    set right(value:SharedNode){
+        this._right = value;
+    }
+
+
+    readRoot(memory:ByteArrayBase):number{
+        this.memory = memory;
+        this.treeLength = memory.readUnsignedInt();
+        this.marker = memory.readUnsignedInt();
+        this.axis = memory.readByte();
+        this.point = memory.readFloat();
+        if(this.marker != NodeMarker.ROOT){
+            throw "Root marker not found!";
+        }else {
+            this.leftPtr = memory.readUnsignedInt();
+            this.rightPtr = memory.readUnsignedInt();
+        }
+        this.resolved = true;
+        return memory.position;
+    }
+
+    read(memory:ByteArrayBase):number{
+
+        this.memory = memory;
+        this.marker = memory.readUnsignedInt();
+        this.axis = memory.readByte();
+        this.point = memory.readFloat();
+        if(this.marker == NodeMarker.LEAF){
+            var shapeLength:number = memory.readUnsignedInt();
+            this.shapeIndices = [];
+            for(var i:number=0;i<shapeLength;i++){
+                var shapeIndex:number = memory.readUnsignedInt();
+                this.shapeIndices.push(shapeIndex);
+            }
+            if(memory.readUnsignedInt() != NodeMarker.EON){
+                console.error("End marker not found on leaf node");
+            }
+        }else {
+            this.leftPtr = memory.readUnsignedInt();
+            this.rightPtr = memory.readUnsignedInt();
+        }
+        this.resolved = true;
+        return memory.position;
+    }
+    readChild(memory:ByteArrayBase, marker:NodeMarker):number{
+        var node:SharedNode = new SharedNode();
+
+        if(marker == NodeMarker.LEFT){
+            memory.position = this.leftPtr;
+            node.read(memory);
+            this.left = node;
+        }else if(marker == NodeMarker.RIGHT){
+            memory.position = this.rightPtr;
+            node.read(memory);
+            this.right = node;
+        }
+
+        if(node.marker != marker){
+            console.error("Wrong marker found on child");
+        }
+        return memory.position;
+    }
+
     static newNode(shapes:Shape[]):SharedNode {
         return new SharedNode(Axis.AxisNone, 0, shapes, [], null, null);
     }
@@ -235,17 +322,29 @@ export class SharedNode{
             bestPoint = mz;
         }
         if (bestAxis == Axis.AxisNone) {
+
+            var shapes:Shape[] = <Shape[]>node.shapes;
+            var shapeIndices:number[] = [];
+            let self = this;
+
             if(this.memory) {
                 this.memory.writeUnsignedInt(NodeMarker.LEAF);
                 this.memory.writeByte(bestAxis);
                 this.memory.writeFloat(bestPoint);
+                this.memory.writeUnsignedInt(shapes.length);
             }
-            var shapes:Shape[] = <Shape[]>node.shapes;
-            var shapeIndices:number[] = [];
             //for shared node we only need shape indices
             shapes.forEach(function(shape:Shape){
                 shapeIndices.push(shape.index);
+                if(self.memory){
+                    self.memory.writeUnsignedInt(shape.index);
+                }
             });
+
+            if(this.memory){
+                this.memory.writeUnsignedInt(NodeMarker.EON);//end of node
+            }
+
             node.shapes = null;
             node.shapeIndices = shapeIndices;
             return;
@@ -256,23 +355,37 @@ export class SharedNode{
         node.left = SharedNode.newNode(p.left);
         node.right = SharedNode.newNode(p.right);
 
+
         if(this.memory) {
+
             this.memory.writeByte(bestAxis);
             this.memory.writeFloat(bestPoint);
-            this.memory.writeUnsignedInt(NodeMarker.LEFT);
+
+            var leftStartPosition:number = this.memory.position +  (2 * ByteArrayBase.SIZE_OF_UINT32);
+
+            this.memory.writeUnsignedInt(leftStartPosition);// left node pointer
+
+            var rightStartPosition:number = this.memory.position;
+            this.memory.position += ByteArrayBase.SIZE_OF_UINT32;//skip right node pointer
+
+            this.memory.writeUnsignedInt(NodeMarker.LEFT);//left node marker
         }
 
         node.left.split(depth + 1);
 
         if(this.memory) {
-            this.memory.writeUnsignedInt(NodeMarker.RIGHT);
+            let pos:number = this.memory.position;//store current position
+            this.memory.position = rightStartPosition;
+            this.memory.writeUnsignedInt(pos);//right node pointer
+            this.memory.position = pos;//reset to current position
+            this.memory.writeUnsignedInt(NodeMarker.RIGHT);//right node marker
         }
 
         node.right.split(depth + 1);
 
         if(this.memory) {
-            this.memory.writeUnsignedInt(0);// shapes only needed at leaf nodes
-            this.memory.writeUnsignedInt(NodeMarker.EON);
+            //this.memory.writeUnsignedInt(0);// shapes only needed at leaf nodes
+            this.memory.writeUnsignedInt(NodeMarker.EON);//end of node
         }
         node.shapes = null; // only needed at leaf nodes
     }

@@ -38,11 +38,23 @@ System.register([], function(exports_1) {
                     mem[offset++] = this.quadratic;
                     return offset;
                 };
-                Attenuation.prototype.read = function (mem, offset) {
+                Attenuation.prototype.directRead = function (mem, offset) {
                     this.constant = mem[offset++];
                     this.linear = mem[offset++];
                     this.quadratic = mem[offset++];
                     return offset;
+                };
+                Attenuation.prototype.read = function (memory) {
+                    this.constant = memory.readFloat();
+                    this.linear = memory.readFloat();
+                    this.quadratic = memory.readFloat();
+                    return memory.position;
+                };
+                Attenuation.prototype.write = function (memory) {
+                    memory.writeFloat(this.constant);
+                    memory.writeFloat(this.linear);
+                    memory.writeFloat(this.quadratic);
+                    return memory.position;
                 };
                 Attenuation.SIZE = 3;
                 return Attenuation;

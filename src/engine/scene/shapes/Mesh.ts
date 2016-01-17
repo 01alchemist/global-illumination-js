@@ -74,7 +74,7 @@ export class Mesh implements Shape {
         });
 
         //serialize kd tree
-        SharedTree.buildAndWrite(memory, this.triangles, this.box);
+        SharedTree.buildAndWrite(memory, this.triangles);
 
         return memory.position;
     }

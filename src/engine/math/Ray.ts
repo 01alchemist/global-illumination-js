@@ -60,7 +60,7 @@ export class Ray {
     bounce(info:HitInfo, p:number, u:number, v:number):{ray:Ray,reflected:boolean} {
         var n:Ray = info.ray;
         var n1:number = 1.0;
-        var n2:number = info.material.index;
+        var n2:number = info.material.ior;
 
         if (info.inside) {
             var _n1 = n1;

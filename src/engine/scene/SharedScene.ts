@@ -7,6 +7,9 @@ import {restoreShape} from "./shapes/Shape";
 import {SharedTree} from "./tree/SharedTree";
 import {ShapeType} from "./shapes/Shape";
 import {Mesh} from "./shapes/Mesh";
+import {SharedArrayBuffer} from "../renderer/worker/TraceWorkerManager";
+import {ByteArrayBase} from "../../pointer/ByteArrayBase";
+import {Pointer} from "../../pointer/Pointer";
 /**
  * Created by r3f on 13/1/2016.
  */
@@ -27,7 +30,7 @@ export class SharedScene extends Scene{
         this.shared = true;
     }
 
-    getMemory():Float32Array{
+    getDirectMemory():Float32Array{
         console.time("getMemory");
         var memorySize:number = this.estimatedMemory + Material.estimatedMemory;
         var memory:Float32Array = new Float32Array(new SharedArrayBuffer(memorySize * Float32Array.BYTES_PER_ELEMENT));
@@ -57,8 +60,25 @@ export class SharedScene extends Scene{
         console.timeEnd("getMemory");
         return memory;
     }
-    getKDTreeMemory():Uint8Array{
-        return new TextEncoder().encode(JSON.stringify(this.sharedTreeMap));
+
+    getMemory():ByteArrayBase{
+        console.time("getMemory");
+
+        Pointer.init();
+        var memory:ByteArrayBase =Pointer.memory;
+        //write materials first
+        Material.write(memory);
+
+        //write scene
+        memory.writeUnsignedInt(this.shapes.length);
+        this.color.write(memory);
+
+        this.shapes.forEach(function(shape:Shape){
+            shape.write(memory);
+        });
+
+        console.timeEnd("getMemory");
+        return memory;
     }
     static getScene(memory:Float32Array, tree:SharedTree[]=null):Scene{
         console.time("getScene");
@@ -73,7 +93,7 @@ export class SharedScene extends Scene{
         var shapes:Shape[] = [];
 
         for (var i = 0; i < numShapes; i++) {
-            offset = restoreShape(memory, offset, shapes);
+            offset = restoreShape(memory, shapes);
             var shape:Shape = shapes[i];
             scene.add(shape);
             if(shape.type == ShapeType.MESH){

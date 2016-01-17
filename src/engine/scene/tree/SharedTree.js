@@ -1,5 +1,5 @@
 System.register(["../shapes/Box", "../../math/Hit", "./SharedNode", "../../../pointer/ByteArrayBase"], function(exports_1) {
-    var Box_1, Hit_1, SharedNode_1, ByteArrayBase_1;
+    var Box_1, Hit_1, SharedNode_1, ByteArrayBase_1, SharedNode_2;
     var SharedTree;
     return {
         setters:[
@@ -11,6 +11,7 @@ System.register(["../shapes/Box", "../../math/Hit", "./SharedNode", "../../../po
             },
             function (SharedNode_1_1) {
                 SharedNode_1 = SharedNode_1_1;
+                SharedNode_2 = SharedNode_1_1;
             },
             function (ByteArrayBase_1_1) {
                 ByteArrayBase_1 = ByteArrayBase_1_1;
@@ -21,9 +22,6 @@ System.register(["../shapes/Box", "../../math/Hit", "./SharedNode", "../../../po
                     this.box = box;
                     this.root = root;
                 }
-                SharedTree.prototype.write = function (memory, offset) {
-                    return offset;
-                };
                 SharedTree.newTree = function (shapes, box) {
                     if (box === void 0) { box = null; }
                     console.time("Building k-d tree (" + shapes.length + " shapes)... ");
@@ -46,17 +44,25 @@ System.register(["../shapes/Box", "../../math/Hit", "./SharedNode", "../../../po
                     node.mesh = mesh;
                     return new SharedTree(box, node);
                 };
-                SharedTree.buildAndWrite = function (memory, shapes, box) {
+                SharedTree.readFromMemory = function (memory) {
+                    console.time("Reading k-d tree");
+                    var node = new SharedNode_1.SharedNode();
+                    node.readRoot(memory);
+                    console.timeEnd("Reading k-d tree");
+                    return memory.position;
+                };
+                SharedTree.buildAndWrite = function (memory, shapes) {
                     console.time("Building k-d tree (" + shapes.length + " shapes)... ");
                     var startPosition = memory.position;
                     var endPosition;
-                    memory.position += ByteArrayBase_1.ByteArrayBase.SIZE_OF_INT32;
+                    memory.position += ByteArrayBase_1.ByteArrayBase.SIZE_OF_UINT32;
                     var node = SharedNode_1.SharedNode.newNode(shapes);
+                    memory.writeUnsignedInt(SharedNode_2.NodeMarker.ROOT);
                     node.memory = memory;
                     node.split(0);
                     endPosition = memory.position;
                     memory.position = startPosition;
-                    memory.writeInt(endPosition - startPosition);
+                    memory.writeUnsignedInt(endPosition - startPosition);
                     memory.position = endPosition;
                     console.timeEnd("Building k-d tree (" + shapes.length + " shapes)... ");
                     return memory.position;

@@ -10,10 +10,15 @@ export class Pointer{
     static offset:number;
     static heap:Uint8Array;
     static memory:ByteArrayBase;
+    static initialized:boolean;
     static init(){
+        if(Pointer.initialized){
+            return;
+        }
         var maxMemory:number = 512 * 1024 * 1024;//512MB
         Pointer.heap = new Uint8Array(new SharedArrayBuffer(maxMemory));
         Pointer.memory = new ByteArrayBase(Pointer.heap.buffer);
+        Pointer.initialized = true;
     }
 
 
@@ -26,13 +31,13 @@ export class Pointer{
         }
         this.beginLocation = Pointer.offset;
         this.currentLocation = Pointer.offset;
-        Pointer.offset = reference.write(Pointer.memory, Pointer.offset);
+        Pointer.offset = reference.write(Pointer.memory);
     }
     read():IPointer{
-        Pointer.offset = this.reference.read(Pointer.memory, Pointer.offset);
+        Pointer.offset = this.reference.read(Pointer.memory);
         return this.reference;
     }
 }
 export function sizeof(ptr:IPointer):number{
-    return ptr.size;
+    return ptr.memorySize;
 }

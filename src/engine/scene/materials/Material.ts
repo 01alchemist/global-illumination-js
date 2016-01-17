@@ -2,6 +2,7 @@ import {Color} from "../../math/Color";
 import {Texture} from "./Texture";
 import {Attenuation} from "./Attenuation";
 import {NoAttenuation} from "./Attenuation";
+import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -30,7 +31,7 @@ export class Material {
      * @param bumpMultiplier
      * @param emittance
      * @param attenuation
-     * @param index -> refractive index
+     * @param ior -> refractive index
      * @param gloss -> reflection cone angle in radians
      * @param tint -> specular and refractive tinting
      * @param transparent
@@ -42,7 +43,7 @@ export class Material {
                 public bumpMultiplier?:number,
                 public emittance?:number,
                 public attenuation:Attenuation=NoAttenuation,
-                public index?:number,
+                public ior?:number,
                 public gloss?:number,
                 public tint?:number,
                 public transparent?:boolean) {
@@ -58,7 +59,7 @@ export class Material {
             this.bumpMultiplier,
             this.emittance,
             this.attenuation.clone(),
-            this.index,
+            this.ior,
             this.gloss,
             this.tint,
             this.transparent
@@ -67,12 +68,12 @@ export class Material {
         return material;
     }
 
-    read(memory:Float32Array, offset:number):number {
+    directRead(memory:Float32Array, offset:number):number {
         offset = this.color.directRead(memory, offset);
         this.bumpMultiplier = memory[offset++];
         this.emittance = memory[offset++];
-        offset = this.attenuation.directRead(memory, offset);
-        this.index = memory[offset++];
+        offset = this.attenuation.read(memory, offset);
+        this.ior = memory[offset++];
         this.gloss = memory[offset++];
         this.tint = memory[offset++];
         this.transparent = memory[offset++] == 1;
@@ -84,11 +85,35 @@ export class Material {
         memory[offset++] = this.bumpMultiplier;
         memory[offset++] = this.emittance;
         offset = this.attenuation.directWrite(memory, offset);
-        memory[offset++] = this.index;
+        memory[offset++] = this.ior;
         memory[offset++] = this.gloss;
         memory[offset++] = this.tint;
         memory[offset++] = this.transparent ? 1 : 0;
         return offset;
+    }
+
+    read(memory:ByteArrayBase):number {
+        this.color.read(memory);
+        this.bumpMultiplier = memory.readFloat();
+        this.emittance = memory.readFloat();
+        this.attenuation.read(memory);
+        this.ior = memory.readFloat();
+        this.gloss = memory.readFloat();
+        this.tint = memory.readFloat();
+        this.transparent = memory.readBoolean();
+        return memory.position;
+    }
+
+    write(memory:ByteArrayBase):number {
+        this.color.write(memory);
+        memory.writeFloat(this.bumpMultiplier);
+        memory.writeFloat(this.emittance);
+        this.attenuation.write(memory);
+        memory.writeFloat(this.ior);
+        memory.writeFloat(this.gloss);
+        memory.writeFloat(this.tint);
+        memory.writeBoolean(this.transparent);
+        return memory.position;
     }
 
     /* static stuff */
@@ -104,12 +129,31 @@ export class Material {
         return offset;
     }
 
-    static restore(memory:Float32Array, offset:number = 0):number {
+    static directRestore(memory:Float32Array, offset:number = 0):number {
         var numMaterials:number = memory[offset++];
         for (var i = 0; i < numMaterials; i++) {
             offset = new Material().directRead(memory, offset);
         }
         console.info(numMaterials+" Materials restored");
         return offset;
+    }
+
+
+    static write(memory:ByteArrayBase):number {
+        memory.writeUnsignedInt(Material.map.length);
+        Material.map.forEach(function (material:Material) {
+            material.write(memory);
+        });
+        return memory.position;
+    }
+
+
+    static restore(memory:ByteArrayBase):number {
+        var numMaterials:number = memory.readUnsignedInt();
+        for (var i = 0; i < numMaterials; i++) {
+            new Material().read(memory);
+        }
+        console.info(numMaterials+" Materials restored");
+        return memory.position;
     }
 }

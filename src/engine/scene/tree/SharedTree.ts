@@ -8,20 +8,15 @@ import {Mesh} from "../shapes/Mesh";
 import {IPointer} from "../../../pointer/IPointer";
 import {Triangle} from "../shapes/Triangle";
 import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
+import {NodeMarker} from "./SharedNode";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
-export class SharedTree implements IPointer {
-
-    size:number;
+export class SharedTree{
 
     constructor(public box:Box,
                 public root:SharedNode) {
 
-    }
-
-    write(memory:DataView, offset:number):number {
-        return offset;
     }
 
     static newTree(shapes:Shape[], box:Box = null):SharedTree {
@@ -48,19 +43,28 @@ export class SharedTree implements IPointer {
         return new SharedTree(box, node);
     }
 
-    static buildAndWrite(memory:ByteArrayBase, shapes:Shape[], box:Box):number {
+    static readFromMemory(memory:ByteArrayBase):number {
+        console.time("Reading k-d tree");
+        var node:SharedNode = new SharedNode();
+        node.readRoot(memory);
+        console.timeEnd("Reading k-d tree");
+        return memory.position;
+    }
+
+    static buildAndWrite(memory:ByteArrayBase, shapes:Shape[]):number {
         console.time("Building k-d tree (" + shapes.length + " shapes)... ");
 
-        //offset one Int32 to store tree length at the end
+        //offset one Uint32 to store tree length at the end
         var startPosition:number = memory.position;
         var endPosition:number;
-        memory.position += ByteArrayBase.SIZE_OF_INT32;
+        memory.position += ByteArrayBase.SIZE_OF_UINT32;
         var node:SharedNode = SharedNode.newNode(shapes);
+        memory.writeUnsignedInt(NodeMarker.ROOT);
         node.memory = memory;
         node.split(0);
         endPosition = memory.position;
         memory.position = startPosition;
-        memory.writeInt(endPosition - startPosition);
+        memory.writeUnsignedInt(endPosition - startPosition);
         memory.position = endPosition;
         console.timeEnd("Building k-d tree (" + shapes.length + " shapes)... ");
 

@@ -61,7 +61,7 @@ System.register(["./Vector3", "./Constants"], function(exports_1) {
                 Ray.prototype.bounce = function (info, p, u, v) {
                     var n = info.ray;
                     var n1 = 1.0;
-                    var n2 = info.material.index;
+                    var n2 = info.material.ior;
                     if (info.inside) {
                         var _n1 = n1;
                         n1 = n2;

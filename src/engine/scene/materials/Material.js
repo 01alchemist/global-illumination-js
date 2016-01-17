@@ -21,7 +21,7 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
             })(MaterialType || (MaterialType = {}));
             exports_1("MaterialType", MaterialType);
             Material = (function () {
-                function Material(color, texture, normalTexture, bumpTexture, bumpMultiplier, emittance, attenuation, index, gloss, tint, transparent) {
+                function Material(color, texture, normalTexture, bumpTexture, bumpMultiplier, emittance, attenuation, ior, gloss, tint, transparent) {
                     if (color === void 0) { color = new Color_1.Color(); }
                     if (attenuation === void 0) { attenuation = Attenuation_2.NoAttenuation; }
                     this.color = color;
@@ -31,7 +31,7 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
                     this.bumpMultiplier = bumpMultiplier;
                     this.emittance = emittance;
                     this.attenuation = attenuation;
-                    this.index = index;
+                    this.ior = ior;
                     this.gloss = gloss;
                     this.tint = tint;
                     this.transparent = transparent;
@@ -39,16 +39,16 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
                     this.index = Material.map.push(this) - 1;
                 }
                 Material.prototype.clone = function () {
-                    var material = new Material(this.color.clone(), this.texture, this.normalTexture, this.bumpTexture, this.bumpMultiplier, this.emittance, this.attenuation.clone(), this.index, this.gloss, this.tint, this.transparent);
+                    var material = new Material(this.color.clone(), this.texture, this.normalTexture, this.bumpTexture, this.bumpMultiplier, this.emittance, this.attenuation.clone(), this.ior, this.gloss, this.tint, this.transparent);
                     material.type = this.type;
                     return material;
                 };
-                Material.prototype.read = function (memory, offset) {
+                Material.prototype.directRead = function (memory, offset) {
                     offset = this.color.directRead(memory, offset);
                     this.bumpMultiplier = memory[offset++];
                     this.emittance = memory[offset++];
-                    offset = this.attenuation.directRead(memory, offset);
-                    this.index = memory[offset++];
+                    offset = this.attenuation.read(memory, offset);
+                    this.ior = memory[offset++];
                     this.gloss = memory[offset++];
                     this.tint = memory[offset++];
                     this.transparent = memory[offset++] == 1;
@@ -59,11 +59,33 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
                     memory[offset++] = this.bumpMultiplier;
                     memory[offset++] = this.emittance;
                     offset = this.attenuation.directWrite(memory, offset);
-                    memory[offset++] = this.index;
+                    memory[offset++] = this.ior;
                     memory[offset++] = this.gloss;
                     memory[offset++] = this.tint;
                     memory[offset++] = this.transparent ? 1 : 0;
                     return offset;
+                };
+                Material.prototype.read = function (memory) {
+                    this.color.read(memory);
+                    this.bumpMultiplier = memory.readFloat();
+                    this.emittance = memory.readFloat();
+                    this.attenuation.read(memory);
+                    this.ior = memory.readFloat();
+                    this.gloss = memory.readFloat();
+                    this.tint = memory.readFloat();
+                    this.transparent = memory.readBoolean();
+                    return memory.position;
+                };
+                Material.prototype.write = function (memory) {
+                    this.color.write(memory);
+                    memory.writeFloat(this.bumpMultiplier);
+                    memory.writeFloat(this.emittance);
+                    this.attenuation.write(memory);
+                    memory.writeFloat(this.ior);
+                    memory.writeFloat(this.gloss);
+                    memory.writeFloat(this.tint);
+                    memory.writeBoolean(this.transparent);
+                    return memory.position;
                 };
                 Object.defineProperty(Material, "estimatedMemory", {
                     get: function () {
@@ -80,7 +102,7 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
                     });
                     return offset;
                 };
-                Material.restore = function (memory, offset) {
+                Material.directRestore = function (memory, offset) {
                     if (offset === void 0) { offset = 0; }
                     var numMaterials = memory[offset++];
                     for (var i = 0; i < numMaterials; i++) {
@@ -88,6 +110,21 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
                     }
                     console.info(numMaterials + " Materials restored");
                     return offset;
+                };
+                Material.write = function (memory) {
+                    memory.writeUnsignedInt(Material.map.length);
+                    Material.map.forEach(function (material) {
+                        material.write(memory);
+                    });
+                    return memory.position;
+                };
+                Material.restore = function (memory) {
+                    var numMaterials = memory.readUnsignedInt();
+                    for (var i = 0; i < numMaterials; i++) {
+                        new Material().read(memory);
+                    }
+                    console.info(numMaterials + " Materials restored");
+                    return memory.position;
                 };
                 Material.SIZE = Color_1.Color.SIZE + Attenuation_1.Attenuation.SIZE + 6;
                 Material.map = [];

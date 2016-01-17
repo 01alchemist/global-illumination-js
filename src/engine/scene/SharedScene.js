@@ -1,10 +1,10 @@
-System.register(["../math/Color", "./Scene", "./materials/Material", "./shapes/Shape", "./tree/SharedTree"], function(exports_1) {
+System.register(["../math/Color", "./Scene", "./materials/Material", "./shapes/Shape", "./tree/SharedTree", "../../pointer/Pointer"], function(exports_1) {
     var __extends = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
-    var Color_1, Scene_1, Material_1, Shape_1, SharedTree_1, Shape_2;
+    var Color_1, Scene_1, Material_1, Shape_1, SharedTree_1, Shape_2, Pointer_1;
     var SharedScene;
     return {
         setters:[
@@ -23,6 +23,9 @@ System.register(["../math/Color", "./Scene", "./materials/Material", "./shapes/S
             },
             function (SharedTree_1_1) {
                 SharedTree_1 = SharedTree_1_1;
+            },
+            function (Pointer_1_1) {
+                Pointer_1 = Pointer_1_1;
             }],
         execute: function() {
             SharedScene = (function (_super) {
@@ -36,7 +39,7 @@ System.register(["../math/Color", "./Scene", "./materials/Material", "./shapes/S
                     _super.call(this, color, shapes, lights, tree, rays);
                     this.shared = true;
                 }
-                SharedScene.prototype.getMemory = function () {
+                SharedScene.prototype.getDirectMemory = function () {
                     console.time("getMemory");
                     var memorySize = this.estimatedMemory + Material_1.Material.estimatedMemory;
                     var memory = new Float32Array(new SharedArrayBuffer(memorySize * Float32Array.BYTES_PER_ELEMENT));
@@ -57,8 +60,18 @@ System.register(["../math/Color", "./Scene", "./materials/Material", "./shapes/S
                     console.timeEnd("getMemory");
                     return memory;
                 };
-                SharedScene.prototype.getKDTreeMemory = function () {
-                    return new TextEncoder().encode(JSON.stringify(this.sharedTreeMap));
+                SharedScene.prototype.getMemory = function () {
+                    console.time("getMemory");
+                    Pointer_1.Pointer.init();
+                    var memory = Pointer_1.Pointer.memory;
+                    Material_1.Material.write(memory);
+                    memory.writeUnsignedInt(this.shapes.length);
+                    this.color.write(memory);
+                    this.shapes.forEach(function (shape) {
+                        shape.write(memory);
+                    });
+                    console.timeEnd("getMemory");
+                    return memory;
                 };
                 SharedScene.getScene = function (memory, tree) {
                     if (tree === void 0) { tree = null; }
@@ -70,7 +83,7 @@ System.register(["../math/Color", "./Scene", "./materials/Material", "./shapes/S
                     offset = scene.color.directRead(memory, offset);
                     var shapes = [];
                     for (var i = 0; i < numShapes; i++) {
-                        offset = Shape_1.restoreShape(memory, offset, shapes);
+                        offset = Shape_1.restoreShape(memory, shapes);
                         var shape = shapes[i];
                         scene.add(shape);
                         if (shape.type == Shape_2.ShapeType.MESH) {

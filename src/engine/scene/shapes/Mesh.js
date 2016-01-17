@@ -89,7 +89,7 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                         t.index = index;
                         t.write(memory);
                     });
-                    SharedTree_1.SharedTree.buildAndWrite(memory, this.triangles, this.box);
+                    SharedTree_1.SharedTree.buildAndWrite(memory, this.triangles);
                     return memory.position;
                 };
                 Mesh.fromJson = function (mesh) {

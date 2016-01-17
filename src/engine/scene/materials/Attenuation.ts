@@ -1,3 +1,4 @@
+import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 /**
  * Created by Nidin Vinayakan on 09-01-2016.
  */
@@ -43,11 +44,25 @@ export class Attenuation {
         return offset;
     }
 
-    read(mem:Float32Array, offset:number):number {
+    directRead(mem:Float32Array, offset:number):number {
         this.constant = mem[offset++];
         this.linear = mem[offset++];
         this.quadratic = mem[offset++];
         return offset;
+    }
+
+    read(memory:ByteArrayBase):number {
+        this.constant = memory.readFloat();
+        this.linear = memory.readFloat();
+        this.quadratic = memory.readFloat();
+        return memory.position;
+    }
+
+    write(memory:ByteArrayBase):number {
+        memory.writeFloat(this.constant);
+        memory.writeFloat(this.linear);
+        memory.writeFloat(this.quadratic);
+        return memory.position;
     }
 }
 
