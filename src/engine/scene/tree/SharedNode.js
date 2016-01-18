@@ -79,7 +79,7 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                 });
                 SharedNode.prototype.readRoot = function (memory) {
                     this.memory = memory;
-                    var initPos = memory.position;
+                    this.thisPtr = memory.position;
                     this.treeLength = memory.readUnsignedInt();
                     this.marker = memory.readUnsignedInt();
                     this.axis = memory.readByte();
@@ -91,12 +91,13 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                         this.leftPtr = memory.readUnsignedInt();
                         this.rightPtr = memory.readUnsignedInt();
                     }
-                    this.resolved = false;
-                    memory.position = initPos + this.treeLength;
+                    this.resolved = true;
+                    memory.position = this.thisPtr + this.treeLength;
                     return memory.position;
                 };
                 SharedNode.prototype.read = function (memory) {
                     this.memory = memory;
+                    this.thisPtr = memory.position;
                     this.marker = memory.readUnsignedInt();
                     this.axis = memory.readByte();
                     this.point = memory.readFloat();
@@ -244,8 +245,11 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                 SharedNode.prototype.intersectShapes = function (node, r) {
                     var hit = Hit_1.NoHit;
                     var self = this;
-                    if (!node.shapeIndices) {
+                    if (!node.resolved && !node.shapeIndices) {
                         node.read(this.memory);
+                    }
+                    else if (!node.shapeIndices) {
+                        console.log("something wrong:", node.thisPtr, this.memory.position);
                     }
                     node.shapeIndices.forEach(function (shapeIndex) {
                         var h = self.mesh.triangles[shapeIndex].intersect(r);

@@ -45,14 +45,12 @@ System.register(["../shapes/Box", "../../math/Hit", "./SharedNode", "../../../po
                     return new SharedTree(box, node);
                 };
                 SharedTree.readFromMemory = function (memory) {
-                    console.time("Reading k-d tree");
                     var node = new SharedNode_1.SharedNode();
                     node.readRoot(memory);
-                    console.timeEnd("Reading k-d tree");
+                    console.log("[readFromMemory] Root axis:" + node.axis);
                     return new SharedTree(null, node);
                 };
                 SharedTree.buildAndWrite = function (memory, shapes) {
-                    console.time("Building k-d tree (" + shapes.length + " shapes)... ");
                     var startPosition = memory.position;
                     var endPosition;
                     memory.position += ByteArrayBase_1.ByteArrayBase.SIZE_OF_UINT32;
@@ -65,7 +63,6 @@ System.register(["../shapes/Box", "../../math/Hit", "./SharedNode", "../../../po
                     memory.position = startPosition;
                     memory.writeUnsignedInt(endPosition - startPosition);
                     memory.position = endPosition;
-                    console.timeEnd("Building k-d tree (" + shapes.length + " shapes)... ");
                     return memory.position;
                 };
                 return SharedTree;

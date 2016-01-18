@@ -31,6 +31,7 @@ export class SharedNode {
     size:number = 0;
     treeLength:number = 0;
     memory:ByteArrayBase|DirectMemory;
+    thisPtr:number;
     leftPtr:number;
     rightPtr:number;
     resolved:boolean = false;
@@ -73,7 +74,7 @@ export class SharedNode {
 
     readRoot(memory:ByteArrayBase|DirectMemory):number {
         this.memory = memory;
-        var initPos = memory.position;
+        this.thisPtr = memory.position;
         this.treeLength = memory.readUnsignedInt();
         this.marker = memory.readUnsignedInt();
         this.axis = memory.readByte();
@@ -84,21 +85,22 @@ export class SharedNode {
             this.leftPtr = memory.readUnsignedInt();
             this.rightPtr = memory.readUnsignedInt();
         }
-        this.resolved = false;
-        memory.position = initPos + this.treeLength;
+        this.resolved = true;
+        memory.position = this.thisPtr + this.treeLength;
         return memory.position;
     }
 
     read(memory:ByteArrayBase|DirectMemory):number {
 
         this.memory = memory;
+        this.thisPtr = memory.position;
         this.marker = memory.readUnsignedInt();
         this.axis = memory.readByte();
         this.point = memory.readFloat();
 
         if (this.axis == Axis.AxisNone) {
             var shapeLength:number = memory.readUnsignedInt();
-            console.log("shapeLength:"+shapeLength);
+            console.log("shapeLength:" + shapeLength);
             this.shapeIndices = [];
             for (var i:number = 0; i < shapeLength; i++) {
                 var shapeIndex:number = memory.readUnsignedInt();
@@ -240,8 +242,10 @@ export class SharedNode {
     intersectShapes(node:SharedNode, r:Ray):Hit {
         var hit:Hit = NoHit;
         var self = this;
-        if(!node.shapeIndices){
+        if (!node.resolved && !node.shapeIndices) {
             node.read(this.memory);
+        } else if (!node.shapeIndices) {
+            console.log("something wrong:", node.thisPtr, this.memory.position);
         }
         node.shapeIndices.forEach(function (shapeIndex:number) {
             var h = self.mesh.triangles[shapeIndex].intersect(r);

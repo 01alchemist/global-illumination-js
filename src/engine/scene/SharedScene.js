@@ -60,7 +60,6 @@ System.register(["../math/Color", "./Scene", "./materials/Material", "./shapes/S
                     return memory;
                 };
                 SharedScene.getScene = function (memory) {
-                    console.time("getScene");
                     var scene = new SharedScene();
                     var offset = Material_1.Material.restore(memory);
                     scene.color.read(memory);
@@ -77,7 +76,6 @@ System.register(["../math/Color", "./Scene", "./materials/Material", "./shapes/S
                     scene.tree = SharedTree_1.SharedTree.readFromMemory(memory);
                     scene.tree.box = box;
                     console.log(memory.position);
-                    console.timeEnd("getScene");
                     return scene;
                 };
                 return SharedScene;

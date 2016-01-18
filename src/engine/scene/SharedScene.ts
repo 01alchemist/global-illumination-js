@@ -96,7 +96,7 @@ export class SharedScene extends Scene {
     }
 
     static getScene(memory:ByteArrayBase|DirectMemory):SharedScene {
-        console.time("getScene");
+        //console.time("getScene");
         var scene:SharedScene = new SharedScene();
         var offset:number = Material.restore(memory);
 
@@ -117,7 +117,7 @@ export class SharedScene extends Scene {
         scene.tree.box = box;
         console.log(memory.position);
 
-        console.timeEnd("getScene");
+        //console.timeEnd("getScene");
         return scene;
     }
 }
