@@ -79,16 +79,30 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                     return offset;
                 };
                 Mesh.prototype.read = function (memory) {
+                    if (!this.box) {
+                        this.box = new Box_1.Box();
+                    }
+                    this.box.read(memory);
+                    var numTriangles = memory.readUnsignedInt();
+                    for (var i = 0; i < numTriangles; i++) {
+                        var t = new Triangle_1.Triangle();
+                        t.read(memory);
+                        this.triangles.push(t);
+                    }
+                    this.tree = SharedTree_1.SharedTree.readFromMemory(memory);
+                    this.tree.box = this.box;
                     return memory.position;
                 };
                 Mesh.prototype.write = function (memory) {
                     memory.writeByte(this.type);
                     this.box.write(memory);
-                    memory.writeInt(this.triangles.length);
+                    memory.writeUnsignedInt(this.triangles.length);
+                    console.log("memory.pos:" + memory.position);
                     this.triangles.forEach(function (t, index) {
                         t.index = index;
                         t.write(memory);
                     });
+                    console.log("memory.pos:" + memory.position);
                     SharedTree_1.SharedTree.buildAndWrite(memory, this.triangles);
                     return memory.position;
                 };

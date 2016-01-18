@@ -47,7 +47,7 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
                     offset = this.color.directRead(memory, offset);
                     this.bumpMultiplier = memory[offset++];
                     this.emittance = memory[offset++];
-                    offset = this.attenuation.read(memory, offset);
+                    offset = this.attenuation.directRead(memory, offset);
                     this.ior = memory[offset++];
                     this.gloss = memory[offset++];
                     this.tint = memory[offset++];

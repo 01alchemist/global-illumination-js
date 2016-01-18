@@ -7,99 +7,116 @@ import {restoreShape} from "./shapes/Shape";
 import {SharedTree} from "./tree/SharedTree";
 import {ShapeType} from "./shapes/Shape";
 import {Mesh} from "./shapes/Mesh";
-import {SharedArrayBuffer} from "../renderer/worker/TraceWorkerManager";
 import {ByteArrayBase} from "../../pointer/ByteArrayBase";
 import {Pointer} from "../../pointer/Pointer";
+import {DirectMemory} from "../../pointer/DirectMemory";
+import {Box} from "./shapes/Box";
 /**
  * Created by r3f on 13/1/2016.
  */
-interface TextEncoder{
+interface TextEncoder {
     new();
     encode(value:string):Uint8Array;
 }
-export class SharedScene extends Scene{
+export class SharedScene extends Scene {
 
     sharedTreeMap:SharedTree[];
 
     constructor(color:Color = new Color(),
                 shapes:Shape[] = [],
                 lights:Shape[] = [],
-                tree:Tree=null,
+                tree:Tree|SharedTree = null,
                 rays:number = 0) {
-        super(color,shapes, lights, tree, rays);
+        super(color, shapes, lights, tree, rays);
         this.shared = true;
     }
 
-    getDirectMemory():Float32Array{
-        console.time("getMemory");
-        var memorySize:number = this.estimatedMemory + Material.estimatedMemory;
-        var memory:Float32Array = new Float32Array(new SharedArrayBuffer(memorySize * Float32Array.BYTES_PER_ELEMENT));
-        //var memory:Float32Array = new Float32Array(new ArrayBuffer(memorySize * Float32Array.BYTES_PER_ELEMENT));
-        var offset:number = 0;
-        //write materials first
-        offset = Material.directWrite(memory, offset);
+    /*getDirectMemory():Uint8Array{
+     console.time("getDirectMemory");
+     //var memorySize:number = this.estimatedMemory + Material.estimatedMemory;
+     var memory:Uint8Array = Pointer.init();
+     var offset:number = 0;
+     //write materials first
+     offset = Material.directWrite(memory, offset);
 
-        //write scene
-        memory[offset++] = this.shapes.length;
-        offset = this.color.directWrite(memory, offset);
+     //write scene
+     offset = this.color.directWrite(memory, offset);
 
-        var self = this;
+     var self = this;
+     memory[offset++] = this.shapes.length;
+     this.shapes.forEach(function(shape:Shape){
+     offset = shape.directWrite(memory, offset);
+     });
 
-        this.shapes.forEach(function(shape:Shape, index:number){
+     console.timeEnd("getDirectMemory");
+     return memory;
+     }
+     static directReadScene(memory:Uint8Array):SharedScene{
+     console.time("getScene");
+     var scene:Scene = new SharedScene();
+     var offset:number = Material.directRestore(memory);
 
-            offset = shape.directWrite(memory, offset);
+     offset = scene.color.directRead(memory, offset);
+     var numShapes:number = memory.readUnsignedInt();
 
-            if(shape.type == ShapeType.MESH){
-                if(self.sharedTreeMap == null){
-                    self.sharedTreeMap = [];
-                }
-                self.sharedTreeMap[index] = <SharedTree>(<Mesh>shape).tree;
-            }
-        });
+     var shapes:Shape[] = [];
 
-        console.timeEnd("getMemory");
-        return memory;
-    }
+     for (var i = 0; i < numShapes; i++) {
+     offset = restoreShape(memory, shapes);
+     var shape:Shape = shapes[i];
+     scene.add(shape);
+     }
+     console.timeEnd("getScene");
+     return scene;
+     }*/
 
-    getMemory():ByteArrayBase{
+    getMemory():DirectMemory {
         console.time("getMemory");
 
         Pointer.init();
-        var memory:ByteArrayBase =Pointer.memory;
+        var memory:DirectMemory = Pointer.memory;
         //write materials first
         Material.write(memory);
 
         //write scene
-        memory.writeUnsignedInt(this.shapes.length);
         this.color.write(memory);
-
-        this.shapes.forEach(function(shape:Shape){
+        memory.writeUnsignedInt(this.shapes.length);
+        this.shapes.forEach(function (shape:Shape) {
             shape.write(memory);
         });
+
+        console.log(memory.position);
+        var box = Box.boxForShapes(this.shapes);
+        box.write(memory);
+        SharedTree.buildAndWrite(memory, this.shapes);
+        console.log(memory.position);
 
         console.timeEnd("getMemory");
         return memory;
     }
-    static getScene(memory:Float32Array, tree:SharedTree[]=null):Scene{
-        console.time("getScene");
-        console.log(tree);
-        var scene:Scene = new Scene();
 
+    static getScene(memory:ByteArrayBase|DirectMemory):SharedScene {
+        console.time("getScene");
+        var scene:SharedScene = new SharedScene();
         var offset:number = Material.restore(memory);
 
-        var numShapes:number = memory[offset++];
-        offset = scene.color.directRead(memory, offset);
+        scene.color.read(memory);
+        var numShapes:number = memory.readUnsignedInt();
 
         var shapes:Shape[] = [];
-
         for (var i = 0; i < numShapes; i++) {
             offset = restoreShape(memory, shapes);
             var shape:Shape = shapes[i];
             scene.add(shape);
-            if(shape.type == ShapeType.MESH){
-                (<Mesh>shape).tree = SharedTree.fromJson(tree[i], <Mesh>shape);
-            }
         }
+
+        console.log(memory.position);
+        var box:Box = new Box();
+        box.read(memory);
+        scene.tree = SharedTree.readFromMemory(memory);
+        scene.tree.box = box;
+        console.log(memory.position);
+
         console.timeEnd("getScene");
         return scene;
     }

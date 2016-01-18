@@ -6,7 +6,7 @@ export abstract class CanvasDisplay {
     canvas:HTMLCanvasElement;
     ctx:CanvasRenderingContext2D;
     imageData:ImageData;
-    data:Uint8ClampedArray;
+    data:Uint8ClampedArray|number[];
     i_width:number;
     i_height:number;
     info;

@@ -1,18 +1,14 @@
 import {TraceJob} from "./TraceJob";
 import {SharedScene} from "../../scene/SharedScene";
+import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
+import {DirectMemory} from "../../../pointer/DirectMemory";
 /**
  * Created by Nidin on 4/1/2016.
  */
 
-export interface SharedArrayBuffer extends ArrayBuffer {
-
-}
-
-//export var SharedArrayBuffer = SharedArrayBuffer || ArrayBuffer;
-
 export class TraceWorkerManager {
 
-    private sceneMemory:Float32Array;
+    private sceneMemory:DirectMemory;
     private kdTreeMemory:SharedArrayBuffer;
     private pixelMemory:Uint8ClampedArray;
 
@@ -31,7 +27,6 @@ export class TraceWorkerManager {
         //this.sceneMemory = new Float32Array(new SharedArrayBuffer(param.scene.size * Float32Array.BYTES_PER_ELEMENT));
         var scene:SharedScene = param.scene;
         this.sceneMemory = scene.getMemory();
-
         this.pixelMemory = new Uint8ClampedArray(new SharedArrayBuffer(width * height * 3));
 
         this.jobs = [];
@@ -61,7 +56,7 @@ export class TraceWorkerManager {
                     this.jobs.push(
                         new TraceJob(
                             this.pixelMemory,
-                            this.sceneMemory,
+                            this.sceneMemory.buffer,
                             {
                                 camera: param.camera,
                                 cameraSamples: param.cameraSamples,
@@ -82,7 +77,7 @@ export class TraceWorkerManager {
             this.jobs.push(
                 new TraceJob(
                     this.pixelMemory,
-                    this.sceneMemory,
+                    this.sceneMemory.buffer,
                     {
                         camera: param.camera,
                         cameraSamples: param.cameraSamples,

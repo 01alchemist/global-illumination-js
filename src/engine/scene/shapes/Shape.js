@@ -63,10 +63,10 @@ System.register(["./Cube", "./Sphere", "./Mesh", "./Triangle", "./TransformedSha
                 container.push(mesh);
                 return mesh.directRead(memory, offset);
                 break;
-            case ShapeType.TRIANGLE:
-                var triangle = new Triangle_1.Triangle();
-                container.push(triangle);
-                return triangle.directRead(memory, offset);
+            case ShapeType.TRANSFORMED_SHAPE:
+                var shape = new TransformedShape_1.TransformedShape();
+                container.push(shape);
+                return shape.directRead(memory, offset);
                 break;
         }
     }
@@ -89,10 +89,10 @@ System.register(["./Cube", "./Sphere", "./Mesh", "./Triangle", "./TransformedSha
                 container.push(mesh);
                 return mesh.read(memory);
                 break;
-            case ShapeType.TRIANGLE:
-                var triangle = new Triangle_1.Triangle();
-                container.push(triangle);
-                return triangle.read(memory);
+            case ShapeType.TRANSFORMED_SHAPE:
+                var shape = new TransformedShape_1.TransformedShape();
+                container.push(shape);
+                return shape.read(memory);
                 break;
         }
     }

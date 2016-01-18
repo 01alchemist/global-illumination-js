@@ -12,6 +12,7 @@ import {LinearAttenuation} from "../../scene/materials/Attenuation";
 import {Renderer} from "../Renderer";
 import {SpecularMaterial} from "../../scene/materials/SpecularMaterial";
 import {SharedScene} from "../../scene/SharedScene";
+import {DirectMemory} from "../../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -25,7 +26,7 @@ export class TraceWorker {
 
     command:any;
     pixelMemory:Uint8ClampedArray;
-    sceneMemory:Float32Array;
+    sceneMemory:DirectMemory;
     camera:Camera;
     scene:Scene;
     full_width:number;
@@ -53,16 +54,16 @@ export class TraceWorker {
 
                 TraceWorker.id = e.data.id;
 
-                console.time("WOKER_INIT:"+TraceWorker.id);
+                console.time("WOKER_INIT:" + TraceWorker.id);
                 self.command = null;
                 self.pixelMemory = new Uint8ClampedArray(e.data.pixelMemory);
-                self.sceneMemory = new Float32Array(e.data.sceneMemory);
+                self.sceneMemory = new DirectMemory(e.data.sceneMemory);
 
-                if(!self.camera){
+                if (!self.camera) {
                     self.camera = Camera.fromJson(e.data.camera);
                 }
-                if(!self.scene){
-                    self.scene = SharedScene.getScene(self.sceneMemory, e.data.tree);
+                if (!self.scene) {
+                    self.scene = SharedScene.getScene(self.sceneMemory);
                     /*self.scene.compile();*/
                 }
                 //this.scene.add(Sphere.newSphere(new Vector3(-1, 4, -1), 0.5, new LightMaterial(new Color(1, 1, 1), 3, new LinearAttenuation(1))));
@@ -81,7 +82,7 @@ export class TraceWorker {
                     e.data.yoffset
                 );
 
-                console.timeEnd("WOKER_INIT:"+TraceWorker.id);
+                console.timeEnd("WOKER_INIT:" + TraceWorker.id);
                 postMessage(TraceWorker.INITED);
 
             } else if (self.command == TraceWorker.TRACE) {
@@ -111,7 +112,6 @@ export class TraceWorker {
 
                 var _x:number = x - this.xoffset;
                 var _y:number = y - this.yoffset;
-
 
 
                 var c:Color = new Color();
@@ -168,6 +168,7 @@ export class TraceWorker {
         this.pixelMemory[i + 2] = rgba.b;
 
     }
+
     drawPixelInt(i:number, color:number) {
 
         var red = (color >> 16) & 255;

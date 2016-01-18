@@ -3,7 +3,7 @@
  */
 export class DataCache{
 
-    private static cache:Map<string, any> = new Map();
+    private static cache:Map<string, any> = new Map<string, any>();
     static getItem(url:string):any{
         return DataCache.cache.get(url);
     }

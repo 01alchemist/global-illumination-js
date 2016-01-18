@@ -1,16 +1,20 @@
-﻿/**
- * JavaScript ByteArrayBase
+import {MemoryUtils} from "./MemoryUtils";
+import {UTF8} from "./UTF8";
+/**
+ * JavaScript DirectMemory
  * version : 0.2
  * @author Nidin Vinayakan | nidinthb@gmail.com
  *
- * ActionScript3 ByteArrayBase implementation in JavaScript
+ * ActionScript3 ByteArray like DirectMemory implementation in JavaScript
  * limitation : size of ByteArrayBase cannot be changed
  *
  */
+export class DirectMemory {
 
-export class ByteArrayBase {
     static BIG_ENDIAN:string = "bigEndian";
     static LITTLE_ENDIAN:string = "littleEndian";
+
+    static MIN_FLOAT32_VALUE:number = 1.1754943508222875e-38;
 
     static SIZE_OF_BOOLEAN:number = 1;
     static SIZE_OF_INT8:number = 1;
@@ -24,15 +28,14 @@ export class ByteArrayBase {
     static SIZE_OF_FLOAT32:number = 4;
     static SIZE_OF_FLOAT64:number = 8;
 
-    private BUFFER_EXT_SIZE:number = 1024;//Buffer expansion size
+    private BUFFER_EXT_SIZE:number = 32 * 1024 * 1024;//Buffer expansion size 32MB
 
-    public array:Uint8Array = null;
-    public data:DataView;
+    public data:Uint8Array;
     private _position:number;
     public write_position:number;
     public endian:string;
 
-    constructor(buffer?:ArrayBuffer, offset:number = 0, length:number = 0) {
+    constructor(public buffer?:ArrayBuffer, private offset:number = 0, length:number = 0) {
 
         if (buffer == undefined) {
             buffer = new ArrayBuffer(this.BUFFER_EXT_SIZE);
@@ -44,28 +47,10 @@ export class ByteArrayBase {
             this.write_position = length > 0 ? length : buffer.byteLength;
         }
         if (buffer) {
-            this.data = new DataView(buffer, offset, length > 0 ? length : buffer.byteLength);
+            this.data = new Uint8Array(buffer, offset, length > 0 ? length : buffer.byteLength);
         }
         this._position = 0;
-        this.endian = ByteArrayBase.BIG_ENDIAN;
-    }
-
-    // getter setter
-    get buffer():ArrayBuffer {
-        return this.data.buffer;
-    }
-
-    set buffer(value:ArrayBuffer) {
-        this.data = new DataView(value);
-    }
-
-    get dataView():DataView {
-        return this.data;
-    }
-
-    set dataView(value:DataView) {
-        this.data = value;
-        this.write_position = value.byteLength;
+        this.endian = DirectMemory.BIG_ENDIAN;
     }
 
     get phyPosition():number {
@@ -107,21 +92,9 @@ export class ByteArrayBase {
         this._position = 0;
     }
 
-    public getArray():Uint8Array {
-        if (this.array == null) {
-            this.array = new Uint8Array(this.data.buffer, this.data.byteOffset, this.data.byteLength);
-        }
-        return this.array;
-    }
-
-    public setArray(array:Uint8Array):void {
-        this.array = array;
-        this.setBuffer(array.buffer, array.byteOffset, array.byteLength);
-    }
-
     public setBuffer(buffer:ArrayBuffer, offset:number = 0, length:number = 0) {
         if (buffer) {
-            this.data = new DataView(buffer, offset, length > 0 ? length : buffer.byteLength);
+            this.data = new Uint8Array(buffer, offset, length > 0 ? length : buffer.byteLength);
             this.write_position = length > 0 ? length : buffer.byteLength;
         } else {
             this.write_position = 0;
@@ -136,9 +109,9 @@ export class ByteArrayBase {
      * @return    Returns true if the byte is nonzero, false otherwise.
      */
     public readBoolean():boolean {
-        if (!this.validate(ByteArrayBase.SIZE_OF_BOOLEAN)) return null;
+        if (!this.validate(DirectMemory.SIZE_OF_BOOLEAN)) return null;
 
-        return this.data.getUint8(this.position++) != 0;
+        return this.data[this.position++] != 0;
     }
 
     /**
@@ -147,35 +120,36 @@ export class ByteArrayBase {
      * @return    An integer between -128 and 127.
      */
     public readByte():number {
-        if (!this.validate(ByteArrayBase.SIZE_OF_INT8)) return null;
+        if (!this.validate(DirectMemory.SIZE_OF_INT8)) return null;
 
-        return this.data.getInt8(this.position++);
+        return this.data[this.position++];
     }
 
     /**
      * Reads the number of data bytes, specified by the length parameter, from the byte stream.
-     * The bytes are read into the ByteArrayBase object specified by the bytes parameter,
-     * and the bytes are written into the destination ByteArrayBase starting at the _position specified by offset.
-     * @param    bytes    The ByteArrayBase object to read data into.
+     * The bytes are read into the DirectMemory object specified by the bytes parameter,
+     * and the bytes are written into the destination DirectMemory starting at the _position specified by offset.
+     * @param    _bytes    The DirectMemory object to read data into.
      * @param    offset    The offset (_position) in bytes at which the read data should be written.
      * @param    length    The number of bytes to read.  The default value of 0 causes all available data to be read.
+     * @param    createNewBuffer Create new ArrayBuffer.
      */
-    public readBytes(_bytes:ByteArrayBase = null, offset:number = 0, length:number = 0, createNewBuffer:boolean = false):ByteArrayBase {
+    public readBytes(_bytes:DirectMemory = null, offset:number = 0, length:number = 0, createNewBuffer:boolean = false):DirectMemory {
         if (length == 0) {
             length = this.bytesAvailable;
         }
         else if (!this.validate(length)) return null;
 
         if (createNewBuffer) {
-            _bytes = _bytes == null ? new ByteArrayBase(new ArrayBuffer(length)) : _bytes;
+            _bytes = _bytes == null ? new DirectMemory(new ArrayBuffer(length)) : _bytes;
             //This method is expensive
             for (var i = 0; i < length; i++) {
-                _bytes.data.setUint8(i + offset, this.data.getUint8(this.position++));
+                _bytes.data[i + offset] = this.data[this.position++];
             }
         } else {
             //Offset argument ignored
-            _bytes = _bytes == null ? new ByteArrayBase(null) : _bytes;
-            _bytes.dataView = new DataView(this.data.buffer, this.bufferOffset + this.position, length);
+            _bytes = _bytes == null ? new DirectMemory(null) : _bytes;
+            _bytes.setBuffer(this.data.buffer, this.bufferOffset + this.position, length);
             this.position += length;
         }
 
@@ -187,10 +161,10 @@ export class ByteArrayBase {
      * @return    A double-precision (64-bit) floating-point number.
      */
     public readDouble():number {
-        if (!this.validate(ByteArrayBase.SIZE_OF_FLOAT64)) return null;
+        if (!this.validate(DirectMemory.SIZE_OF_FLOAT64)) return null;
 
-        var value:number = this.data.getFloat64(this.position, this.endian == ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_FLOAT64;
+        var value:number = MemoryUtils.readFloat64(this.data, this.position, this.endian == DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_FLOAT64;
         return value;
     }
 
@@ -199,10 +173,10 @@ export class ByteArrayBase {
      * @return    A single-precision (32-bit) floating-point number.
      */
     public readFloat():number {
-        if (!this.validate(ByteArrayBase.SIZE_OF_FLOAT32)) return null;
+        if (!this.validate(DirectMemory.SIZE_OF_FLOAT32)) return null;
 
-        var value:number = this.data.getFloat32(this.position, this.endian == ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_FLOAT32;
+        var value:number = MemoryUtils.readFloat32(this.data, this.position, this.endian == DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_FLOAT32;
         return value;
     }
 
@@ -213,10 +187,10 @@ export class ByteArrayBase {
      * @return    A 32-bit signed integer between -2147483648 and 2147483647.
      */
     public readInt():number {
-        if (!this.validate(ByteArrayBase.SIZE_OF_INT32)) return null;
+        if (!this.validate(DirectMemory.SIZE_OF_INT32)) return null;
 
-        var value = this.data.getInt32(this.position, this.endian == ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_INT32;
+        var value = MemoryUtils.readInt32(this.data, this.position, this.endian == DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_INT32;
         return value;
     }
 
@@ -227,12 +201,12 @@ export class ByteArrayBase {
      * @return    A 64-bit signed integer between −(2^63) to 2^63 − 1
      */
     /*public readInt64():Int64{
-     if (!this.validate(ByteArrayBase.SIZE_OF_UINT32)) return null;
+     if (!this.validate(DirectMemory.SIZE_OF_UINT32)) return null;
 
-     var low = this.data.getInt32(this.position,this.endian == ByteArrayBase.LITTLE_ENDIAN);
-     this.position += ByteArrayBase.SIZE_OF_INT32;
-     var high = this.data.getInt32(this.position,this.endian == ByteArrayBase.LITTLE_ENDIAN);
-     this.position += ByteArrayBase.SIZE_OF_INT32;
+     var low = this.data.getInt32(this.position,this.endian == DirectMemory.LITTLE_ENDIAN);
+     this.position += DirectMemory.SIZE_OF_INT32;
+     var high = this.data.getInt32(this.position,this.endian == DirectMemory.LITTLE_ENDIAN);
+     this.position += DirectMemory.SIZE_OF_INT32;
      return new Int64(low,high);
      }*/
 
@@ -254,8 +228,7 @@ export class ByteArrayBase {
      */
     public readMultiByte(length:number, charSet?:string):string {
         if (!this.validate(length)) return null;
-
-        return "";
+        throw "readMultiByte: Not Implemented!";
     }
 
     /**
@@ -265,10 +238,10 @@ export class ByteArrayBase {
      * @return    A 16-bit signed integer between -32768 and 32767.
      */
     public readShort():number {
-        if (!this.validate(ByteArrayBase.SIZE_OF_INT16)) return null;
+        if (!this.validate(DirectMemory.SIZE_OF_INT16)) return null;
 
-        var value = this.data.getInt16(this.position, this.endian == ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_INT16;
+        var value = MemoryUtils.readInt16(this.data, this.position, this.endian == DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_INT16;
         return value;
     }
 
@@ -276,12 +249,12 @@ export class ByteArrayBase {
      * Reads an unsigned byte from the byte stream.
      *
      *   The returned value is in the range 0 to 255.
-     * @return    A 32-bit unsigned integer between 0 and 255.
+     * @return    A 8-bit unsigned integer between 0 and 255.
      */
     public readUnsignedByte():number {
-        if (!this.validate(ByteArrayBase.SIZE_OF_UINT8)) return null;
+        if (!this.validate(DirectMemory.SIZE_OF_UINT8)) return null;
 
-        return this.data.getUint8(this.position++);
+        return this.data[this.position++];
     }
 
     /**
@@ -291,10 +264,10 @@ export class ByteArrayBase {
      * @return    A 32-bit unsigned integer between 0 and 4294967295.
      */
     public readUnsignedInt():number {
-        if (!this.validate(ByteArrayBase.SIZE_OF_UINT32)) return null;
+        if (!this.validate(DirectMemory.SIZE_OF_UINT32)) return null;
 
-        var value = this.data.getUint32(this.position, this.endian == ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_UINT32;
+        var value = MemoryUtils.readUint32(this.data, this.position, this.endian == DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_UINT32;
         return value;
     }
 
@@ -343,12 +316,12 @@ export class ByteArrayBase {
      * @return    A 64-bit unsigned integer between 0 and 2^64 − 1
      */
     /*public readUnsignedInt64():UInt64{
-     if (!this.validate(ByteArrayBase.SIZE_OF_UINT32)) return null;
+     if (!this.validate(DirectMemory.SIZE_OF_UINT32)) return null;
 
-     var low = this.data.getUint32(this.position,this.endian == ByteArrayBase.LITTLE_ENDIAN);
-     this.position += ByteArrayBase.SIZE_OF_UINT32;
-     var high = this.data.getUint32(this.position,this.endian == ByteArrayBase.LITTLE_ENDIAN);
-     this.position += ByteArrayBase.SIZE_OF_UINT32;
+     var low = this.data.getUint32(this.position,this.endian == DirectMemory.LITTLE_ENDIAN);
+     this.position += DirectMemory.SIZE_OF_UINT32;
+     var high = this.data.getUint32(this.position,this.endian == DirectMemory.LITTLE_ENDIAN);
+     this.position += DirectMemory.SIZE_OF_UINT32;
      return new UInt64(low,high);
      }*/
 
@@ -359,10 +332,10 @@ export class ByteArrayBase {
      * @return    A 16-bit unsigned integer between 0 and 65535.
      */
     public readUnsignedShort():number {
-        if (!this.validate(ByteArrayBase.SIZE_OF_UINT16)) return null;
+        if (!this.validate(DirectMemory.SIZE_OF_UINT16)) return null;
 
-        var value = this.data.getUint16(this.position, this.endian == ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_UINT16;
+        var value = MemoryUtils.readUint16(this.data, this.position, this.endian == DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_UINT16;
         return value;
     }
 
@@ -373,10 +346,10 @@ export class ByteArrayBase {
      * @return    UTF-8 encoded  string.
      */
     public readUTF():string {
-        if (!this.validate(ByteArrayBase.SIZE_OF_UINT16)) return null;
+        if (!this.validate(DirectMemory.SIZE_OF_UINT16)) return null;
 
-        var length:number = this.data.getUint16(this.position, this.endian == ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_UINT16;
+        var length:number = MemoryUtils.readUint16(this.data, this.position, this.endian == DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_UINT16;
 
         if (length > 0) {
             return this.readUTFBytes(length);
@@ -400,7 +373,7 @@ export class ByteArrayBase {
          for (var i = 0; i < length; i++) {
          _bytes[i] = this.data.getUint8(this.position++);
          }*/
-        return this.decodeUTF8(_bytes);
+        return UTF8.decode(_bytes);
     }
 
     public readStandardString(length:number):string {
@@ -409,7 +382,7 @@ export class ByteArrayBase {
         var str:string = "";
 
         for (var i = 0; i < length; i++) {
-            str += String.fromCharCode(this.data.getUint8(this.position++));
+            str += String.fromCharCode(this.data[this.position++]);
         }
         return str;
     }
@@ -419,7 +392,7 @@ export class ByteArrayBase {
         var str:string = "";
         var num:number = 0;
         while (this.bytesAvailable > 0) {
-            var _byte:number = this.data.getUint8(this.position++);
+            var _byte:number = this.data[this.position++];
             num++;
             if (_byte != 0) {
                 str += String.fromCharCode(_byte);
@@ -440,9 +413,9 @@ export class ByteArrayBase {
      *   the method writes a 1; if false, the method writes a 0.
      */
     public writeBoolean(value:boolean):void {
-        this.validateBuffer(ByteArrayBase.SIZE_OF_BOOLEAN);
+        this.validateBuffer(DirectMemory.SIZE_OF_BOOLEAN);
 
-        this.data.setUint8(this.position++, value ? 1 : 0);
+        this.data[this.position++] = value ? 1 : 0;
     }
 
     /**
@@ -452,15 +425,15 @@ export class ByteArrayBase {
      * @param    value    A 32-bit integer. The low 8 bits are written to the byte stream.
      */
     public writeByte(value:number):void {
-        this.validateBuffer(ByteArrayBase.SIZE_OF_INT8);
+        this.validateBuffer(DirectMemory.SIZE_OF_INT8);
 
-        this.data.setInt8(this.position++, value);
+        this.data[this.position++] = value;
     }
 
     public writeUnsignedByte(value:number):void {
-        this.validateBuffer(ByteArrayBase.SIZE_OF_UINT8);
+        this.validateBuffer(DirectMemory.SIZE_OF_UINT8);
 
-        this.data.setUint8(this.position++, value);
+        this.data[this.position++] = value;
     }
 
     /**
@@ -476,16 +449,16 @@ export class ByteArrayBase {
      * written. If offset or length
      * is out of range, they are clamped to the beginning and end
      * of the bytes array.
-     * @param    bytes    The ByteArrayBase object.
+     * @param    _bytes    The DirectMemory object.
      * @param    offset    A zero-based index indicating the _position into the array to begin writing.
      * @param    length    An unsigned integer indicating how far into the buffer to write.
      */
-    public writeBytes(_bytes:ByteArrayBase, offset:number = 0, length:number = 0):void {
+    public writeBytes(_bytes:DirectMemory, offset:number = 0, length:number = 0):void {
         this.validateBuffer(length);
-
-        var tmp_data = new DataView(_bytes.buffer);
-        for (var i = 0; i < _bytes.length; i++) {
-            this.data.setUint8(this.position++, tmp_data.getUint8(i));
+        length = length > 0 ? length : _bytes.length;
+        var tmp_data = new Uint8Array(_bytes.buffer, offset, length);
+        for (var i = 0; i < length; i++) {
+            this.data[offset + this.position++] = tmp_data[i];
         }
     }
 
@@ -494,10 +467,10 @@ export class ByteArrayBase {
      * @param    value    A double-precision (64-bit) floating-point number.
      */
     public writeDouble(value:number):void {
-        this.validateBuffer(ByteArrayBase.SIZE_OF_FLOAT64);
+        this.validateBuffer(DirectMemory.SIZE_OF_FLOAT64);
 
-        this.data.setFloat64(this.position, value, this.endian == ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_FLOAT64;
+        MemoryUtils.writeFloat64(this.data, this.position, value, this.endian == DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_FLOAT64;
     }
 
     /**
@@ -505,10 +478,10 @@ export class ByteArrayBase {
      * @param    value    A single-precision (32-bit) floating-point number.
      */
     public writeFloat(value:number):void {
-        this.validateBuffer(ByteArrayBase.SIZE_OF_FLOAT32);
+        this.validateBuffer(DirectMemory.SIZE_OF_FLOAT32);
 
-        this.data.setFloat32(this.position, value, this.endian == ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_FLOAT32;
+        MemoryUtils.writeFloat32(this.data, this.position, value, this.endian == DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_FLOAT32;
     }
 
     /**
@@ -516,10 +489,10 @@ export class ByteArrayBase {
      * @param    value    An integer to write to the byte stream.
      */
     public writeInt(value:number):void {
-        this.validateBuffer(ByteArrayBase.SIZE_OF_INT32);
+        this.validateBuffer(DirectMemory.SIZE_OF_INT32);
 
-        this.data.setInt32(this.position, value, this.endian == ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_INT32;
+        MemoryUtils.writeInt32(this.data, this.position, value, this.endian == DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_INT32;
     }
 
     /**
@@ -539,17 +512,17 @@ export class ByteArrayBase {
      * @param    value    32-bit integer, whose low 16 bits are written to the byte stream.
      */
     public writeShort(value:number):void {
-        this.validateBuffer(ByteArrayBase.SIZE_OF_INT16);
+        this.validateBuffer(DirectMemory.SIZE_OF_INT16);
 
-        this.data.setInt16(this.position, value, this.endian == ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_INT16;
+        MemoryUtils.writeInt16(this.data, this.position, value, this.endian == DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_INT16;
     }
 
     public writeUnsignedShort(value:number):void {
-        this.validateBuffer(ByteArrayBase.SIZE_OF_UINT16);
+        this.validateBuffer(DirectMemory.SIZE_OF_UINT16);
 
-        this.data.setUint16(this.position, value, this.endian == ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_UINT16;
+        MemoryUtils.writeUint16(this.data, this.position, value, this.endian == DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_UINT16;
     }
 
     /**
@@ -557,10 +530,10 @@ export class ByteArrayBase {
      * @param    value    An unsigned integer to write to the byte stream.
      */
     public writeUnsignedInt(value:number):void {
-        this.validateBuffer(ByteArrayBase.SIZE_OF_UINT32);
+        this.validateBuffer(DirectMemory.SIZE_OF_UINT32);
 
-        this.data.setUint32(this.position, value, this.endian == ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_UINT32;
+        MemoryUtils.writeUint32(this.data, this.position, value, this.endian == DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_UINT32;
     }
 
     /**
@@ -570,13 +543,13 @@ export class ByteArrayBase {
      * @param    value    The string value to be written.
      */
     public writeUTF(value:string):void {
-        var utf8bytes:Uint8Array = this.encodeUTF8(value);
+        var utf8bytes:Uint8Array = UTF8.encode(value);
         var length:number = utf8bytes.length;
 
-        this.validateBuffer(ByteArrayBase.SIZE_OF_UINT16 + length);
+        this.validateBuffer(DirectMemory.SIZE_OF_UINT16 + length);
 
-        this.data.setUint16(this.position, length, this.endian === ByteArrayBase.LITTLE_ENDIAN);
-        this.position += ByteArrayBase.SIZE_OF_UINT16;
+        MemoryUtils.writeUint16(this.data, this.position, length, this.endian === DirectMemory.LITTLE_ENDIAN);
+        this.position += DirectMemory.SIZE_OF_UINT16;
         this.writeUint8Array(utf8bytes);
     }
 
@@ -586,12 +559,12 @@ export class ByteArrayBase {
      * @param    value    The string value to be written.
      */
     public writeUTFBytes(value:string):void {
-        this.writeUint8Array(this.encodeUTF8(value));
+        this.writeUint8Array(UTF8.encode(value));
     }
 
 
     public toString():string {
-        return "[ByteArrayBase] length:" + this.length + ", bytesAvailable:" + this.bytesAvailable;
+        return "[DirectMemory] length:" + this.length + ", bytesAvailable:" + this.bytesAvailable;
     }
 
     /****************************/
@@ -600,109 +573,110 @@ export class ByteArrayBase {
 
     /**
      * Writes a Uint8Array to the byte stream.
-     * @param    value    The Uint8Array to be written.
+     * @param    _bytes    The Uint8Array to be written.
      */
     public writeUint8Array(_bytes:Uint8Array):void {
         this.validateBuffer(this.position + _bytes.length);
 
         for (var i = 0; i < _bytes.length; i++) {
-            this.data.setUint8(this.position++, _bytes[i]);
+            this.data[this.position++] = _bytes[i];
         }
     }
 
     /**
      * Writes a Uint16Array to the byte stream.
-     * @param    value    The Uint16Array to be written.
+     * @param    _bytes    The Uint16Array to be written.
      */
     public writeUint16Array(_bytes:Uint16Array):void {
         this.validateBuffer(this.position + _bytes.length);
 
         for (var i = 0; i < _bytes.length; i++) {
-            this.data.setUint16(this.position, _bytes[i], this.endian === ByteArrayBase.LITTLE_ENDIAN);
-            this.position += ByteArrayBase.SIZE_OF_UINT16;
+            MemoryUtils.writeUint16(this.data, this.position, _bytes[i], this.endian === DirectMemory.LITTLE_ENDIAN);
+            this.position += DirectMemory.SIZE_OF_UINT16;
         }
     }
 
     /**
      * Writes a Uint32Array to the byte stream.
-     * @param    value    The Uint32Array to be written.
+     * @param    _bytes    The Uint32Array to be written.
      */
     public writeUint32Array(_bytes:Uint32Array):void {
         this.validateBuffer(this.position + _bytes.length);
 
         for (var i = 0; i < _bytes.length; i++) {
-            this.data.setUint32(this.position, _bytes[i], this.endian === ByteArrayBase.LITTLE_ENDIAN);
-            this.position += ByteArrayBase.SIZE_OF_UINT32;
+            MemoryUtils.writeUint32(this.data, this.position, _bytes[i], this.endian === DirectMemory.LITTLE_ENDIAN);
+            this.position += DirectMemory.SIZE_OF_UINT32;
         }
     }
 
     /**
      * Writes a Int8Array to the byte stream.
-     * @param    value    The Int8Array to be written.
+     * @param    _bytes    The Int8Array to be written.
      */
     public writeInt8Array(_bytes:Int8Array):void {
         this.validateBuffer(this.position + _bytes.length);
 
         for (var i = 0; i < _bytes.length; i++) {
-            this.data.setInt8(this.position++, _bytes[i]);
+            this.data[this.position++] = _bytes[i];
         }
     }
 
     /**
      * Writes a Int16Array to the byte stream.
-     * @param    value    The Int16Array to be written.
+     * @param    _bytes    The Int16Array to be written.
      */
     public writeInt16Array(_bytes:Int16Array):void {
         this.validateBuffer(this.position + _bytes.length);
 
         for (var i = 0; i < _bytes.length; i++) {
-            this.data.setInt16(this.position, _bytes[i], this.endian === ByteArrayBase.LITTLE_ENDIAN);
-            this.position += ByteArrayBase.SIZE_OF_INT16;
+            MemoryUtils.writeInt16(this.data, this.position, _bytes[i], this.endian === DirectMemory.LITTLE_ENDIAN);
+            this.position += DirectMemory.SIZE_OF_INT16;
         }
     }
 
     /**
      * Writes a Int32Array to the byte stream.
-     * @param    value    The Int32Array to be written.
+     * @param    _bytes    The Int32Array to be written.
      */
     public writeInt32Array(_bytes:Int32Array):void {
         this.validateBuffer(this.position + _bytes.length);
 
         for (var i = 0; i < _bytes.length; i++) {
-            this.data.setInt32(this.position, _bytes[i], this.endian === ByteArrayBase.LITTLE_ENDIAN);
-            this.position += ByteArrayBase.SIZE_OF_INT32;
+            MemoryUtils.writeInt32(this.data, this.position, _bytes[i], this.endian === DirectMemory.LITTLE_ENDIAN);
+            this.position += DirectMemory.SIZE_OF_INT32;
         }
     }
 
     /**
      * Writes a Float32Array to the byte stream.
-     * @param    value    The Float32Array to be written.
+     * @param    _bytes    The Float32Array to be written.
      */
     public writeFloat32Array(_bytes:Float32Array):void {
         this.validateBuffer(this.position + _bytes.length);
 
         for (var i = 0; i < _bytes.length; i++) {
-            this.data.setFloat32(this.position, _bytes[i], this.endian === ByteArrayBase.LITTLE_ENDIAN);
-            this.position += ByteArrayBase.SIZE_OF_FLOAT32;
+            MemoryUtils.writeFloat32(this.data, this.position, _bytes[i], this.endian === DirectMemory.LITTLE_ENDIAN);
+            this.position += DirectMemory.SIZE_OF_FLOAT32;
         }
     }
 
     /**
      * Writes a Float64Array to the byte stream.
-     * @param    value    The Float64Array to be written.
+     * @param    _bytes    The Float64Array to be written.
      */
     public writeFloat64Array(_bytes:Float64Array):void {
         this.validateBuffer(this.position + _bytes.length);
 
         for (var i = 0; i < _bytes.length; i++) {
-            this.data.setFloat64(this.position, _bytes[i], this.endian === ByteArrayBase.LITTLE_ENDIAN);
-            this.position += ByteArrayBase.SIZE_OF_FLOAT64;
+            MemoryUtils.writeFloat64(this.data, this.position, _bytes[i], this.endian === DirectMemory.LITTLE_ENDIAN);
+            this.position += DirectMemory.SIZE_OF_FLOAT64;
         }
     }
 
     /**
      * Read a Uint8Array from the byte stream.
      * @param    length An unsigned short indicating the length of the Uint8Array.
+     * @param    createNewBuffer Create new ArrayBuffer.
      */
     public readUint8Array(length:number, createNewBuffer:boolean = true):Uint8Array {
         if (!this.validate(length)) return null;
@@ -712,8 +686,8 @@ export class ByteArrayBase {
         } else {
             result = new Uint8Array(new ArrayBuffer(length));
             for (var i = 0; i < length; i++) {
-                result[i] = this.data.getUint8(this.position);
-                this.position += ByteArrayBase.SIZE_OF_UINT8;
+                result[i] = this.data[this.position];
+                this.position += DirectMemory.SIZE_OF_UINT8;
             }
         }
         return result;
@@ -722,9 +696,10 @@ export class ByteArrayBase {
     /**
      * Read a Uint16Array from the byte stream.
      * @param    length An unsigned short indicating the length of the Uint16Array.
+     * @param    createNewBuffer Create new ArrayBuffer.
      */
     public readUint16Array(length:number, createNewBuffer:boolean = true):Uint16Array {
-        var size:number = length * ByteArrayBase.SIZE_OF_UINT16;
+        var size:number = length * DirectMemory.SIZE_OF_UINT16;
         if (!this.validate(size)) return null;
         if (!createNewBuffer) {
             var result:Uint16Array = new Uint16Array(this.buffer, this.bufferOffset + this.position, length);
@@ -733,8 +708,8 @@ export class ByteArrayBase {
         else {
             result = new Uint16Array(new ArrayBuffer(size));
             for (var i = 0; i < length; i++) {
-                result[i] = this.data.getUint16(this.position, this.endian === ByteArrayBase.LITTLE_ENDIAN);
-                this.position += ByteArrayBase.SIZE_OF_UINT16;
+                result[i] = MemoryUtils.readUint16(this.data, this.position, this.endian === DirectMemory.LITTLE_ENDIAN);
+                this.position += DirectMemory.SIZE_OF_UINT16;
             }
         }
         return result;
@@ -743,9 +718,10 @@ export class ByteArrayBase {
     /**
      * Read a Uint32Array from the byte stream.
      * @param    length An unsigned short indicating the length of the Uint32Array.
+     * @param    createNewBuffer Create new ArrayBuffer.
      */
     public readUint32Array(length:number, createNewBuffer:boolean = true):Uint32Array {
-        var size:number = length * ByteArrayBase.SIZE_OF_UINT32;
+        var size:number = length * DirectMemory.SIZE_OF_UINT32;
         if (!this.validate(size)) return null;
         if (!createNewBuffer) {
             var result:Uint32Array = new Uint32Array(this.buffer, this.bufferOffset + this.position, length);
@@ -754,8 +730,8 @@ export class ByteArrayBase {
         else {
             result = new Uint32Array(new ArrayBuffer(size));
             for (var i = 0; i < length; i++) {
-                result[i] = this.data.getUint32(this.position, this.endian === ByteArrayBase.LITTLE_ENDIAN);
-                this.position += ByteArrayBase.SIZE_OF_UINT32;
+                result[i] = MemoryUtils.readUint32(this.data, this.position, this.endian === DirectMemory.LITTLE_ENDIAN);
+                this.position += DirectMemory.SIZE_OF_UINT32;
             }
         }
         return result;
@@ -764,6 +740,7 @@ export class ByteArrayBase {
     /**
      * Read a Int8Array from the byte stream.
      * @param    length An unsigned short indicating the length of the Int8Array.
+     * @param    createNewBuffer Create new ArrayBuffer.
      */
     public readInt8Array(length:number, createNewBuffer:boolean = true):Int8Array {
         if (!this.validate(length)) return null;
@@ -774,8 +751,8 @@ export class ByteArrayBase {
         else {
             result = new Int8Array(new ArrayBuffer(length));
             for (var i = 0; i < length; i++) {
-                result[i] = this.data.getInt8(this.position);
-                this.position += ByteArrayBase.SIZE_OF_INT8;
+                result[i] = this.data[this.position];
+                this.position += DirectMemory.SIZE_OF_INT8;
             }
         }
         return result;
@@ -784,9 +761,10 @@ export class ByteArrayBase {
     /**
      * Read a Int16Array from the byte stream.
      * @param    length An unsigned short indicating the length of the Int16Array.
+     * @param    createNewBuffer Create new ArrayBuffer.
      */
     public readInt16Array(length:number, createNewBuffer:boolean = true):Int16Array {
-        var size:number = length * ByteArrayBase.SIZE_OF_INT16
+        var size:number = length * DirectMemory.SIZE_OF_INT16;
         if (!this.validate(size)) return null;
         if (!createNewBuffer) {
             var result:Int16Array = new Int16Array(this.buffer, this.bufferOffset + this.position, length);
@@ -795,8 +773,8 @@ export class ByteArrayBase {
         else {
             result = new Int16Array(new ArrayBuffer(size));
             for (var i = 0; i < length; i++) {
-                result[i] = this.data.getInt16(this.position, this.endian === ByteArrayBase.LITTLE_ENDIAN);
-                this.position += ByteArrayBase.SIZE_OF_INT16;
+                result[i] = MemoryUtils.readInt16(this.data, this.position, this.endian === DirectMemory.LITTLE_ENDIAN);
+                this.position += DirectMemory.SIZE_OF_INT16;
             }
         }
         return result;
@@ -805,20 +783,21 @@ export class ByteArrayBase {
     /**
      * Read a Int32Array from the byte stream.
      * @param    length An unsigned short indicating the length of the Int32Array.
+     * @param    createNewBuffer Create new ArrayBuffer.
      */
     public readInt32Array(length:number, createNewBuffer:boolean = true):Int32Array {
-        var size:number = length * ByteArrayBase.SIZE_OF_INT32
+        var size:number = length * DirectMemory.SIZE_OF_INT32;
         if (!this.validate(size)) return null;
         if (!createNewBuffer) {
 
             if ((this.bufferOffset + this.position) % 4 == 0) {
-                var result:Float32Array = new Int32Array(this.buffer, this.bufferOffset + this.position, length);
+                var result:Int32Array = new Int32Array(this.buffer, this.bufferOffset + this.position, length);
                 this.position += size;
             } else {
                 var tmp:Uint8Array = new Uint8Array(new ArrayBuffer(size));
                 for (var i = 0; i < size; i++) {
-                    tmp[i] = this.data.getUint8(this.position);
-                    this.position += ByteArrayBase.SIZE_OF_UINT8;
+                    tmp[i] = this.data[this.position];
+                    this.position += DirectMemory.SIZE_OF_UINT8;
                 }
                 result = new Int32Array(tmp.buffer);
             }
@@ -826,8 +805,8 @@ export class ByteArrayBase {
         else {
             result = new Int32Array(new ArrayBuffer(size));
             for (var i = 0; i < length; i++) {
-                result[i] = this.data.getInt32(this.position, this.endian === ByteArrayBase.LITTLE_ENDIAN);
-                this.position += ByteArrayBase.SIZE_OF_INT32;
+                result[i] = MemoryUtils.readInt32(this.data, this.position, this.endian === DirectMemory.LITTLE_ENDIAN);
+                this.position += DirectMemory.SIZE_OF_INT32;
             }
         }
         return result;
@@ -836,9 +815,10 @@ export class ByteArrayBase {
     /**
      * Read a Float32Array from the byte stream.
      * @param    length An unsigned short indicating the length of the Float32Array.
+     * @param    createNewBuffer Create new ArrayBuffer.
      */
     public readFloat32Array(length:number, createNewBuffer:boolean = true):Float32Array {
-        var size:number = length * ByteArrayBase.SIZE_OF_FLOAT32;
+        var size:number = length * DirectMemory.SIZE_OF_FLOAT32;
         if (!this.validate(size)) return null;
         if (!createNewBuffer) {
             if ((this.bufferOffset + this.position) % 4 == 0) {
@@ -847,8 +827,8 @@ export class ByteArrayBase {
             } else {
                 var tmp:Uint8Array = new Uint8Array(new ArrayBuffer(size));
                 for (var i = 0; i < size; i++) {
-                    tmp[i] = this.data.getUint8(this.position);
-                    this.position += ByteArrayBase.SIZE_OF_UINT8;
+                    tmp[i] = this.data[this.position];
+                    this.position += DirectMemory.SIZE_OF_UINT8;
                 }
                 result = new Float32Array(tmp.buffer);
             }
@@ -857,8 +837,8 @@ export class ByteArrayBase {
             result = new Float32Array(new ArrayBuffer(size));
 
             for (var i = 0; i < length; i++) {
-                result[i] = this.data.getFloat32(this.position, this.endian === ByteArrayBase.LITTLE_ENDIAN);
-                this.position += ByteArrayBase.SIZE_OF_FLOAT32;
+                result[i] = MemoryUtils.readFloat32(this.data, this.position, this.endian === DirectMemory.LITTLE_ENDIAN);
+                this.position += DirectMemory.SIZE_OF_FLOAT32;
             }
         }
         return result;
@@ -867,9 +847,10 @@ export class ByteArrayBase {
     /**
      * Read a Float64Array from the byte stream.
      * @param    length An unsigned short indicating the length of the Float64Array.
+     * @param    createNewBuffer Create new ArrayBuffer.
      */
     public readFloat64Array(length:number, createNewBuffer:boolean = true):Float64Array {
-        var size:number = length * ByteArrayBase.SIZE_OF_FLOAT64
+        var size:number = length * DirectMemory.SIZE_OF_FLOAT64;
         if (!this.validate(size)) return null;
         if (!createNewBuffer) {
             var result:Float64Array = new Float64Array(this.buffer, this.position, length);
@@ -877,8 +858,8 @@ export class ByteArrayBase {
         } else {
             result = new Float64Array(new ArrayBuffer(size));
             for (var i = 0; i < length; i++) {
-                result[i] = this.data.getFloat64(this.position, this.endian === ByteArrayBase.LITTLE_ENDIAN);
-                this.position += ByteArrayBase.SIZE_OF_FLOAT64;
+                result[i] = MemoryUtils.readFloat64(this.data, this.position, this.endian === DirectMemory.LITTLE_ENDIAN);
+                this.position += DirectMemory.SIZE_OF_FLOAT64;
             }
         }
         return result;
@@ -899,192 +880,9 @@ export class ByteArrayBase {
     private validateBuffer(len:number):void {
         this.write_position = len > this.write_position ? len : this.write_position;
         if (this.data.byteLength < len) {
-            var tmp:Uint8Array = new Uint8Array(new ArrayBuffer(len + this.BUFFER_EXT_SIZE));
+            var tmp:Uint8Array = new Uint8Array(new SharedArrayBuffer(len + this.BUFFER_EXT_SIZE));
             tmp.set(new Uint8Array(this.data.buffer));
             this.data.buffer = tmp.buffer;
         }
-    }
-
-    /**
-     * UTF-8 Encoding/Decoding
-     */
-    private encodeUTF8(str:string):Uint8Array {
-        var pos:number = 0;
-        var codePoints = this.stringToCodePoints(str);
-        var outputBytes = [];
-
-        while (codePoints.length > pos) {
-            var code_point:number = codePoints[pos++];
-
-            if (this.inRange(code_point, 0xD800, 0xDFFF)) {
-                this.encoderError(code_point);
-            }
-            else if (this.inRange(code_point, 0x0000, 0x007f)) {
-                outputBytes.push(code_point);
-            } else {
-                var count, offset;
-                if (this.inRange(code_point, 0x0080, 0x07FF)) {
-                    count = 1;
-                    offset = 0xC0;
-                } else if (this.inRange(code_point, 0x0800, 0xFFFF)) {
-                    count = 2;
-                    offset = 0xE0;
-                } else if (this.inRange(code_point, 0x10000, 0x10FFFF)) {
-                    count = 3;
-                    offset = 0xF0;
-                }
-
-                outputBytes.push(this.div(code_point, Math.pow(64, count)) + offset);
-
-                while (count > 0) {
-                    var temp = this.div(code_point, Math.pow(64, count - 1));
-                    outputBytes.push(0x80 + (temp % 64));
-                    count -= 1;
-                }
-            }
-        }
-        return new Uint8Array(outputBytes);
-    }
-
-    private decodeUTF8(data:Uint8Array):string {
-        var fatal:boolean = false;
-        var pos:number = 0;
-        var result:string = "";
-        var code_point:number;
-        var utf8_code_point = 0;
-        var utf8_bytes_needed = 0;
-        var utf8_bytes_seen = 0;
-        var utf8_lower_boundary = 0;
-
-        while (data.length > pos) {
-
-            var _byte = data[pos++];
-
-            if (_byte === this.EOF_byte) {
-                if (utf8_bytes_needed !== 0) {
-                    code_point = this.decoderError(fatal);
-                } else {
-                    code_point = this.EOF_code_point;
-                }
-            } else {
-
-                if (utf8_bytes_needed === 0) {
-                    if (this.inRange(_byte, 0x00, 0x7F)) {
-                        code_point = _byte;
-                    } else {
-                        if (this.inRange(_byte, 0xC2, 0xDF)) {
-                            utf8_bytes_needed = 1;
-                            utf8_lower_boundary = 0x80;
-                            utf8_code_point = _byte - 0xC0;
-                        } else if (this.inRange(_byte, 0xE0, 0xEF)) {
-                            utf8_bytes_needed = 2;
-                            utf8_lower_boundary = 0x800;
-                            utf8_code_point = _byte - 0xE0;
-                        } else if (this.inRange(_byte, 0xF0, 0xF4)) {
-                            utf8_bytes_needed = 3;
-                            utf8_lower_boundary = 0x10000;
-                            utf8_code_point = _byte - 0xF0;
-                        } else {
-                            this.decoderError(fatal);
-                        }
-                        utf8_code_point = utf8_code_point * Math.pow(64, utf8_bytes_needed);
-                        code_point = null;
-                    }
-                } else if (!this.inRange(_byte, 0x80, 0xBF)) {
-                    utf8_code_point = 0;
-                    utf8_bytes_needed = 0;
-                    utf8_bytes_seen = 0;
-                    utf8_lower_boundary = 0;
-                    pos--;
-                    code_point = this.decoderError(fatal, _byte);
-                } else {
-
-                    utf8_bytes_seen += 1;
-                    utf8_code_point = utf8_code_point + (_byte - 0x80) * Math.pow(64, utf8_bytes_needed - utf8_bytes_seen);
-
-                    if (utf8_bytes_seen !== utf8_bytes_needed) {
-                        code_point = null;
-                    } else {
-
-                        var cp = utf8_code_point;
-                        var lower_boundary = utf8_lower_boundary;
-                        utf8_code_point = 0;
-                        utf8_bytes_needed = 0;
-                        utf8_bytes_seen = 0;
-                        utf8_lower_boundary = 0;
-                        if (this.inRange(cp, lower_boundary, 0x10FFFF) && !this.inRange(cp, 0xD800, 0xDFFF)) {
-                            code_point = cp;
-                        } else {
-                            code_point = this.decoderError(fatal, _byte);
-                        }
-                    }
-
-                }
-            }
-            //Decode string
-            if (code_point !== null && code_point !== this.EOF_code_point) {
-                if (code_point <= 0xFFFF) {
-                    if (code_point > 0)result += String.fromCharCode(code_point);
-                } else {
-                    code_point -= 0x10000;
-                    result += String.fromCharCode(0xD800 + ((code_point >> 10) & 0x3ff));
-                    result += String.fromCharCode(0xDC00 + (code_point & 0x3ff));
-                }
-            }
-        }
-        return result;
-    }
-
-    private encoderError(code_point) {
-        throw 'EncodingError! The code point ' + code_point + ' could not be encoded.';
-    }
-
-    private decoderError(fatal, opt_code_point?):number {
-        if (fatal) {
-            throw 'DecodingError';
-        }
-        return opt_code_point || 0xFFFD;
-    }
-
-    private EOF_byte:number = -1;
-    private EOF_code_point:number = -1;
-
-    private inRange(a, min, max) {
-        return min <= a && a <= max;
-    }
-
-    private div(n, d) {
-        return Math.floor(n / d);
-    }
-
-    private stringToCodePoints(string) {
-        /** @type {Array.<number>} */
-        var cps = [];
-        // Based on http://www.w3.org/TR/WebIDL/#idl-DOMString
-        var i = 0, n = string.length;
-        while (i < string.length) {
-            var c = string.charCodeAt(i);
-            if (!this.inRange(c, 0xD800, 0xDFFF)) {
-                cps.push(c);
-            } else if (this.inRange(c, 0xDC00, 0xDFFF)) {
-                cps.push(0xFFFD);
-            } else { // (inRange(c, 0xD800, 0xDBFF))
-                if (i === n - 1) {
-                    cps.push(0xFFFD);
-                } else {
-                    var d = string.charCodeAt(i + 1);
-                    if (this.inRange(d, 0xDC00, 0xDFFF)) {
-                        var a = c & 0x3FF;
-                        var b = d & 0x3FF;
-                        i += 1;
-                        cps.push(0x10000 + (a << 10) + b);
-                    } else {
-                        cps.push(0xFFFD);
-                    }
-                }
-            }
-            i += 1;
-        }
-        return cps;
     }
 }

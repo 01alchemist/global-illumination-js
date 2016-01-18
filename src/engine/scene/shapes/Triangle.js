@@ -138,23 +138,17 @@ System.register(["../materials/Material", "./Box", "../../math/Vector3", "../../
                     this.n1.read(memory);
                     this.n2.read(memory);
                     this.n3.read(memory);
-                    if (this.t1) {
-                        this.t1.read(memory);
+                    this.t1.read(memory);
+                    this.t2.read(memory);
+                    this.t3.read(memory);
+                    if (this.t1.isNullVector()) {
+                        this.t1 = null;
                     }
-                    else {
-                        memory.position += Vector3_1.Vector3.SIZE;
+                    if (this.t2.isNullVector()) {
+                        this.t2 = null;
                     }
-                    if (this.t2) {
-                        this.t2.read(memory);
-                    }
-                    else {
-                        memory.position += Vector3_1.Vector3.SIZE;
-                    }
-                    if (this.t3) {
-                        this.t3.read(memory);
-                    }
-                    else {
-                        memory.position += Vector3_1.Vector3.SIZE;
+                    if (this.t3.isNullVector()) {
+                        this.t3 = null;
                     }
                     this.updateBox();
                     return memory.position;
@@ -173,19 +167,19 @@ System.register(["../materials/Material", "./Box", "../../math/Vector3", "../../
                         this.t1.write(memory);
                     }
                     else {
-                        memory.position += Vector3_1.Vector3.SIZE;
+                        Vector3_1.Vector3.NullVector.write(memory);
                     }
                     if (this.t2) {
                         this.t2.write(memory);
                     }
                     else {
-                        memory.position += Vector3_1.Vector3.SIZE;
+                        Vector3_1.Vector3.NullVector.write(memory);
                     }
                     if (this.t3) {
                         this.t3.write(memory);
                     }
                     else {
-                        memory.position += Vector3_1.Vector3.SIZE;
+                        Vector3_1.Vector3.NullVector.write(memory);
                     }
                     return memory.position;
                 };

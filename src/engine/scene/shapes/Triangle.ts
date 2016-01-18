@@ -11,6 +11,7 @@ import {Shape} from "./Shape";
 import {ShapeType} from "./Shape";
 import {MaterialUtils} from "../materials/MaterialUtils";
 import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
+import {DirectMemory} from "../../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -98,7 +99,7 @@ export class Triangle implements Shape {
         return offset;
     }
 
-    read(memory:ByteArrayBase):number {
+    read(memory:ByteArrayBase|DirectMemory):number {
         memory.position += ByteArrayBase.SIZE_OF_UINT8;//type
         var materialIndex:number = memory.readInt();
         var material:Material = Material.map[materialIndex];
@@ -114,20 +115,18 @@ export class Triangle implements Shape {
         this.n2.read(memory);
         this.n3.read(memory);
 
-        if (this.t1) {
-            this.t1.read(memory);
-        } else {
-            memory.position += Vector3.SIZE;
+        this.t1.read(memory);
+        this.t2.read(memory);
+        this.t3.read(memory);
+
+        if(this.t1.isNullVector()){
+            this.t1 = null;
         }
-        if (this.t2) {
-            this.t2.read(memory);
-        } else {
-            memory.position += Vector3.SIZE;
+        if(this.t2.isNullVector()){
+            this.t2 = null;
         }
-        if (this.t3) {
-            this.t3.read(memory);
-        } else {
-            memory.position += Vector3.SIZE;
+        if(this.t3.isNullVector()){
+            this.t3 = null;
         }
 
         this.updateBox();
@@ -135,7 +134,7 @@ export class Triangle implements Shape {
         return memory.position;
     }
 
-    write(memory:ByteArrayBase):number{
+    write(memory:ByteArrayBase|DirectMemory):number{
         memory.writeByte(this.type);
         memory.writeInt(this.material.index);
         memory.writeInt(this.index);
@@ -149,17 +148,17 @@ export class Triangle implements Shape {
         if (this.t1) {
             this.t1.write(memory);
         } else {
-            memory.position += Vector3.SIZE;
+            Vector3.NullVector.write(memory);
         }
         if (this.t2) {
             this.t2.write(memory);
         } else {
-            memory.position += Vector3.SIZE;
+            Vector3.NullVector.write(memory);
         }
         if (this.t3) {
             this.t3.write(memory);
         } else {
-            memory.position += Vector3.SIZE;
+            Vector3.NullVector.write(memory);
         }
         return memory.position;
     }

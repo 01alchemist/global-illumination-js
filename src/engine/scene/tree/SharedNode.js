@@ -68,7 +68,7 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                             return this._right;
                         }
                         else {
-                            this.readChild(this.memory, NodeMarker.LEFT);
+                            this.readChild(this.memory, NodeMarker.RIGHT);
                         }
                     },
                     set: function (value) {
@@ -79,18 +79,20 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                 });
                 SharedNode.prototype.readRoot = function (memory) {
                     this.memory = memory;
+                    var initPos = memory.position;
                     this.treeLength = memory.readUnsignedInt();
                     this.marker = memory.readUnsignedInt();
                     this.axis = memory.readByte();
                     this.point = memory.readFloat();
                     if (this.marker != NodeMarker.ROOT) {
-                        throw "Root marker not found!";
+                        throw "Root marker not found!, found:" + this.marker.toString(16) + ",  pos:" + memory.position;
                     }
                     else {
                         this.leftPtr = memory.readUnsignedInt();
                         this.rightPtr = memory.readUnsignedInt();
                     }
-                    this.resolved = true;
+                    this.resolved = false;
+                    memory.position = initPos + this.treeLength;
                     return memory.position;
                 };
                 SharedNode.prototype.read = function (memory) {
@@ -98,8 +100,9 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                     this.marker = memory.readUnsignedInt();
                     this.axis = memory.readByte();
                     this.point = memory.readFloat();
-                    if (this.marker == NodeMarker.LEAF) {
+                    if (this.axis == Axis_1.Axis.AxisNone) {
                         var shapeLength = memory.readUnsignedInt();
+                        console.log("shapeLength:" + shapeLength);
                         this.shapeIndices = [];
                         for (var i = 0; i < shapeLength; i++) {
                             var shapeIndex = memory.readUnsignedInt();
@@ -241,6 +244,9 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                 SharedNode.prototype.intersectShapes = function (node, r) {
                     var hit = Hit_1.NoHit;
                     var self = this;
+                    if (!node.shapeIndices) {
+                        node.read(this.memory);
+                    }
                     node.shapeIndices.forEach(function (shapeIndex) {
                         var h = self.mesh.triangles[shapeIndex].intersect(r);
                         if (h.T < hit.T) {
@@ -335,7 +341,6 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                         var shapeIndices = [];
                         var self_1 = this;
                         if (this.memory) {
-                            this.memory.writeUnsignedInt(NodeMarker.LEAF);
                             this.memory.writeByte(bestAxis);
                             this.memory.writeFloat(bestPoint);
                             this.memory.writeUnsignedInt(shapes.length);

@@ -32,7 +32,7 @@ export class Test extends CanvasDisplay {
     onInit() {
 
         var scene:SharedScene = new SharedScene();
-
+        scene.color = new Color(1,0,1);
         //scene.add(Sphere.newSphere(new Vector3(-4, 7, 3), 2, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
         //scene.add(Cube.newCube(new Vector3(-30, -1, -30), new Vector3(30, 0, 30), wall));
         //scene.add(Cube.newCube(new Vector3(-30, -10, -30), new Vector3(30, 0.376662, 30), wall));
@@ -49,8 +49,8 @@ export class Test extends CanvasDisplay {
         var self = this;
         var mesh;
         this.renderer = new Renderer();
-        this.i_width = 2560 / 4;
-        this.i_height = 1440 / 4;
+        this.i_width = 2560 / 8;
+        this.i_height = 1440 / 8;
         //this.i_width = 1280;
         //this.i_height = 720;
         var cameraSamples:number = 1;
@@ -59,7 +59,7 @@ export class Test extends CanvasDisplay {
         //var camera:Camera = Camera.lookAt(new Vector3(-3, 2, -1), new Vector3(0, 0.5, 0), new Vector3(0, 1, 0), 35);
         var camera:Camera = Camera.lookAt(new Vector3(1, 1, 1), new Vector3(0, 0.5, 0), new Vector3(0, 1, 0), 35);
 
-        loader.load("models/CornellBox-Sphere.obj", function (_mesh) {
+        loader.load("teapot.obj", function (_mesh) {
             if (!_mesh) {
                 console.log("LoadOBJ error:");
             } else {

@@ -9,6 +9,7 @@ import {Color} from "../../math/Color";
 import {ShapeType} from "./Shape";
 import {MaterialUtils} from "../materials/MaterialUtils";
 import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
+import {DirectMemory} from "../../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -53,7 +54,7 @@ export class Sphere implements Shape {
         return offset;
     }
 
-    read(memory:ByteArrayBase):number{
+    read(memory:ByteArrayBase|DirectMemory):number{
         this.center.read(memory);
         this.radius = memory.readFloat();
 
@@ -69,7 +70,7 @@ export class Sphere implements Shape {
         return memory.position;
     }
 
-    write(memory:ByteArrayBase):number{
+    write(memory:ByteArrayBase|DirectMemory):number{
         memory.writeByte(this.type);
         this.center.write(memory);
         memory.writeFloat(this.radius);

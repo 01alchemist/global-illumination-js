@@ -11,6 +11,7 @@ import {Triangle} from "./Triangle";
 import {TransformedShape} from "./TransformedShape";
 import {IPointer} from "../../../pointer/IPointer";
 import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
+import {DirectMemory} from "../../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -33,7 +34,7 @@ export interface Shape extends IPointer{
     getMaterial(p:Vector3):Material;
     getNormal(p:Vector3):Vector3;
     getRandomPoint():Vector3;
-    directWrite(memory:Float32Array, offset:number):number;
+    directWrite(memory:Uint8Array, offset:number):number;
 }
 export function ShapesfromJson(shapes:Shape[]):Shape[] {
     var _shapes:Shape[] = [];
@@ -97,19 +98,19 @@ export function directRestoreShape(memory:Float32Array, offset:number, container
             container.push(mesh);
             return mesh.directRead(memory, offset);
             break;
-        /*case ShapeType.TRANSFORMED_SHAPE:
+        case ShapeType.TRANSFORMED_SHAPE:
             var shape = new TransformedShape();
             container.push(shape);
             return shape.directRead(memory, offset);
-            break;*/
-        case ShapeType.TRIANGLE:
+            break;
+       /* case ShapeType.TRIANGLE:
             var triangle = new Triangle();
             container.push(triangle);
             return triangle.directRead(memory, offset);
-            break;
+            break;*/
     }
 }
-export function restoreShape(memory:ByteArrayBase, container:Shape[]):number {
+export function restoreShape(memory:ByteArrayBase|DirectMemory, container:Shape[]):number {
     var type:ShapeType = memory.readByte();
     switch (type) {
         case ShapeType.CUBE:
@@ -127,15 +128,15 @@ export function restoreShape(memory:ByteArrayBase, container:Shape[]):number {
             container.push(mesh);
             return mesh.read(memory);
             break;
-        /*case ShapeType.TRANSFORMED_SHAPE:
+        case ShapeType.TRANSFORMED_SHAPE:
             var shape = new TransformedShape();
             container.push(shape);
-            return shape.directRead(memory);
-            break;*/
+            return shape.read(memory);
+            break;/*
         case ShapeType.TRIANGLE:
             var triangle = new Triangle();
             container.push(triangle);
             return triangle.read(memory);
-            break;
+            break;*/
     }
 }

@@ -1,7 +1,11 @@
-System.register([], function(exports_1) {
+System.register(["../../pointer/DirectMemory"], function(exports_1) {
+    var DirectMemory_1;
     var Vector3;
     return {
-        setters:[],
+        setters:[
+            function (DirectMemory_1_1) {
+                DirectMemory_1 = DirectMemory_1_1;
+            }],
         execute: function() {
             Vector3 = (function () {
                 function Vector3(x, y, z) {
@@ -131,7 +135,13 @@ System.register([], function(exports_1) {
                     memory.writeFloat(this.z);
                     return memory.position;
                 };
+                Vector3.prototype.isNullVector = function () {
+                    return this.x == DirectMemory_1.DirectMemory.MIN_FLOAT32_VALUE &&
+                        this.y == DirectMemory_1.DirectMemory.MIN_FLOAT32_VALUE &&
+                        this.z == DirectMemory_1.DirectMemory.MIN_FLOAT32_VALUE;
+                };
                 Vector3.SIZE = 3;
+                Vector3.NullVector = new Vector3(DirectMemory_1.DirectMemory.MIN_FLOAT32_VALUE, DirectMemory_1.DirectMemory.MIN_FLOAT32_VALUE, DirectMemory_1.DirectMemory.MIN_FLOAT32_VALUE);
                 return Vector3;
             })();
             exports_1("Vector3", Vector3);

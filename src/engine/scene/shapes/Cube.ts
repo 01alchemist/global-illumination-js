@@ -10,6 +10,7 @@ import {NoHit} from "../../math/Hit";
 import {ShapeType} from "./Shape";
 import {MaterialUtils} from "../materials/MaterialUtils";
 import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
+import {DirectMemory} from "../../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -26,14 +27,14 @@ export class Cube implements Shape {
 
     }
 
-    write(memory:ByteArrayBase):number{
+    write(memory:ByteArrayBase|DirectMemory):number{
         memory.writeByte(this.type);
         this.min.write(memory);
         this.max.write(memory);
         memory.writeInt(this.material.index);
         return memory.position;
     }
-    read(memory:ByteArrayBase):number{
+    read(memory:ByteArrayBase|DirectMemory):number{
         this.min.read(memory);
         this.max.read(memory);
         var materialIndex:number = memory.readInt();

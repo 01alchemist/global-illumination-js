@@ -1,5 +1,5 @@
-System.register(["../../scene/Camera", "../../math/Color", "../Renderer", "../../scene/SharedScene"], function(exports_1) {
-    var Camera_1, Color_1, Renderer_1, SharedScene_1;
+System.register(["../../scene/Camera", "../../math/Color", "../Renderer", "../../scene/SharedScene", "../../../pointer/DirectMemory"], function(exports_1) {
+    var Camera_1, Color_1, Renderer_1, SharedScene_1, DirectMemory_1;
     var TraceWorker;
     return {
         setters:[
@@ -14,6 +14,9 @@ System.register(["../../scene/Camera", "../../math/Color", "../Renderer", "../..
             },
             function (SharedScene_1_1) {
                 SharedScene_1 = SharedScene_1_1;
+            },
+            function (DirectMemory_1_1) {
+                DirectMemory_1 = DirectMemory_1_1;
             }],
         execute: function() {
             TraceWorker = (function () {
@@ -30,12 +33,12 @@ System.register(["../../scene/Camera", "../../math/Color", "../Renderer", "../..
                             console.time("WOKER_INIT:" + TraceWorker.id);
                             self.command = null;
                             self.pixelMemory = new Uint8ClampedArray(e.data.pixelMemory);
-                            self.sceneMemory = new Float32Array(e.data.sceneMemory);
+                            self.sceneMemory = new DirectMemory_1.DirectMemory(e.data.sceneMemory);
                             if (!self.camera) {
                                 self.camera = Camera_1.Camera.fromJson(e.data.camera);
                             }
                             if (!self.scene) {
-                                self.scene = SharedScene_1.SharedScene.getScene(self.sceneMemory, e.data.tree);
+                                self.scene = SharedScene_1.SharedScene.getScene(self.sceneMemory);
                             }
                             self.full_width = e.data.full_width;
                             self.full_height = e.data.full_height;

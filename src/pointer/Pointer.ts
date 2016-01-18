@@ -1,5 +1,6 @@
 import {IPointer} from "./IPointer";
 import {ByteArrayBase} from "./ByteArrayBase";
+import {DirectMemory} from "./DirectMemory";
 /**
  * Created by Nidin Vinayakan on 15/1/2016.
  * C Like pointer to keep objects in shared memory
@@ -9,7 +10,11 @@ export class Pointer{
 
     static offset:number;
     static heap:Uint8Array;
-    static memory:ByteArrayBase;
+    //static memory:ByteArrayBase; //DataView expects ArrayBuffer not SharedArrayBuffer wait for the implementation
+    static memory:DirectMemory;
+    /*static get memory():Uint8Array{
+        return Pointer.heap;
+    }*/
     static initialized:boolean;
     static init(){
         if(Pointer.initialized){
@@ -17,8 +22,10 @@ export class Pointer{
         }
         var maxMemory:number = 512 * 1024 * 1024;//512MB
         Pointer.heap = new Uint8Array(new SharedArrayBuffer(maxMemory));
-        Pointer.memory = new ByteArrayBase(Pointer.heap.buffer);
+        //Pointer.memory = new ByteArrayBase(Pointer.heap.buffer);
+        Pointer.memory = new DirectMemory(Pointer.heap.buffer);
         Pointer.initialized = true;
+        return Pointer.memory;
     }
 
 

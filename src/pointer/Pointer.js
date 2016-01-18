@@ -1,5 +1,5 @@
-System.register(["./ByteArrayBase"], function(exports_1) {
-    var ByteArrayBase_1;
+System.register(["./DirectMemory"], function(exports_1) {
+    var DirectMemory_1;
     var Pointer;
     function sizeof(ptr) {
         return ptr.memorySize;
@@ -7,8 +7,8 @@ System.register(["./ByteArrayBase"], function(exports_1) {
     exports_1("sizeof", sizeof);
     return {
         setters:[
-            function (ByteArrayBase_1_1) {
-                ByteArrayBase_1 = ByteArrayBase_1_1;
+            function (DirectMemory_1_1) {
+                DirectMemory_1 = DirectMemory_1_1;
             }],
         execute: function() {
             Pointer = (function () {
@@ -27,8 +27,9 @@ System.register(["./ByteArrayBase"], function(exports_1) {
                     }
                     var maxMemory = 512 * 1024 * 1024;
                     Pointer.heap = new Uint8Array(new SharedArrayBuffer(maxMemory));
-                    Pointer.memory = new ByteArrayBase_1.ByteArrayBase(Pointer.heap.buffer);
+                    Pointer.memory = new DirectMemory_1.DirectMemory(Pointer.heap.buffer);
                     Pointer.initialized = true;
+                    return Pointer.memory;
                 };
                 Pointer.prototype.read = function () {
                     Pointer.offset = this.reference.read(Pointer.memory);

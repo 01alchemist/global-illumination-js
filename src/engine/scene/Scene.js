@@ -55,7 +55,7 @@ System.register(["../math/Color", "./tree/Tree", "../utils/MapUtils", "../math/V
                     get: function () {
                         var size = Color_1.Color.SIZE + 1;
                         this.shapes.forEach(function (shape) {
-                            size += shape.size;
+                            size += shape.memorySize;
                         });
                         return size;
                     },

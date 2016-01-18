@@ -12,6 +12,7 @@ import {Box} from "./Box";
 import {ShapeType} from "./Shape";
 import {SharedTree} from "../tree/SharedTree";
 import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
+import {DirectMemory} from "../../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -61,18 +62,36 @@ export class Mesh implements Shape {
         return offset;
     }
 
-    read(memory:ByteArrayBase):number {
+    read(memory:ByteArrayBase|DirectMemory):number {
+        if(!this.box){
+            this.box = new Box();
+        }
+        this.box.read(memory);
+        var numTriangles:number = memory.readUnsignedInt();
+        //console.log("numTriangles:" + numTriangles);
+        //console.log("memory.pos:" + memory.position);
+        for (var i:number = 0; i < numTriangles; i++) {
+            var t:Triangle = new Triangle();
+            t.read(memory);
+            this.triangles.push(t);
+        }
+        //console.log("memory.pos:" + memory.position);
+        this.tree = SharedTree.readFromMemory(memory);
+        this.tree.box = this.box;
         return memory.position;
     }
-    write(memory:ByteArrayBase):number {
+
+    write(memory:ByteArrayBase|DirectMemory):number {
         memory.writeByte(this.type);
         this.box.write(memory);
-        memory.writeInt(this.triangles.length);
+        memory.writeUnsignedInt(this.triangles.length);
+        //console.log("numTriangles:" + this.triangles.length);
+        console.log("memory.pos:" + memory.position);
         this.triangles.forEach(function (t:Triangle, index:number) {
             t.index = index;
             t.write(memory);
         });
-
+        console.log("memory.pos:" + memory.position);
         //serialize kd tree
         SharedTree.buildAndWrite(memory, this.triangles);
 
@@ -140,13 +159,13 @@ export class Mesh implements Shape {
         var m:Mesh = this;
         var threshold:number = Math.cos(radians);
         //var lookup = make(map[Vector3][]Vector3)
-        var lookup:Map<Vector3,Vector3[]> = new Map<Vector3,Vector3[]>();
-        m.triangles.forEach(function (t:Triangle) {
+        var lookup:Map<any,Vector3[]> = new Map<any,Vector3[]>();
+        m.triangles.forEach(function (t:any) {
             lookup[t.v1] = append(lookup[t.v1], t.n1);
             lookup[t.v2] = append(lookup[t.v2], t.n2);
             lookup[t.v3] = append(lookup[t.v3], t.n3);
         });
-        m.triangles.forEach(function (t:Triangle) {
+        m.triangles.forEach(function (t:any) {
             t.n1 = m._smoothNormalsThreshold(t.n1, lookup[t.v1], threshold);
             t.n2 = m._smoothNormalsThreshold(t.n2, lookup[t.v2], threshold);
             t.n3 = m._smoothNormalsThreshold(t.n3, lookup[t.v3], threshold);
@@ -156,16 +175,16 @@ export class Mesh implements Shape {
     smoothNormals():void {
         var m:Mesh = this;
         //var lookup = make(map[Vector3]Vector3)
-        var lookup:Map = new Map();
-        m.triangles.forEach(function (t:Triangle) {
-            lookup[t.v1] = lookup[t.v1]?lookup[t.v1].add(t.n1):t.n1;
-            lookup[t.v2] = lookup[t.v2]?lookup[t.v2].add(t.n2):t.v2;
-            lookup[t.v3] = lookup[t.v3]?lookup[t.v3].add(t.n3):t.v3;
+        var lookup:Map<any,Vector3> = new Map<any,Vector3>();
+        m.triangles.forEach(function (t:any) {
+            lookup[t.v1] = lookup[t.v1] ? lookup[t.v1].add(t.n1) : t.n1;
+            lookup[t.v2] = lookup[t.v2] ? lookup[t.v2].add(t.n2) : t.v2;
+            lookup[t.v3] = lookup[t.v3] ? lookup[t.v3].add(t.n3) : t.v3;
         });
-        lookup.forEach(function (v, k) {
+        lookup.forEach(function (v:Vector3, k) {
             lookup[k] = v.normalize();
         });
-        m.triangles.forEach(function (t) {
+        m.triangles.forEach(function (t:any) {
             t.n1 = lookup[t.v1];
             t.n2 = lookup[t.v2];
             t.n3 = lookup[t.v3];

@@ -3,6 +3,7 @@ import {Texture} from "./Texture";
 import {Attenuation} from "./Attenuation";
 import {NoAttenuation} from "./Attenuation";
 import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
+import {DirectMemory} from "../../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -72,7 +73,7 @@ export class Material {
         offset = this.color.directRead(memory, offset);
         this.bumpMultiplier = memory[offset++];
         this.emittance = memory[offset++];
-        offset = this.attenuation.read(memory, offset);
+        offset = this.attenuation.directRead(memory, offset);
         this.ior = memory[offset++];
         this.gloss = memory[offset++];
         this.tint = memory[offset++];
@@ -92,7 +93,7 @@ export class Material {
         return offset;
     }
 
-    read(memory:ByteArrayBase):number {
+    read(memory:ByteArrayBase|DirectMemory):number {
         this.color.read(memory);
         this.bumpMultiplier = memory.readFloat();
         this.emittance = memory.readFloat();
@@ -104,7 +105,7 @@ export class Material {
         return memory.position;
     }
 
-    write(memory:ByteArrayBase):number {
+    write(memory:ByteArrayBase|DirectMemory):number {
         this.color.write(memory);
         memory.writeFloat(this.bumpMultiplier);
         memory.writeFloat(this.emittance);
@@ -139,7 +140,7 @@ export class Material {
     }
 
 
-    static write(memory:ByteArrayBase):number {
+    static write(memory:ByteArrayBase|DirectMemory):number {
         memory.writeUnsignedInt(Material.map.length);
         Material.map.forEach(function (material:Material) {
             material.write(memory);
@@ -148,7 +149,7 @@ export class Material {
     }
 
 
-    static restore(memory:ByteArrayBase):number {
+    static restore(memory:ByteArrayBase|DirectMemory):number {
         var numMaterials:number = memory.readUnsignedInt();
         for (var i = 0; i < numMaterials; i++) {
             new Material().read(memory);

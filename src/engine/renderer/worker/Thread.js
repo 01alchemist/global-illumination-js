@@ -9,7 +9,7 @@ System.register(["./TraceWorker"], function(exports_1) {
         execute: function() {
             Thread = (function () {
                 function Thread(name) {
-                    this.instance = new Worker(Thread.workerBootStrap);
+                    this.instance = new Worker("../workerBootstrap.js");
                     var self = this;
                     this.instance.onmessage = function (event) {
                         if (event.data == TraceWorker_1.TraceWorker.INITED) {
@@ -37,7 +37,6 @@ System.register(["./TraceWorker"], function(exports_1) {
                 Thread.prototype.sendData = function (data, buffers) {
                     this.instance.postMessage(data, buffers);
                 };
-                Thread.workerBootStrap = window.URL.createObjectURL(new Blob(["importScripts(\n        \"node_modules/systemjs/dist/system.src.js\"\n        );\n        System.config({\n            packages: {\n                \"src/engine\": {\n                    format: 'register',\n                    defaultExtension: 'js'\n                }\n            }\n        });\n        System.import('src/engine/renderer/worker/TraceWorker').then(null, console.error.bind(console));"], { type: "text/javascript" }));
                 return Thread;
             })();
             exports_1("Thread", Thread);

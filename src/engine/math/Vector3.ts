@@ -1,4 +1,5 @@
 import {ByteArrayBase} from "../../pointer/ByteArrayBase";
+import {DirectMemory} from "../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -6,7 +7,7 @@ import {ByteArrayBase} from "../../pointer/ByteArrayBase";
 export class Vector3 {
 
     static SIZE:number = 3;
-
+    static NullVector:Vector3 = new Vector3(DirectMemory.MIN_FLOAT32_VALUE,DirectMemory.MIN_FLOAT32_VALUE,DirectMemory.MIN_FLOAT32_VALUE);
     memorySize:number = Vector3.SIZE;
 
     constructor(public x:number = 0, public y:number = 0, public z:number = 0) {
@@ -139,17 +140,23 @@ export class Vector3 {
         return offset;
     }
 
-    read(memory:ByteArrayBase):number {
+    read(memory:ByteArrayBase|DirectMemory):number {
         this.x = memory.readFloat();
         this.y = memory.readFloat();
         this.z = memory.readFloat();
         return memory.position;
     }
 
-    write(memory:ByteArrayBase):number {
+    write(memory:ByteArrayBase|DirectMemory):number {
         memory.writeFloat(this.x);
         memory.writeFloat(this.y);
         memory.writeFloat(this.z);
         return memory.position;
+    }
+
+    isNullVector():boolean {
+        return this.x == DirectMemory.MIN_FLOAT32_VALUE &&
+            this.y == DirectMemory.MIN_FLOAT32_VALUE &&
+            this.z == DirectMemory.MIN_FLOAT32_VALUE
     }
 }

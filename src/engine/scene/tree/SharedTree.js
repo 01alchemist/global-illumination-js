@@ -49,7 +49,7 @@ System.register(["../shapes/Box", "../../math/Hit", "./SharedNode", "../../../po
                     var node = new SharedNode_1.SharedNode();
                     node.readRoot(memory);
                     console.timeEnd("Reading k-d tree");
-                    return memory.position;
+                    return new SharedTree(null, node);
                 };
                 SharedTree.buildAndWrite = function (memory, shapes) {
                     console.time("Building k-d tree (" + shapes.length + " shapes)... ");
@@ -58,6 +58,7 @@ System.register(["../shapes/Box", "../../math/Hit", "./SharedNode", "../../../po
                     memory.position += ByteArrayBase_1.ByteArrayBase.SIZE_OF_UINT32;
                     var node = SharedNode_1.SharedNode.newNode(shapes);
                     memory.writeUnsignedInt(SharedNode_2.NodeMarker.ROOT);
+                    console.info("Root marker pos:" + memory.position);
                     node.memory = memory;
                     node.split(0);
                     endPosition = memory.position;

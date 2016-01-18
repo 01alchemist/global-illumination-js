@@ -12,7 +12,7 @@ export class OBJLoader {
 
     parentMaterial:Material;
     lastMesh:Mesh;
-    materials:Map;
+    materials:Map<string, Material>;
     private hasMaterials:boolean = false;
     private materialsLoaded:boolean = false;
     private materialsLoading:boolean = false;

@@ -2,6 +2,7 @@ import {Vector3} from "./Vector3";
 import {Box} from "../scene/shapes/Box";
 import {Ray} from "./Ray";
 import {ByteArrayBase} from "../../pointer/ByteArrayBase";
+import {DirectMemory} from "../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -60,7 +61,7 @@ export class Matrix4 {
         return offset;
     }
 
-    read(memory:ByteArrayBase):number {
+    read(memory:ByteArrayBase|DirectMemory):number {
         this.x00 = memory.readFloat();
         this.x01 = memory.readFloat();
         this.x02 = memory.readFloat();
@@ -80,7 +81,7 @@ export class Matrix4 {
         return memory.position;
     }
 
-    write(memory:ByteArrayBase):number {
+    write(memory:ByteArrayBase|DirectMemory):number {
         memory.writeFloat(this.x00);
         memory.writeFloat(this.x01);
         memory.writeFloat(this.x02);

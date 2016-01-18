@@ -12,6 +12,7 @@ import {Sphere} from "./shapes/Sphere";
 import {Mesh} from "./shapes/Mesh";
 import {TransformedShape} from "./shapes/TransformedShape";
 import {Triangle} from "./shapes/Triangle";
+import {SharedTree} from "./tree/SharedTree";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -20,7 +21,7 @@ export class Scene {
     get estimatedMemory():number{
         var size:number = Color.SIZE + 1;// 1 for shape length;
         this.shapes.forEach(function (shape:Shape) {
-            size += shape.size;
+            size += shape.memorySize;
         });
         return size;
     }
@@ -30,7 +31,7 @@ export class Scene {
     constructor(public color:Color = new Color(),
                 public shapes:Shape[] = [],
                 public lights:Shape[] = [],
-                public tree:Tree=null,
+                public tree:Tree|SharedTree=null,
                 public rays:number = 0) {
 
     }

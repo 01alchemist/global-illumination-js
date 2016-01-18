@@ -1,5 +1,6 @@
 import {Vector3} from "./Vector3";
 import {ByteArrayBase} from "../../pointer/ByteArrayBase";
+import {DirectMemory} from "../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -33,13 +34,13 @@ export class Color {
         return offset;
     }
 
-    read(memory:ByteArrayBase):number {
+    read(memory:ByteArrayBase|DirectMemory):number {
         this.r = memory.readFloat();
         this.g = memory.readFloat();
         this.b = memory.readFloat();
         return memory.position;
     }
-    write(memory:ByteArrayBase):number {
+    write(memory:ByteArrayBase|DirectMemory):number {
         memory.writeFloat(this.r);
         memory.writeFloat(this.g);
         memory.writeFloat(this.b);

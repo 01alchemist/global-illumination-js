@@ -5,6 +5,7 @@ import {Shape} from "./Shape";
 import {Ray} from "../../math/Ray";
 import {IPointer} from "../../../pointer/IPointer";
 import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
+import {DirectMemory} from "../../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -30,13 +31,13 @@ export class Box implements IPointer{
         return offset;
     }
 
-    read(memory:ByteArrayBase):number {
+    read(memory:ByteArrayBase|DirectMemory):number {
         this.min.read(memory);
         this.max.read(memory);
         return memory.position;
     }
 
-    write(memory:ByteArrayBase):number {
+    write(memory:ByteArrayBase|DirectMemory):number {
         this.min.write(memory);
         this.max.write(memory);
         return memory.position;

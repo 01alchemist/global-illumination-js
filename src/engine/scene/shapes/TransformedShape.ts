@@ -7,6 +7,7 @@ import {Material} from "../materials/Material";
 import {Color} from "../../math/Color";
 import {Shape, ShapeType, ShapesfromJson, directRestoreShape, ShapefromJson, restoreShape} from "./Shape";
 import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
+import {DirectMemory} from "../../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
@@ -45,7 +46,7 @@ export class TransformedShape implements Shape {
         return offset;
     }
 
-    read(memory:ByteArrayBase):number{
+    read(memory:ByteArrayBase|DirectMemory):number{
         this.matrix.read(memory);
         this.inverse = this.matrix.inverse();
         var container:Shape[] = [];
@@ -55,7 +56,7 @@ export class TransformedShape implements Shape {
         return memory.position;
     }
 
-    write(memory:ByteArrayBase):number{
+    write(memory:ByteArrayBase|DirectMemory):number{
         memory.writeByte(this.type);
         this.matrix.write(memory);
         this.shape.write(memory);

@@ -1,4 +1,5 @@
 import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
+import {DirectMemory} from "../../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 09-01-2016.
  */
@@ -51,14 +52,14 @@ export class Attenuation {
         return offset;
     }
 
-    read(memory:ByteArrayBase):number {
+    read(memory:ByteArrayBase|DirectMemory):number {
         this.constant = memory.readFloat();
         this.linear = memory.readFloat();
         this.quadratic = memory.readFloat();
         return memory.position;
     }
 
-    write(memory:ByteArrayBase):number {
+    write(memory:ByteArrayBase|DirectMemory):number {
         memory.writeFloat(this.constant);
         memory.writeFloat(this.linear);
         memory.writeFloat(this.quadratic);

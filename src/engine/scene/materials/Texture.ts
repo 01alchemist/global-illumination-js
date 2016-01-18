@@ -39,7 +39,7 @@ export class Texture extends ImageLoader {
     height:number;
     image:HTMLImageElement;
     data:Color[];
-    pixels:number[];//Uint8ClampedArray;
+    pixels:number[]|Uint8ClampedArray;
 
     constructor(url?:string) {
         super();
@@ -110,7 +110,7 @@ export class Texture extends ImageLoader {
         Texture.map.set(url, this);
         return super.load(url, function (image) {
             Texture.ctx.drawImage(image, 0, 0);
-            let pixels:number[] = Texture.ctx.getImageData(0, 0, image.width, image.height).data;
+            let pixels:Uint8ClampedArray|number[] = Texture.ctx.getImageData(0, 0, image.width, image.height).data;
             if (onLoad) {
                 onLoad(pixels);
             }

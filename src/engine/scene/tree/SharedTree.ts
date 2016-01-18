@@ -9,10 +9,11 @@ import {IPointer} from "../../../pointer/IPointer";
 import {Triangle} from "../shapes/Triangle";
 import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 import {NodeMarker} from "./SharedNode";
+import {DirectMemory} from "../../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
-export class SharedTree{
+export class SharedTree {
 
     constructor(public box:Box,
                 public root:SharedNode) {
@@ -43,15 +44,15 @@ export class SharedTree{
         return new SharedTree(box, node);
     }
 
-    static readFromMemory(memory:ByteArrayBase):number {
+    static readFromMemory(memory:ByteArrayBase|DirectMemory):SharedTree {
         console.time("Reading k-d tree");
         var node:SharedNode = new SharedNode();
         node.readRoot(memory);
         console.timeEnd("Reading k-d tree");
-        return memory.position;
+        return new SharedTree(null, node);
     }
 
-    static buildAndWrite(memory:ByteArrayBase, shapes:Shape[]):number {
+    static buildAndWrite(memory:ByteArrayBase|DirectMemory, shapes:Shape[]):number {
         console.time("Building k-d tree (" + shapes.length + " shapes)... ");
 
         //offset one Uint32 to store tree length at the end
@@ -60,6 +61,7 @@ export class SharedTree{
         memory.position += ByteArrayBase.SIZE_OF_UINT32;
         var node:SharedNode = SharedNode.newNode(shapes);
         memory.writeUnsignedInt(NodeMarker.ROOT);
+        console.info("Root marker pos:" + memory.position);
         node.memory = memory;
         node.split(0);
         endPosition = memory.position;
