@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/01alchemist/global-illumination-js.png)](https://travis-ci.org/01alchemist/global-illumination-js)
 
-I am a [Global Illumination](https://en.wikipedia.org/wiki/Global_illumination) renderer using [path tracing](http://en.wikipedia.org/wiki/Path_tracing) written in Typescript/Javascript.
+I am a [Global Illumination](https://en.wikipedia.org/wiki/Global_illumination) renderer using [path tracing](http://en.wikipedia.org/wiki/Path_tracing) written by [Nidin Vinayakan](https://github.com/nidin) in Typescript/Javascript.
 
 Rendering algorithm is ported from [Go implementation](https://github.com/fogleman/pt) written by [Michael Fogleman](https://github.com/fogleman)
 
@@ -45,3 +45,6 @@ Here are some resources that I have found useful.
 
 ### Samples
 
+[Example1](http://01alchemist.com/projects/global-illumination-js/examples/Example1.html)
+[Example2](http://01alchemist.com/projects/global-illumination-js/examples/Example2.html)
+[Example3](http://01alchemist.com/projects/global-illumination-js/examples/Example3.html)
