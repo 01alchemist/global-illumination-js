@@ -33,10 +33,11 @@ export class Example1 extends CanvasDisplay {
     onInit() {
         console.info("onInit");
         var scene:Scene = new SharedScene();
-        //var glass = new ClearMaterial(5.5, MathUtils.radians(30));
-        var glass = new GlossyMaterial(new Color(1,0,0), 1.5, MathUtils.radians(0));
-        //glass.transparent = true;
-        scene.add(Sphere.newSphere(new Vector3(-1, 0.5, 1), 0.5, glass));
+        var glass = new ClearMaterial(1.05, MathUtils.radians(1));
+        var red = new GlossyMaterial(new Color(1,0,0), 1.5, MathUtils.radians(0));
+        glass.transparent = true;
+        scene.add(Sphere.newSphere(new Vector3(-3, 0.5, 1), 0.5, red));
+        scene.add(Sphere.newSphere(new Vector3(-1, 0.5, 1), 2, glass));
         scene.add(Sphere.newSphere(new Vector3(1.5, 1, 0), 1, new SpecularMaterial(Color.hexColor(0x334D5C), 2)));
         scene.add(Sphere.newSphere(new Vector3(-1, 1, 2), 1, new SpecularMaterial(Color.hexColor(0xEFC94C), 2)));
         scene.add(Cube.newCube(new Vector3(-100, -1, -100), new Vector3(100, 0, 100), new DiffuseMaterial(new Color(1, 1, 1))));
@@ -46,8 +47,8 @@ export class Example1 extends CanvasDisplay {
         this.renderer = new Renderer();
         this.i_width = 2560 / 2;
         this.i_height = 1440 / 2;
-        var cameraSamples:number = 2;
-        var hitSamples:number = 4;
+        var cameraSamples:number = 4;
+        var hitSamples:number = 16;
         var bounces:number = 5;
 
         this.pixels = this.renderer.initParallelRender(
