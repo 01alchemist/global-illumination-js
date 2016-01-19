@@ -85,11 +85,9 @@ export class SharedScene extends Scene {
             shape.write(memory);
         });
 
-        console.log(memory.position);
         var box = Box.boxForShapes(this.shapes);
         box.write(memory);
         SharedTree.buildAndWrite(memory, this.shapes);
-        console.log(memory.position);
 
         console.timeEnd("getMemory");
         return memory;
@@ -110,12 +108,10 @@ export class SharedScene extends Scene {
             scene.add(shape);
         }
 
-        console.log(memory.position);
         var box:Box = new Box();
         box.read(memory);
-        scene.tree = SharedTree.readFromMemory(memory);
+        scene.tree = SharedTree.readFromMemory(memory, shapes);
         scene.tree.box = box;
-        console.log(memory.position);
 
         //console.timeEnd("getScene");
         return scene;

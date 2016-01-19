@@ -51,11 +51,9 @@ System.register(["../math/Color", "./Scene", "./materials/Material", "./shapes/S
                     this.shapes.forEach(function (shape) {
                         shape.write(memory);
                     });
-                    console.log(memory.position);
                     var box = Box_1.Box.boxForShapes(this.shapes);
                     box.write(memory);
                     SharedTree_1.SharedTree.buildAndWrite(memory, this.shapes);
-                    console.log(memory.position);
                     console.timeEnd("getMemory");
                     return memory;
                 };
@@ -70,12 +68,10 @@ System.register(["../math/Color", "./Scene", "./materials/Material", "./shapes/S
                         var shape = shapes[i];
                         scene.add(shape);
                     }
-                    console.log(memory.position);
                     var box = new Box_1.Box();
                     box.read(memory);
-                    scene.tree = SharedTree_1.SharedTree.readFromMemory(memory);
+                    scene.tree = SharedTree_1.SharedTree.readFromMemory(memory, shapes);
                     scene.tree.box = box;
-                    console.log(memory.position);
                     return scene;
                 };
                 return SharedScene;

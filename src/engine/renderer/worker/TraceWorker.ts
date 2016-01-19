@@ -44,7 +44,6 @@ export class TraceWorker {
 
     constructor() {
         var self = this;
-        console.log("Worker init");
 
         addEventListener('message', (e:any) => {
 

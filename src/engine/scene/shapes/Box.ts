@@ -9,7 +9,7 @@ import {DirectMemory} from "../../../pointer/DirectMemory";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
-export class Box implements IPointer{
+export class Box implements IPointer {
 
     static SIZE:number = Vector3.SIZE * 2;
 
@@ -137,6 +137,10 @@ export class Box implements IPointer{
                 break;
         }
         return {left: left, right: right};
+    }
+
+    toString():string {
+        return "Box(min:" + this.min.toString() + ", max:" + this.max.toString() + ")";
     }
 }
 

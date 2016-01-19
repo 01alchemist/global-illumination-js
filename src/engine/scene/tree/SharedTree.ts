@@ -44,11 +44,11 @@ export class SharedTree {
         return new SharedTree(box, node);
     }
 
-    static readFromMemory(memory:ByteArrayBase|DirectMemory):SharedTree {
+    static readFromMemory(memory:ByteArrayBase|DirectMemory, shapes:Shape[]):SharedTree {
         //console.time("Reading k-d tree");
         var node:SharedNode = new SharedNode();
+        node.shapes = shapes;
         node.readRoot(memory);
-        console.log("[readFromMemory] Root axis:" + node.axis);
         //console.timeEnd("Reading k-d tree");
         return new SharedTree(null, node);
     }
@@ -60,18 +60,18 @@ export class SharedTree {
         var startPosition:number = memory.position;
         var endPosition:number;
         memory.position += ByteArrayBase.SIZE_OF_UINT32;
-        var node:SharedNode = SharedNode.newNode(shapes);
+        var node:SharedNode = SharedNode.newNode(shapes, memory);
         memory.writeUnsignedInt(NodeMarker.ROOT);
-        console.info("Root marker pos:" + memory.position);
-        node.memory = memory;
-        node.split(0);
-        //console.log("Root axis:" + node.axis);
+        var result = node.split(0);
         endPosition = memory.position;
+        if(!result){
+            memory.position = startPosition + ByteArrayBase.SIZE_OF_UINT32;
+            memory.writeUnsignedInt(NodeMarker.LEAF);
+        }
         memory.position = startPosition;
         memory.writeUnsignedInt(endPosition - startPosition);
         memory.position = endPosition;
         //console.timeEnd("Building k-d tree (" + shapes.length + " shapes)... ");
-
 
         return memory.position;
     }

@@ -96,6 +96,7 @@ System.register(["../math/Color", "./tree/Tree", "../utils/MapUtils", "../math/V
                 };
                 Scene.prototype.add = function (shape) {
                     this.shapes = MapUtils_1.append(this.shapes, shape);
+                    shape.index = this.shapes.length - 1;
                     var mat = shape.getMaterial(new Vector3_1.Vector3());
                     if (mat && mat.emittance > 0) {
                         this.lights = MapUtils_1.append(this.lights, shape);
@@ -143,7 +144,7 @@ System.register(["../math/Color", "./tree/Tree", "../utils/MapUtils", "../math/V
                     }
                     var hit = this.intersect(r);
                     if (!hit.ok()) {
-                        return this.color;
+                        return new Color_1.Color(1, 0, 0);
                     }
                     var info = hit.info(r);
                     var result = new Color_1.Color();

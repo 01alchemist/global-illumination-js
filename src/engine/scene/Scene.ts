@@ -31,7 +31,7 @@ export class Scene {
     constructor(public color:Color = new Color(),
                 public shapes:Shape[] = [],
                 public lights:Shape[] = [],
-                public tree:Tree|SharedTree=null,
+                public tree:SharedTree=null,
                 public rays:number = 0) {
 
     }
@@ -76,6 +76,7 @@ export class Scene {
 
     add(shape:Shape) {
         this.shapes = append(this.shapes, shape);
+        shape.index = this.shapes.length - 1;
         var mat = shape.getMaterial(new Vector3());
         if (mat && mat.emittance > 0) {
             this.lights = append(this.lights, shape)
@@ -133,8 +134,8 @@ export class Scene {
         }
         var hit = this.intersect(r);
         if (!hit.ok()) {
-            return this.color;
-            //return new Color(1,0,0);
+            //return this.color;
+            return new Color(1,0,0);
         }
         var info = hit.info(r);
         var result:Color = new Color();

@@ -31,7 +31,7 @@ export class Mesh implements Shape {
 
     constructor(public box:Box = null,
                 public triangles:Triangle[] = [],
-                public tree:Tree|SharedTree = null) {
+                public tree:SharedTree = null) {
 
     }
 
@@ -76,7 +76,7 @@ export class Mesh implements Shape {
             this.triangles.push(t);
         }
         //console.log("memory.pos:" + memory.position);
-        this.tree = SharedTree.readFromMemory(memory);
+        this.tree = SharedTree.readFromMemory(memory, this.triangles);
         this.tree.box = this.box;
         return memory.position;
     }
@@ -86,12 +86,10 @@ export class Mesh implements Shape {
         this.box.write(memory);
         memory.writeUnsignedInt(this.triangles.length);
         //console.log("numTriangles:" + this.triangles.length);
-        console.log("memory.pos:" + memory.position);
         this.triangles.forEach(function (t:Triangle, index:number) {
             t.index = index;
             t.write(memory);
         });
-        console.log("memory.pos:" + memory.position);
         //serialize kd tree
         SharedTree.buildAndWrite(memory, this.triangles);
 
@@ -121,7 +119,12 @@ export class Mesh implements Shape {
         }
     }
 
+    static inter=0;
+
     intersect(r:Ray):Hit {
+        if(Mesh.inter % 5000 == 0){
+            console.log("Mesh intersect");
+        }
         return this.tree.intersect(r);
     }
 
@@ -130,7 +133,7 @@ export class Mesh implements Shape {
     }
 
     getMaterial(p:Vector3):Material {
-        return new Material(); // not implemented
+        return null;//new Material(); // not implemented
     }
 
     getNormal(p:Vector3):Vector3 {

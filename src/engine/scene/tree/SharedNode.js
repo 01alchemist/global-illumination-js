@@ -25,7 +25,8 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                 NodeMarker[NodeMarker["LEFT"] = 15597585] = "LEFT";
                 NodeMarker[NodeMarker["RIGHT"] = 1114350] = "RIGHT";
                 NodeMarker[NodeMarker["LEAF"] = 15597806] = "LEAF";
-                NodeMarker[NodeMarker["EON"] = 15658734] = "EON";
+                NodeMarker[NodeMarker["EON"] = 14737632] = "EON";
+                NodeMarker[NodeMarker["NULL"] = 15658734] = "NULL";
             })(NodeMarker || (NodeMarker = {}));
             exports_1("NodeMarker", NodeMarker);
             SharedNode = (function () {
@@ -44,6 +45,7 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                     this._right = _right;
                     this.size = 0;
                     this.treeLength = 0;
+                    this.thisPtr = -1;
                     this.resolved = false;
                     this.index = SharedNode.map.push(this) - 1;
                 }
@@ -82,12 +84,27 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                     this.thisPtr = memory.position;
                     this.treeLength = memory.readUnsignedInt();
                     this.marker = memory.readUnsignedInt();
-                    this.axis = memory.readByte();
-                    this.point = memory.readFloat();
-                    if (this.marker != NodeMarker.ROOT) {
-                        throw "Root marker not found!, found:" + this.marker.toString(16) + ",  pos:" + memory.position;
+                    if (this.marker == NodeMarker.LEAF) {
+                        this.axis = Axis_1.Axis.AxisNone;
+                        var shapeLength = memory.readUnsignedInt();
+                        console.log("shapeLength:" + shapeLength);
+                        this.shapeIndices = [];
+                        for (var i = 0; i < shapeLength; i++) {
+                            var shapeIndex = memory.readUnsignedInt();
+                            this.shapeIndices.push(shapeIndex);
+                        }
+                        if (memory.readUnsignedInt() != NodeMarker.EON) {
+                            console.error("End marker not found on leaf node");
+                        }
+                        this.resolved = true;
+                        return memory.position;
+                    }
+                    else if (this.marker != NodeMarker.ROOT) {
+                        throw "Root marker not found!, found:" + this.marker + ",  pos:" + memory.position;
                     }
                     else {
+                        this.axis = memory.readByte();
+                        this.point = memory.readFloat();
                         this.leftPtr = memory.readUnsignedInt();
                         this.rightPtr = memory.readUnsignedInt();
                     }
@@ -96,8 +113,16 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                     return memory.position;
                 };
                 SharedNode.prototype.read = function (memory) {
+                    if (this.resolved) {
+                        return;
+                    }
                     this.memory = memory;
-                    this.thisPtr = memory.position;
+                    if (this.thisPtr == -1) {
+                        this.thisPtr = memory.position;
+                    }
+                    else {
+                        memory.position = this.thisPtr;
+                    }
                     this.marker = memory.readUnsignedInt();
                     this.axis = memory.readByte();
                     this.point = memory.readFloat();
@@ -137,8 +162,10 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                     }
                     return memory.position;
                 };
-                SharedNode.newNode = function (shapes) {
-                    return new SharedNode(Axis_1.Axis.AxisNone, 0, shapes, [], null, null);
+                SharedNode.newNode = function (shapes, memory) {
+                    var node = new SharedNode(Axis_1.Axis.AxisNone, 0, shapes, [], null, null);
+                    node.memory = memory;
+                    return node;
                 };
                 SharedNode.fromJson = function (node) {
                     return new SharedNode(node.axis, node.point, null, node.shapeIndices, node.left, node.right);
@@ -252,7 +279,8 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                         console.log("something wrong:", node.thisPtr, this.memory.position);
                     }
                     node.shapeIndices.forEach(function (shapeIndex) {
-                        var h = self.mesh.triangles[shapeIndex].intersect(r);
+                        var shape = self.shapes[shapeIndex];
+                        var h = shape.intersect(r);
                         if (h.T < hit.T) {
                             hit = h;
                         }
@@ -299,7 +327,20 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                 SharedNode.prototype.split = function (depth) {
                     var node = this;
                     if (node.shapes.length < 8) {
-                        return;
+                        var self = this;
+                        this.memory.writeUnsignedInt(node.shapes.length);
+                        node.shapes.forEach(function (shape) {
+                            if (self.memory) {
+                                self.memory.writeUnsignedInt(shape.index);
+                            }
+                            if (node.shapes.length < 8) {
+                                console.log("split,shape:", shape.index);
+                            }
+                        });
+                        if (this.memory) {
+                            this.memory.writeUnsignedInt(NodeMarker.EON);
+                        }
+                        return false;
                     }
                     var xs = [];
                     var ys = [];
@@ -360,13 +401,13 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                         }
                         node.shapes = null;
                         node.shapeIndices = shapeIndices;
-                        return;
+                        return true;
                     }
                     var p = node.partition(best, bestAxis, bestPoint);
                     node.axis = bestAxis;
                     node.point = bestPoint;
-                    node.left = SharedNode.newNode(p.left);
-                    node.right = SharedNode.newNode(p.right);
+                    node.left = SharedNode.newNode(p.left, this.memory);
+                    node.right = SharedNode.newNode(p.right, this.memory);
                     if (this.memory) {
                         this.memory.writeByte(bestAxis);
                         this.memory.writeFloat(bestPoint);
@@ -376,7 +417,9 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                         this.memory.position += ByteArrayBase_1.ByteArrayBase.SIZE_OF_UINT32;
                         this.memory.writeUnsignedInt(NodeMarker.LEFT);
                     }
-                    node.left.split(depth + 1);
+                    var result = node.left.split(depth + 1);
+                    if (!result) {
+                    }
                     if (this.memory) {
                         var pos = this.memory.position;
                         this.memory.position = rightStartPosition;
@@ -384,11 +427,14 @@ System.register(["../Axis", "../../math/Hit", "../../utils/MapUtils", "../../uti
                         this.memory.position = pos;
                         this.memory.writeUnsignedInt(NodeMarker.RIGHT);
                     }
-                    node.right.split(depth + 1);
+                    result = node.right.split(depth + 1);
+                    if (!result) {
+                    }
                     if (this.memory) {
                         this.memory.writeUnsignedInt(NodeMarker.EON);
                     }
                     node.shapes = null;
+                    return true;
                 };
                 SharedNode.map = [];
                 return SharedNode;

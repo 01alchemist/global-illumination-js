@@ -44,22 +44,24 @@ System.register(["../shapes/Box", "../../math/Hit", "./SharedNode", "../../../po
                     node.mesh = mesh;
                     return new SharedTree(box, node);
                 };
-                SharedTree.readFromMemory = function (memory) {
+                SharedTree.readFromMemory = function (memory, shapes) {
                     var node = new SharedNode_1.SharedNode();
+                    node.shapes = shapes;
                     node.readRoot(memory);
-                    console.log("[readFromMemory] Root axis:" + node.axis);
                     return new SharedTree(null, node);
                 };
                 SharedTree.buildAndWrite = function (memory, shapes) {
                     var startPosition = memory.position;
                     var endPosition;
                     memory.position += ByteArrayBase_1.ByteArrayBase.SIZE_OF_UINT32;
-                    var node = SharedNode_1.SharedNode.newNode(shapes);
+                    var node = SharedNode_1.SharedNode.newNode(shapes, memory);
                     memory.writeUnsignedInt(SharedNode_2.NodeMarker.ROOT);
-                    console.info("Root marker pos:" + memory.position);
-                    node.memory = memory;
-                    node.split(0);
+                    var result = node.split(0);
                     endPosition = memory.position;
+                    if (!result) {
+                        memory.position = startPosition + ByteArrayBase_1.ByteArrayBase.SIZE_OF_UINT32;
+                        memory.writeUnsignedInt(SharedNode_2.NodeMarker.LEAF);
+                    }
                     memory.position = startPosition;
                     memory.writeUnsignedInt(endPosition - startPosition);
                     memory.position = endPosition;

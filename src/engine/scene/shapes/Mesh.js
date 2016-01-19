@@ -1,5 +1,5 @@
-System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../../math/Color", "../materials/Material", "../../utils/MapUtils", "../tree/Tree", "./Box", "./Shape", "../tree/SharedTree"], function(exports_1) {
-    var Triangle_1, Matrix4_1, Vector3_1, Color_1, Material_1, MapUtils_1, Tree_1, Box_1, Shape_1, SharedTree_1;
+System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../../math/Color", "../../utils/MapUtils", "../tree/Tree", "./Box", "./Shape", "../tree/SharedTree"], function(exports_1) {
+    var Triangle_1, Matrix4_1, Vector3_1, Color_1, MapUtils_1, Tree_1, Box_1, Shape_1, SharedTree_1;
     var Mesh;
     return {
         setters:[
@@ -14,9 +14,6 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
             },
             function (Color_1_1) {
                 Color_1 = Color_1_1;
-            },
-            function (Material_1_1) {
-                Material_1 = Material_1_1;
             },
             function (MapUtils_1_1) {
                 MapUtils_1 = MapUtils_1_1;
@@ -89,7 +86,7 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                         t.read(memory);
                         this.triangles.push(t);
                     }
-                    this.tree = SharedTree_1.SharedTree.readFromMemory(memory);
+                    this.tree = SharedTree_1.SharedTree.readFromMemory(memory, this.triangles);
                     this.tree.box = this.box;
                     return memory.position;
                 };
@@ -97,12 +94,10 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                     memory.writeByte(this.type);
                     this.box.write(memory);
                     memory.writeUnsignedInt(this.triangles.length);
-                    console.log("memory.pos:" + memory.position);
                     this.triangles.forEach(function (t, index) {
                         t.index = index;
                         t.write(memory);
                     });
-                    console.log("memory.pos:" + memory.position);
                     SharedTree_1.SharedTree.buildAndWrite(memory, this.triangles);
                     return memory.position;
                 };
@@ -120,13 +115,16 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                     }
                 };
                 Mesh.prototype.intersect = function (r) {
+                    if (Mesh.inter % 5000 == 0) {
+                        console.log("Mesh intersect");
+                    }
                     return this.tree.intersect(r);
                 };
                 Mesh.prototype.getColor = function (p) {
                     return new Color_1.Color();
                 };
                 Mesh.prototype.getMaterial = function (p) {
-                    return new Material_1.Material();
+                    return null;
                 };
                 Mesh.prototype.getNormal = function (p) {
                     return new Vector3_1.Vector3();
@@ -207,6 +205,7 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                     m.updateBox();
                     m.tree = null;
                 };
+                Mesh.inter = 0;
                 return Mesh;
             })();
             exports_1("Mesh", Mesh);

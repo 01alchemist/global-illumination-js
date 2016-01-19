@@ -23,7 +23,6 @@ System.register(["../../scene/Camera", "../../math/Color", "../Renderer", "../..
                 function TraceWorker() {
                     this.iterations = 1;
                     var self = this;
-                    console.log("Worker init");
                     addEventListener('message', function (e) {
                         if (self.command == null) {
                             self.command = e.data;

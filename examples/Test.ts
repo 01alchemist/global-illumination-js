@@ -32,13 +32,13 @@ export class Test extends CanvasDisplay {
     onInit() {
 
         var scene:SharedScene = new SharedScene();
-        scene.color = new Color(1,0,1);
+        //scene.color = new Color(1,0,1);
         //scene.add(Sphere.newSphere(new Vector3(-4, 7, 3), 2, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
         //scene.add(Cube.newCube(new Vector3(-30, -1, -30), new Vector3(30, 0, 30), wall));
         //scene.add(Cube.newCube(new Vector3(-30, -10, -30), new Vector3(30, 0.376662, 30), wall));
         //scene.add(Sphere.newSphere(new Vector3(0.1, 0.1, 0.5), 0.1, new LightMaterial(new Color(1, 0, 0), 1, new QuadraticAttenuation(3))));
 
-        //var floor = new GlossyMaterial(Color.hexColor(0xD8CAA8), 1.2, MathUtils.radians(20));
+        var floor = new GlossyMaterial(Color.hexColor(0xD8CAA8), 1.2, MathUtils.radians(20));
         //scene.add(Cube.newCube(new Vector3(-1000, -1000, -1000), new Vector3(1000, 0, 1000), floor));
         scene.add(Sphere.newSphere(new Vector3(0, 10, 0), 1, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
 

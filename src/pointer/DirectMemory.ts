@@ -870,7 +870,7 @@ export class DirectMemory {
         if (this.data.byteLength > 0 && this._position + len <= this.data.byteLength) {
             return true;
         } else {
-            throw 'Error #2030: End of file was encountered.';
+            throw "Error #2030: End of file was encountered";
         }
     }
 

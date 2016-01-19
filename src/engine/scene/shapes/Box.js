@@ -118,6 +118,9 @@ System.register(["../../math/Vector3", "../Axis"], function(exports_1) {
                     }
                     return { left: left, right: right };
                 };
+                Box.prototype.toString = function () {
+                    return "Box(min:" + this.min.toString() + ", max:" + this.max.toString() + ")";
+                };
                 Box.SIZE = Vector3_1.Vector3.SIZE * 2;
                 return Box;
             })();

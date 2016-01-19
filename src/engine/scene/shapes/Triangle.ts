@@ -23,7 +23,7 @@ export class Triangle implements Shape {
     memorySize:number = Triangle.SIZE;
     index:number;
 
-    constructor(public material:Material = new Material(),
+    constructor(public material:Material = null,
                 public box:Box = new Box(),
                 public v1:Vector3 = new Vector3(), public v2:Vector3 = new Vector3(), public v3:Vector3 = new Vector3(),
                 public n1:Vector3 = new Vector3(), public n2:Vector3 = new Vector3(), public n3:Vector3 = new Vector3(),
@@ -213,6 +213,7 @@ export class Triangle implements Shape {
     }
 
     intersect(r:Ray):Hit {
+
         var t = this;
         var e1x:number = t.v2.x - t.v1.x;
         var e1y:number = t.v2.y - t.v1.y;

@@ -34,7 +34,7 @@ System.register(["../materials/Material", "./Box", "../../math/Vector3", "../../
         execute: function() {
             Triangle = (function () {
                 function Triangle(material, box, v1, v2, v3, n1, n2, n3, t1, t2, t3) {
-                    if (material === void 0) { material = new Material_1.Material(); }
+                    if (material === void 0) { material = null; }
                     if (box === void 0) { box = new Box_1.Box(); }
                     if (v1 === void 0) { v1 = new Vector3_1.Vector3(); }
                     if (v2 === void 0) { v2 = new Vector3_1.Vector3(); }
