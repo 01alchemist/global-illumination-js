@@ -31,7 +31,6 @@ export class OBJLoader {
         xhr.open('GET', url, true);
         xhr.onload = function () {
             self.lastMesh = self.loadOBJ(xhr.response);
-            self.lastMesh.smoothNormals();
             if (onLoad) {
                 if (self.hasMaterials && self.materialsLoaded) {
                     onLoad(self.lastMesh);
@@ -56,7 +55,7 @@ export class OBJLoader {
 
     static parseLine(line:string):{keyword:string, value:string[]} {
         try {
-            var result = line.match(/^(\S+)\s(.*)/)
+            var result = line.match(/^(\S+)\s(.*)/);
             if (result) {
                 var _str = result.slice(1);
             } else {
@@ -190,7 +189,7 @@ export class OBJLoader {
             return;
         }
         this.materialsLoading = true;
-        url = this.basePath + "/" + url;
+        url = this.basePath == "" ? url : this.basePath + "/" + url;
         console.log("Loading MTL:" + url);
         var self = this;
         var xhr:XMLHttpRequest = new XMLHttpRequest();
@@ -222,6 +221,7 @@ export class OBJLoader {
                     }
                 }
             }
+
             self.materialsLoaded = true;
             if (self.pendingCallback) {
                 self.pendingCallback(self.lastMesh);
