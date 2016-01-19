@@ -50,11 +50,10 @@ export class SharedNode {
 
     get left():SharedNode {
 
-        if (this._left) {
-            return this._left;
-        } else {
+        if (!this._left) {
             this.readChild(this.memory, NodeMarker.LEFT);
         }
+        return this._left;
     }
 
     set left(value:SharedNode) {
@@ -62,11 +61,10 @@ export class SharedNode {
     }
 
     get right():SharedNode {
-        if (this._right) {
-            return this._right;
-        } else {
+        if (!this._right) {
             this.readChild(this.memory, NodeMarker.RIGHT);
         }
+        return this._right;
     }
 
     set right(value:SharedNode) {
@@ -81,9 +79,9 @@ export class SharedNode {
         this.marker = memory.readUnsignedInt();
 
         if (this.marker == NodeMarker.LEAF) {
-            this.axis = Axis.AxisNone;
+            this.axis = memory.readByte();
+            this.point = memory.readFloat();
             var shapeLength:number = memory.readUnsignedInt();
-            console.log("shapeLength:" + shapeLength);
             this.shapeIndices = [];
             for (var i:number = 0; i < shapeLength; i++) {
                 var shapeIndex:number = memory.readUnsignedInt();
@@ -113,18 +111,17 @@ export class SharedNode {
             return;
         }
         this.memory = memory;
-        if(this.thisPtr == -1){
+        if (this.thisPtr == -1) {
             this.thisPtr = memory.position;
-        }else{
+        } else {
             memory.position = this.thisPtr;
         }
         this.marker = memory.readUnsignedInt();
         this.axis = memory.readByte();
         this.point = memory.readFloat();
 
-        if (this.axis == Axis.AxisNone) {
+        if (this.marker == NodeMarker.LEAF) {
             var shapeLength:number = memory.readUnsignedInt();
-            console.log("shapeLength:" + shapeLength);
             this.shapeIndices = [];
             for (var i:number = 0; i < shapeLength; i++) {
                 var shapeIndex:number = memory.readUnsignedInt();
@@ -152,10 +149,6 @@ export class SharedNode {
             memory.position = this.rightPtr;
             node.read(memory);
             this.right = node;
-        }
-
-        if (node.marker != marker) {
-            console.error("Wrong marker found on child");
         }
         return memory.position;
     }
@@ -200,6 +193,16 @@ export class SharedNode {
             first = node.right;
             second = node.left;
         }
+
+        if (!first || !second) {
+            console.log("node:", node);
+            console.log("null nodes found");
+        }
+
+        //if(++Mesh.inter % 500000 == 0){
+        //console.log("intersectShapes,shape:", shape.type == ShapeType.MESH);
+        //}
+
         if (tsplit > tmax || tsplit <= 0) {
             return this.intersectNode(first, r, tmin, tmax);
         } else if (tsplit < tmin) {
@@ -247,6 +250,12 @@ export class SharedNode {
             first = node.right;
             second = node.left;
         }
+
+        if (!first || !second) {
+            console.log("node:", node);
+            console.log("null nodes found");
+        }
+
         if (tsplit > tmax || tsplit <= 0) {
             return this.intersectNode(first, r, tmin, tmax);
         } else if (tsplit < tmin) {
@@ -271,7 +280,7 @@ export class SharedNode {
         if (!node.resolved && !node.shapeIndices) {
             node.read(this.memory);
         } else if (!node.shapeIndices) {
-            console.log("something wrong:", node.thisPtr, this.memory.position);
+            console.log("something wrong:", node.thisPtr, this.memory.position + ", axis:" + node.axis + ", pt:" + node.point);
         }
         node.shapeIndices.forEach(function (shapeIndex:number) {
             var shape:Shape = self.shapes[shapeIndex];
@@ -325,17 +334,15 @@ export class SharedNode {
         var node = this;
         if (node.shapes.length < 8) {
             var self = this;
+            this.memory.position -= DirectMemory.SIZE_OF_UINT32;
+            this.memory.writeUnsignedInt(NodeMarker.LEAF);
+            this.memory.writeByte(Axis.AxisNone);
+            this.memory.writeFloat(0);
             this.memory.writeUnsignedInt(node.shapes.length);
             node.shapes.forEach(function (shape:Shape) {
                 if (self.memory) {
                     self.memory.writeUnsignedInt(shape.index);
                 }
-                //if(++Mesh.inter % 500000 == 0){
-                    //console.log("intersectShapes,shape:", shape.type == ShapeType.MESH);
-                    if(node.shapes.length < 8){
-                        console.log("split,shape:", shape.index);
-                    }
-                //}
             });
             if (this.memory) {
                 this.memory.writeUnsignedInt(NodeMarker.EON);//end of node
@@ -390,6 +397,8 @@ export class SharedNode {
             let self = this;
 
             if (this.memory) {
+                this.memory.position -= DirectMemory.SIZE_OF_UINT32;
+                this.memory.writeUnsignedInt(NodeMarker.LEAF);
                 this.memory.writeByte(bestAxis);
                 this.memory.writeFloat(bestPoint);
                 this.memory.writeUnsignedInt(shapes.length);
@@ -425,32 +434,25 @@ export class SharedNode {
 
             this.memory.writeUnsignedInt(leftStartPosition);// left node pointer
 
-            var rightStartPosition:number = this.memory.position;
+            var rightLengthPosition:number = this.memory.position;
             this.memory.position += ByteArrayBase.SIZE_OF_UINT32;//skip right node pointer
 
             this.memory.writeUnsignedInt(NodeMarker.LEFT);//left node marker
         }
 
-        var result = node.left.split(depth + 1);
-        if(!result){
-            //TODO: handle if node has less than 8 shapes
-        }
+        node.left.split(depth + 1);
 
-        if(this.memory) {
-            let pos:number = this.memory.position;//store current position
-            this.memory.position = rightStartPosition;
-            this.memory.writeUnsignedInt(pos);//right node pointer
-            this.memory.position = pos;//reset to current position
+        if (this.memory) {
+            var rightStartPosition:number = this.memory.position;//store current position
+            this.memory.position = rightLengthPosition;
+            this.memory.writeUnsignedInt(rightStartPosition);//right node pointer
+            this.memory.position = rightStartPosition;//reset to current position
             this.memory.writeUnsignedInt(NodeMarker.RIGHT);//right node marker
         }
 
-        result = node.right.split(depth + 1);
-        if(!result){
-            //TODO: handle if node has less than 8 shapes
-        }
+        node.right.split(depth + 1);
 
         if (this.memory) {
-            //this.memory.writeUnsignedInt(0);// shapes only needed at leaf nodes
             this.memory.writeUnsignedInt(NodeMarker.EON);//end of node
         }
         node.shapes = null; // only needed at leaf nodes

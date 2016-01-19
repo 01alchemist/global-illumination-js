@@ -1,10 +1,10 @@
-System.register(["../src/engine/math/Color", "../src/engine/scene/materials/LightMaterial", "../src/engine/math/Vector3", "../src/engine/scene/shapes/Sphere", "../src/engine/scene/materials/SpecularMaterial", "../src/engine/scene/Camera", "../src/engine/renderer/Renderer", "../src/engine/scene/shapes/Cube", "../src/engine/scene/materials/Attenuation", "../src/engine/data/OBJLoader", "./CanvasDisplay", "../src/engine/scene/materials/GlossyMaterial", "../src/engine/utils/MathUtils", "../src/engine/scene/SharedScene", "../src/engine/scene/materials/TransparentMaterial"], function(exports_1) {
+System.register(["../src/engine/math/Color", "../src/engine/scene/materials/LightMaterial", "../src/engine/math/Vector3", "../src/engine/scene/shapes/Sphere", "../src/engine/scene/materials/SpecularMaterial", "../src/engine/scene/Camera", "../src/engine/renderer/Renderer", "../src/engine/scene/shapes/Cube", "../src/engine/scene/materials/Attenuation", "../src/engine/data/OBJLoader", "./CanvasDisplay", "../src/engine/scene/materials/GlossyMaterial", "../src/engine/utils/MathUtils", "../src/engine/scene/SharedScene"], function(exports_1) {
     var __extends = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
-    var Color_1, LightMaterial_1, Vector3_1, Sphere_1, SpecularMaterial_1, Camera_1, Renderer_1, Cube_1, Attenuation_1, OBJLoader_1, CanvasDisplay_1, GlossyMaterial_1, MathUtils_1, SharedScene_1, TransparentMaterial_1;
+    var Color_1, LightMaterial_1, Vector3_1, Sphere_1, SpecularMaterial_1, Camera_1, Renderer_1, Cube_1, Attenuation_1, OBJLoader_1, CanvasDisplay_1, GlossyMaterial_1, MathUtils_1, SharedScene_1;
     var Gopher;
     return {
         setters:[
@@ -49,9 +49,6 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
             },
             function (SharedScene_1_1) {
                 SharedScene_1 = SharedScene_1_1;
-            },
-            function (TransparentMaterial_1_1) {
-                TransparentMaterial_1 = TransparentMaterial_1_1;
             }],
         execute: function() {
             Gopher = (function (_super) {
@@ -69,7 +66,7 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                     scene.add(Cube_1.Cube.newCube(new Vector3_1.Vector3(-30, -1, -30), new Vector3_1.Vector3(-8, 10, 30), wall));
                     scene.add(Cube_1.Cube.newCube(new Vector3_1.Vector3(-30, -1, -30), new Vector3_1.Vector3(30, 0.376662, 30), wall));
                     var loader = new OBJLoader_1.OBJLoader();
-                    loader.parentMaterial = new TransparentMaterial_1.TransparentMaterial(Color_1.Color.hexColor(0xFFFFFF), 1.31, MathUtils_1.MathUtils.radians(60), 0);
+                    loader.parentMaterial = new GlossyMaterial_1.GlossyMaterial(new Color_1.Color(), 1.5, MathUtils_1.MathUtils.radians(30));
                     var self = this;
                     var mesh;
                     this.renderer = new Renderer_1.Renderer();
@@ -89,6 +86,7 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                             scene.add(mesh);
                             self.pixels = self.renderer.initParallelRender(scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples, bounces);
                             self.drawPixels(self.pixels, { x: 0, y: 0, width: self.i_width, height: self.i_height });
+                            requestAnimationFrame(self.render.bind(self));
                         }
                     });
                 };

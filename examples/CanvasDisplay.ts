@@ -41,7 +41,6 @@ export abstract class CanvasDisplay {
         if(!window["SharedArrayBuffer"]){
             this.info.innerHTML = "Oops! Your browser does not supported. If you want to try this app go and get Firefox Nightly 46 from <a href='https://nightly.mozilla.org/'>Here</a>";
             throw "Oops! Your browser does not supported. If you want to try this app go and get Firefox Nightly 46 https://nightly.mozilla.org";
-            return;
         }
 
         if(this.onInit){

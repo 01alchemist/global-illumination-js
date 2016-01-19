@@ -31,7 +31,7 @@ export class Scene {
     constructor(public color:Color = new Color(),
                 public shapes:Shape[] = [],
                 public lights:Shape[] = [],
-                public tree:SharedTree=null,
+                public tree:Tree|SharedTree=null,
                 public rays:number = 0) {
 
     }
@@ -134,8 +134,8 @@ export class Scene {
         }
         var hit = this.intersect(r);
         if (!hit.ok()) {
-            //return this.color;
-            return new Color(1,0,0);
+            return this.color;
+            //return new Color(1,0,0);
         }
         var info = hit.info(r);
         var result:Color = new Color();

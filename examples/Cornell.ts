@@ -34,7 +34,7 @@ export class Cornell extends CanvasDisplay {
 
     onInit() {
         console.info("onInit");
-        var scene:Scene = new SharedScene();
+        var scene:SharedScene = new SharedScene();
 
         var white = new DiffuseMaterial(new Color(0.740, 0.742, 0.734));
         var red = new DiffuseMaterial(new Color(0.366, 0.037, 0.042));

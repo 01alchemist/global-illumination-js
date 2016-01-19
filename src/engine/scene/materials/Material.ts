@@ -135,7 +135,7 @@ export class Material {
         for (var i = 0; i < numMaterials; i++) {
             offset = new Material().directRead(memory, offset);
         }
-        console.info(numMaterials+" Materials restored");
+        //console.info(numMaterials+" Materials restored");
         return offset;
     }
 
@@ -154,7 +154,7 @@ export class Material {
         for (var i = 0; i < numMaterials; i++) {
             new Material().read(memory);
         }
-        console.info(numMaterials+" Materials restored");
+        //console.info(numMaterials+" Materials restored");
         return memory.position;
     }
 }

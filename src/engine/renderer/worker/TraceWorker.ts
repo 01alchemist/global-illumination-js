@@ -55,8 +55,8 @@ export class TraceWorker {
 
                 console.time("WOKER_INIT:" + TraceWorker.id);
                 self.command = null;
-                self.pixelMemory = new Uint8ClampedArray(e.data.pixelMemory);
-                self.sceneMemory = new DirectMemory(e.data.sceneMemory);
+                self.pixelMemory = new Uint8ClampedArray(e.data.pixelBuffer);
+                self.sceneMemory = new DirectMemory(e.data.sceneBuffer);
 
                 if (!self.camera) {
                     self.camera = Camera.fromJson(e.data.camera);

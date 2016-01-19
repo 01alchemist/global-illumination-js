@@ -18,14 +18,13 @@ export class TraceWorkerManager {
     constructor() {
     }
 
-    configure(param) {
+    configure(param, scene:SharedScene) {
 
         console.log("configure");
         var width:number = param.width;
         var height:number = param.height;
 
         //this.sceneMemory = new Float32Array(new SharedArrayBuffer(param.scene.size * Float32Array.BYTES_PER_ELEMENT));
-        var scene:SharedScene = param.scene;
         this.sceneMemory = scene.getMemory();
         this.pixelMemory = new Uint8ClampedArray(new SharedArrayBuffer(width * height * 3));
 
@@ -39,7 +38,7 @@ export class TraceWorkerManager {
 
         num_threads = num_threads > 2 ? 2 : num_threads;
 
-        num_threads = 2;//debug temp
+        num_threads = 4;//debug temp
 
         console.info("hardwareConcurrency:" + num_threads);
 
@@ -55,9 +54,10 @@ export class TraceWorkerManager {
                 for (var i = 0; i < num_threads; i++) {
                     this.jobs.push(
                         new TraceJob(
-                            this.pixelMemory,
-                            this.sceneMemory.buffer,
                             {
+                                id: ++thread_id,
+                                pixelBuffer: this.pixelMemory.buffer,
+                                sceneBuffer: this.sceneMemory.buffer,
                                 camera: param.camera,
                                 cameraSamples: param.cameraSamples,
                                 hitSamples: param.hitSamples,
@@ -67,8 +67,7 @@ export class TraceWorkerManager {
                                 width: _width,
                                 height: _height,
                                 xoffset: i * _width,
-                                yoffset: j * _height,
-                                id: ++thread_id
+                                yoffset: j * _height
                             }
                         ));
                 }
@@ -76,9 +75,9 @@ export class TraceWorkerManager {
         } else {
             this.jobs.push(
                 new TraceJob(
-                    this.pixelMemory,
-                    this.sceneMemory.buffer,
                     {
+                        pixelBuffer: this.pixelMemory.buffer,
+                        sceneBuffer: this.sceneMemory.buffer,
                         camera: param.camera,
                         cameraSamples: param.cameraSamples,
                         hitSamples: param.hitSamples,
@@ -93,6 +92,8 @@ export class TraceWorkerManager {
                     }
                 ));
         }
+
+        this.totalThreads = thread_id;
     }
 
     get numWorkers():number {
@@ -101,6 +102,26 @@ export class TraceWorkerManager {
 
     get pixels():Uint8ClampedArray {
         return this.pixelMemory;
+    }
+
+    init():void {
+        this.initNext();
+    }
+
+    private initCount:number = 0;
+    private totalThreads:number = 0;
+
+    initNext() {
+        console.time("initNext");
+        //console.log("initCount:" + this.initCount + ", totalThreads:" + this.totalThreads);
+        var self = this;
+        if (this.initCount == this.totalThreads) {
+            return;
+        }
+        this.jobs[this.initCount++].init(function () {
+            self.initNext.bind(self)();
+            console.timeEnd("initNext");
+        });
     }
 
     render():void {

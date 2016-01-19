@@ -31,8 +31,8 @@ System.register(["../../scene/Camera", "../../math/Color", "../Renderer", "../..
                             TraceWorker.id = e.data.id;
                             console.time("WOKER_INIT:" + TraceWorker.id);
                             self.command = null;
-                            self.pixelMemory = new Uint8ClampedArray(e.data.pixelMemory);
-                            self.sceneMemory = new DirectMemory_1.DirectMemory(e.data.sceneMemory);
+                            self.pixelMemory = new Uint8ClampedArray(e.data.pixelBuffer);
+                            self.sceneMemory = new DirectMemory_1.DirectMemory(e.data.sceneBuffer);
                             if (!self.camera) {
                                 self.camera = Camera_1.Camera.fromJson(e.data.camera);
                             }

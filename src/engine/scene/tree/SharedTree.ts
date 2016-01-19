@@ -62,12 +62,8 @@ export class SharedTree {
         memory.position += ByteArrayBase.SIZE_OF_UINT32;
         var node:SharedNode = SharedNode.newNode(shapes, memory);
         memory.writeUnsignedInt(NodeMarker.ROOT);
-        var result = node.split(0);
+        node.split(0);
         endPosition = memory.position;
-        if(!result){
-            memory.position = startPosition + ByteArrayBase.SIZE_OF_UINT32;
-            memory.writeUnsignedInt(NodeMarker.LEAF);
-        }
         memory.position = startPosition;
         memory.writeUnsignedInt(endPosition - startPosition);
         memory.position = endPosition;

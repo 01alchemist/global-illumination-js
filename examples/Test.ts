@@ -39,7 +39,7 @@ export class Test extends CanvasDisplay {
         //scene.add(Sphere.newSphere(new Vector3(0.1, 0.1, 0.5), 0.1, new LightMaterial(new Color(1, 0, 0), 1, new QuadraticAttenuation(3))));
 
         var floor = new GlossyMaterial(Color.hexColor(0xD8CAA8), 1.2, MathUtils.radians(20));
-        //scene.add(Cube.newCube(new Vector3(-1000, -1000, -1000), new Vector3(1000, 0, 1000), floor));
+        scene.add(Cube.newCube(new Vector3(-1000, -1000, -1000), new Vector3(1000, 0, 1000), floor));
         scene.add(Sphere.newSphere(new Vector3(0, 10, 0), 1, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
 
         var loader:OBJLoader = new OBJLoader();
@@ -49,23 +49,23 @@ export class Test extends CanvasDisplay {
         var self = this;
         var mesh;
         this.renderer = new Renderer();
-        this.i_width = 2560 / 8;
-        this.i_height = 1440 / 8;
+        this.i_width = 2560 / 4;
+        this.i_height = 1440 / 4;
         //this.i_width = 1280;
         //this.i_height = 720;
-        var cameraSamples:number = 1;
-        var hitSamples:number = 1;
-        var bounces:number = 3;
+        var cameraSamples:number = 4;
+        var hitSamples:number = 6;
+        var bounces:number = 5;
         //var camera:Camera = Camera.lookAt(new Vector3(-3, 2, -1), new Vector3(0, 0.5, 0), new Vector3(0, 1, 0), 35);
-        var camera:Camera = Camera.lookAt(new Vector3(1, 1, 1), new Vector3(0, 0.5, 0), new Vector3(0, 1, 0), 35);
+        var camera:Camera = Camera.lookAt(new Vector3(5, 6, -7), new Vector3(0, 1, 0), new Vector3(0, 1, 0), 35);
 
-        loader.load("teapot.obj", function (_mesh) {
+        loader.load("suzanne.obj", function (_mesh) {
             if (!_mesh) {
                 console.log("LoadOBJ error:");
             } else {
                 console.log("Obj file loaded");
                 mesh = _mesh;
-                //mesh.fitInside(new Box(new Vector3(-1, 0, -1), new Vector3(1, 2, 1)), new Vector3(0.5, 0, 0.5));
+                mesh.fitInside(new Box(new Vector3(-1, 0, -1), new Vector3(1, 2, 1)), new Vector3(0.5, 0, 0.5));
                 scene.add(mesh);
 
                 //console.time("compile");

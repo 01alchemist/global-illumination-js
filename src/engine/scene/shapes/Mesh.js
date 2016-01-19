@@ -115,9 +115,6 @@ System.register(["./Triangle", "../../math/Matrix4", "../../math/Vector3", "../.
                     }
                 };
                 Mesh.prototype.intersect = function (r) {
-                    if (Mesh.inter % 5000 == 0) {
-                        console.log("Mesh intersect");
-                    }
                     return this.tree.intersect(r);
                 };
                 Mesh.prototype.getColor = function (p) {

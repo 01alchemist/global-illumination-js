@@ -1,9 +1,11 @@
+///<reference path="worker/TraceWorkerManager.ts"/>
 import {Camera} from "../scene/Camera";
 import {Scene} from "../scene/Scene";
 import {Color} from "../math/Color";
 import {RGBA} from "../math/Color";
 import {Ray} from "../math/Ray";
 import {TraceWorkerManager} from "./worker/TraceWorkerManager";
+import {SharedScene} from "../scene/SharedScene";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -21,23 +23,25 @@ export class Renderer {
 
     static interval:number = 0;
 
-    get iterations():number{
+    get iterations():number {
         return this.workerManager.iterations;
     }
 
-    initParallelRender(scene:Scene, camera:Camera, w:number, h:number, cameraSamples:number, hitSamples:number, bounces:number):Uint8ClampedArray {
+    initParallelRender(scene:SharedScene, camera:Camera, w:number, h:number, cameraSamples:number, hitSamples:number, bounces:number):Uint8ClampedArray {
         if (!this.workerManager) {
             this.workerManager = new TraceWorkerManager();
         }
         this.workerManager.configure({
-            scene: scene,
-            camera: camera,
-            width: w,
-            height: h,
-            cameraSamples: cameraSamples,
-            hitSamples: hitSamples,
-            bounces: bounces
-        });
+                camera: camera,
+                width: w,
+                height: h,
+                cameraSamples: cameraSamples,
+                hitSamples: hitSamples,
+                bounces: bounces
+            },
+            scene
+        );
+        this.workerManager.init();
         this.workerManager.render();
         return this.workerManager.pixels;
     }

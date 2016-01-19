@@ -108,7 +108,6 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
                     for (var i = 0; i < numMaterials; i++) {
                         offset = new Material().directRead(memory, offset);
                     }
-                    console.info(numMaterials + " Materials restored");
                     return offset;
                 };
                 Material.write = function (memory) {
@@ -123,7 +122,6 @@ System.register(["../../math/Color", "./Attenuation"], function(exports_1) {
                     for (var i = 0; i < numMaterials; i++) {
                         new Material().read(memory);
                     }
-                    console.info(numMaterials + " Materials restored");
                     return memory.position;
                 };
                 Material.SIZE = Color_1.Color.SIZE + Attenuation_1.Attenuation.SIZE + 6;

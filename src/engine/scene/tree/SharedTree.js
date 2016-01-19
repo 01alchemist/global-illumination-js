@@ -56,12 +56,8 @@ System.register(["../shapes/Box", "../../math/Hit", "./SharedNode", "../../../po
                     memory.position += ByteArrayBase_1.ByteArrayBase.SIZE_OF_UINT32;
                     var node = SharedNode_1.SharedNode.newNode(shapes, memory);
                     memory.writeUnsignedInt(SharedNode_2.NodeMarker.ROOT);
-                    var result = node.split(0);
+                    node.split(0);
                     endPosition = memory.position;
-                    if (!result) {
-                        memory.position = startPosition + ByteArrayBase_1.ByteArrayBase.SIZE_OF_UINT32;
-                        memory.writeUnsignedInt(SharedNode_2.NodeMarker.LEAF);
-                    }
                     memory.position = startPosition;
                     memory.writeUnsignedInt(endPosition - startPosition);
                     memory.position = endPosition;

@@ -30,14 +30,14 @@ System.register(["../math/Color", "./worker/TraceWorkerManager"], function(expor
                         this.workerManager = new TraceWorkerManager_1.TraceWorkerManager();
                     }
                     this.workerManager.configure({
-                        scene: scene,
                         camera: camera,
                         width: w,
                         height: h,
                         cameraSamples: cameraSamples,
                         hitSamples: hitSamples,
                         bounces: bounces
-                    });
+                    }, scene);
+                    this.workerManager.init();
                     this.workerManager.render();
                     return this.workerManager.pixels;
                 };

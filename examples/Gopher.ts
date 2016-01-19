@@ -44,8 +44,8 @@ export class Gopher extends CanvasDisplay {
         scene.add(Cube.newCube(new Vector3(-30, -1, -30), new Vector3(30, 0.376662, 30), wall));
 
         var loader:OBJLoader = new OBJLoader();
-        //loader.parentMaterial = new GlossyMaterial(new Color(),1.5, MathUtils.radians(30));
-        loader.parentMaterial = new TransparentMaterial(Color.hexColor(0xFFFFFF), 1.31, MathUtils.radians(60), 0);
+        loader.parentMaterial = new GlossyMaterial(new Color(),1.5, MathUtils.radians(30));
+        //loader.parentMaterial = new TransparentMaterial(Color.hexColor(0xFFFFFF), 1.31, MathUtils.radians(60), 0);
 
         var self = this;
         var mesh;
@@ -78,7 +78,7 @@ export class Gopher extends CanvasDisplay {
                 );
                 self.drawPixels(self.pixels, {x: 0, y: 0, width: self.i_width, height: self.i_height});
 
-                /*requestAnimationFrame(self.render.bind(self));*/
+                requestAnimationFrame(self.render.bind(self));
             }
         });
     }

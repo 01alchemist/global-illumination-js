@@ -10,12 +10,13 @@ System.register(["./TraceJob"], function(exports_1) {
             TraceWorkerManager = (function () {
                 function TraceWorkerManager() {
                     this.iterations = 0;
+                    this.initCount = 0;
+                    this.totalThreads = 0;
                 }
-                TraceWorkerManager.prototype.configure = function (param) {
+                TraceWorkerManager.prototype.configure = function (param, scene) {
                     console.log("configure");
                     var width = param.width;
                     var height = param.height;
-                    var scene = param.scene;
                     this.sceneMemory = scene.getMemory();
                     this.pixelMemory = new Uint8ClampedArray(new SharedArrayBuffer(width * height * 3));
                     this.jobs = [];
@@ -24,7 +25,7 @@ System.register(["./TraceJob"], function(exports_1) {
                         num_threads = navigator["hardwareConcurrency"] || 2;
                     }
                     num_threads = num_threads > 2 ? 2 : num_threads;
-                    num_threads = 2;
+                    num_threads = 4;
                     console.info("hardwareConcurrency:" + num_threads);
                     this.jobs = [];
                     var thread_id = 0;
@@ -33,7 +34,10 @@ System.register(["./TraceJob"], function(exports_1) {
                         var _height = height / num_threads;
                         for (var j = 0; j < num_threads; j++) {
                             for (var i = 0; i < num_threads; i++) {
-                                this.jobs.push(new TraceJob_1.TraceJob(this.pixelMemory, this.sceneMemory.buffer, {
+                                this.jobs.push(new TraceJob_1.TraceJob({
+                                    id: ++thread_id,
+                                    pixelBuffer: this.pixelMemory.buffer,
+                                    sceneBuffer: this.sceneMemory.buffer,
                                     camera: param.camera,
                                     cameraSamples: param.cameraSamples,
                                     hitSamples: param.hitSamples,
@@ -43,14 +47,15 @@ System.register(["./TraceJob"], function(exports_1) {
                                     width: _width,
                                     height: _height,
                                     xoffset: i * _width,
-                                    yoffset: j * _height,
-                                    id: ++thread_id
+                                    yoffset: j * _height
                                 }));
                             }
                         }
                     }
                     else {
-                        this.jobs.push(new TraceJob_1.TraceJob(this.pixelMemory, this.sceneMemory.buffer, {
+                        this.jobs.push(new TraceJob_1.TraceJob({
+                            pixelBuffer: this.pixelMemory.buffer,
+                            sceneBuffer: this.sceneMemory.buffer,
                             camera: param.camera,
                             cameraSamples: param.cameraSamples,
                             hitSamples: param.hitSamples,
@@ -64,6 +69,7 @@ System.register(["./TraceJob"], function(exports_1) {
                             id: 0
                         }));
                     }
+                    this.totalThreads = thread_id;
                 };
                 Object.defineProperty(TraceWorkerManager.prototype, "numWorkers", {
                     get: function () {
@@ -79,6 +85,20 @@ System.register(["./TraceJob"], function(exports_1) {
                     enumerable: true,
                     configurable: true
                 });
+                TraceWorkerManager.prototype.init = function () {
+                    this.initNext();
+                };
+                TraceWorkerManager.prototype.initNext = function () {
+                    console.time("initNext");
+                    var self = this;
+                    if (this.initCount == this.totalThreads) {
+                        return;
+                    }
+                    this.jobs[this.initCount++].init(function () {
+                        self.initNext.bind(self)();
+                        console.timeEnd("initNext");
+                    });
+                };
                 TraceWorkerManager.prototype.render = function () {
                     var self = this;
                     if (this.workersFinished()) {

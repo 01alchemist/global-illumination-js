@@ -122,9 +122,6 @@ export class Mesh implements Shape {
     static inter=0;
 
     intersect(r:Ray):Hit {
-        if(Mesh.inter % 5000 == 0){
-            console.log("Mesh intersect");
-        }
         return this.tree.intersect(r);
     }
 

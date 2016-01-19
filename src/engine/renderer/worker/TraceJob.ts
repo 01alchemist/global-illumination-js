@@ -4,19 +4,12 @@ import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 
 export class TraceJob {
 
-    private width:number;
-    private height:number;
-    private xoffset:number;
-    private yoffset:number;
     private id:number;
     public finished:boolean;
     public thread:Thread;
+    private onInit:Function;
 
-    constructor(pixelMemory:Uint8Array, sceneMemory:SharedArrayBuffer, param) {
-        this.width = param.width;
-        this.height = param.height;
-        this.xoffset = param.xoffset;
-        this.yoffset = param.yoffset;
+    constructor(private param) {
         this.id = param.id;
         this.finished = false;
         var self = this;
@@ -25,29 +18,20 @@ export class TraceJob {
         this.thread.onInitComplete = function(){
             //console.timeEnd("INIT_"+self.id);
             self.finished = true;
+            if(self.onInit){
+                self.onInit(self.id);
+            }
         };
         this.thread.onTraceComplete = function(){
             //console.timeEnd("TRACE_"+id);
             self.finished = true;
         };
-        this.thread.sendCommand(TraceWorker.INIT);
-        this.thread.sendData({
-            id: this.id,
-            pixelMemory: pixelMemory.buffer,
-            sceneMemory: sceneMemory,
-            camera: param.camera,
-            cameraSamples: param.cameraSamples,
-            hitSamples: param.hitSamples,
-            bounces: param.bounces,
-            full_width: param.full_width,
-            full_height: param.full_height,
-            width: param.width,
-            height: param.height,
-            xoffset: param.xoffset,
-            yoffset: param.yoffset
-        },[pixelMemory.buffer, sceneMemory]);
     }
-
+    init(onInit:Function){
+        this.onInit = onInit;
+        this.thread.sendCommand(TraceWorker.INIT);
+        this.thread.sendData(this.param,[this.param.pixelBuffer, this.param.sceneBuffer]);
+    }
     run(iterations:number):void {
         if(this.thread.initialized && !this.thread.isTracing){
             this.finished = false;

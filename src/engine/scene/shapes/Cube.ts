@@ -38,9 +38,7 @@ export class Cube implements Shape {
         this.min.read(memory);
         this.max.read(memory);
         var materialIndex:number = memory.readInt();
-        /* create box */
         this.box = new Box(this.min, this.max);
-        /* get Material */
         var material:Material = Material.map[materialIndex];
         if(material){
             this.material = material;
@@ -88,14 +86,10 @@ export class Cube implements Shape {
     intersect(r:Ray):Hit {
 
         var n:Vector3 = this.min.sub(r.origin).div(r.direction);
-        //console.log(n.toString());
         var f:Vector3 = this.max.sub(r.origin).div(r.direction);
-        //console.log(f.toString());
         let _n = n;
         n = _n.min(f);
         f = _n.max(f);
-        //console.log(n.toString());
-        //console.log(f.toString());
         var t0:number = Math.max(Math.max(n.x, n.y), n.z);
         var t1:number = Math.min(Math.min(f.x, f.y), f.z);
 

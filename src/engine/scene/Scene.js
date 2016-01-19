@@ -144,7 +144,7 @@ System.register(["../math/Color", "./tree/Tree", "../utils/MapUtils", "../math/V
                     }
                     var hit = this.intersect(r);
                     if (!hit.ok()) {
-                        return new Color_1.Color(1, 0, 0);
+                        return this.color;
                     }
                     var info = hit.info(r);
                     var result = new Color_1.Color();
