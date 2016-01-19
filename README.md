@@ -45,6 +45,6 @@ Here are some resources that I have found useful.
 
 ### Samples
 
-[Example1](http://01alchemist.com/projects/global-illumination-js/examples/Example1.html)
-[Example2](http://01alchemist.com/projects/global-illumination-js/examples/Example2.html)
-[Example3](http://01alchemist.com/projects/global-illumination-js/examples/Example3.html)
+* [Example1](http://01alchemist.com/projects/global-illumination-js/examples/Example1.html)
+* [Example2](http://01alchemist.com/projects/global-illumination-js/examples/Example2.html)
+* [Example3](http://01alchemist.com/projects/global-illumination-js/examples/Example3.html)
