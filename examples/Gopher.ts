@@ -67,6 +67,7 @@ export class Gopher extends CanvasDisplay {
             } else {
                 console.log("Obj file loaded");
                 mesh = _mesh;
+                mesh.smoothNormals();
                 scene.add(mesh);
 
                 //console.time("compile");
