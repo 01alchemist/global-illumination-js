@@ -26,7 +26,7 @@ export class Teapot extends CanvasDisplay {
 
     onInit() {
 
-        var scene:Scene = new SharedScene(new Color(0.24,0.25,0.26));
+        var scene:SharedScene = new SharedScene(new Color(0.24,0.25,0.26));
         scene.add(Sphere.newSphere(new Vector3(-2, 5, -3), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
         scene.add(Sphere.newSphere(new Vector3(5, 5, -3), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
         scene.add(Cube.newCube(new Vector3(-30, -1, -30), new Vector3(30, 0, 30), new SpecularMaterial(Color.hexColor(0xFCFAE1), 2)));

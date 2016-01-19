@@ -32,7 +32,7 @@ export class Example3 extends CanvasDisplay {
 
     onInit() {
         console.info("onInit");
-        var scene:Scene = new SharedScene();
+        var scene:SharedScene = new SharedScene();
 
         var material = new DiffuseMaterial(Color.hexColor(0xFCFAE1));
         scene.add(Cube.newCube(new Vector3(-1000, -1, -1000), new Vector3(1000, 0, 1000), material));

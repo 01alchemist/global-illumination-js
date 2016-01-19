@@ -32,7 +32,7 @@ export class Example1 extends CanvasDisplay {
 
     onInit() {
         console.info("onInit");
-        var scene:Scene = new SharedScene();
+        var scene:SharedScene = new SharedScene();
         var glass = new ClearMaterial(1.05, MathUtils.radians(1));
         var red = new GlossyMaterial(new Color(1,0,0), 1.5, MathUtils.radians(0));
         glass.transparent = true;

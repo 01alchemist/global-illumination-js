@@ -31,7 +31,7 @@ export class Mesh implements Shape {
 
     constructor(public box:Box = null,
                 public triangles:Triangle[] = [],
-                public tree:SharedTree = null) {
+                public tree:Tree|SharedTree = null) {
 
     }
 

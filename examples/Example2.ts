@@ -31,7 +31,7 @@ export class Example2 extends CanvasDisplay {
 
     onInit() {
         console.info("onInit");
-        var scene:Scene = new SharedScene();
+        var scene:SharedScene = new SharedScene();
 
         var material = new GlossyMaterial(Color.hexColor(0xEFC94C), 3, MathUtils.radians(30));
         var whiteMat = new GlossyMaterial(new Color(1, 1, 1), 3, MathUtils.radians(30));
