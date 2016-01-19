@@ -12,7 +12,7 @@ import {Pointer} from "../../pointer/Pointer";
 import {DirectMemory} from "../../pointer/DirectMemory";
 import {Box} from "./shapes/Box";
 /**
- * Created by r3f on 13/1/2016.
+ * Created by Nidin Vinayakan on 13/1/2016.
  */
 interface TextEncoder {
     new();

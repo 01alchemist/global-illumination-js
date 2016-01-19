@@ -1,7 +1,7 @@
 import {ByteArrayBase} from "./ByteArrayBase";
 import {DirectMemory} from "./DirectMemory";
 /**
- * Created by r3f on 15/1/2016.
+ * Created by Nidin Vinayakan on 15/1/2016.
  */
 export interface IPointer{
 
