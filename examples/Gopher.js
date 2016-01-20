@@ -59,8 +59,6 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                 }
                 Gopher.prototype.onInit = function () {
                     var scene = new SharedScene_1.SharedScene();
-                    var glass = new GlossyMaterial_1.GlossyMaterial(new Color_1.Color(1, 0, 0), 1.5, MathUtils_1.MathUtils.radians(0));
-                    scene.add(Sphere_1.Sphere.newSphere(new Vector3_1.Vector3(-0.5, 1, 0), 0.5, glass));
                     var wall = new SpecularMaterial_1.SpecularMaterial(Color_1.Color.hexColor(0xFCFAE1), 2);
                     scene.add(Sphere_1.Sphere.newSphere(new Vector3_1.Vector3(4, 7, 3), 2, new LightMaterial_1.LightMaterial(new Color_1.Color(1, 1, 1), 1, Attenuation_1.NoAttenuation)));
                     scene.add(Cube_1.Cube.newCube(new Vector3_1.Vector3(-30, -1, -30), new Vector3_1.Vector3(-8, 10, 30), wall));
@@ -72,9 +70,9 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                     this.renderer = new Renderer_1.Renderer();
                     this.i_width = 2560 / 4;
                     this.i_height = 1440 / 4;
-                    var cameraSamples = 4;
-                    var hitSamples = 16;
-                    var bounces = 8;
+                    var cameraSamples = 1;
+                    var hitSamples = 1;
+                    var bounces = 4;
                     var camera = Camera_1.Camera.lookAt(new Vector3_1.Vector3(8, 3, 0.5), new Vector3_1.Vector3(-1, 2.5, 0.5), new Vector3_1.Vector3(0, 1, 0), 45);
                     loader.load("gopher.obj", function (_mesh) {
                         if (!_mesh) {
@@ -83,6 +81,7 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                         else {
                             console.log("Obj file loaded");
                             mesh = _mesh;
+                            mesh.smoothNormals();
                             scene.add(mesh);
                             self.pixels = self.renderer.initParallelRender(scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples, bounces);
                             self.drawPixels(self.pixels, { x: 0, y: 0, width: self.i_width, height: self.i_height });

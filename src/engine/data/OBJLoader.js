@@ -34,7 +34,6 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                     xhr.open('GET', url, true);
                     xhr.onload = function () {
                         self.lastMesh = self.loadOBJ(xhr.response);
-                        self.lastMesh.smoothNormals();
                         if (onLoad) {
                             if (self.hasMaterials && self.materialsLoaded) {
                                 onLoad(self.lastMesh);
@@ -182,7 +181,7 @@ System.register(["../scene/shapes/Mesh", "../math/Vector3", "../scene/shapes/Tri
                         return;
                     }
                     this.materialsLoading = true;
-                    url = this.basePath + "/" + url;
+                    url = this.basePath == "" ? url : this.basePath + "/" + url;
                     console.log("Loading MTL:" + url);
                     var self = this;
                     var xhr = new XMLHttpRequest();

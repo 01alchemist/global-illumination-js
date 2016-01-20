@@ -54,7 +54,7 @@ System.register(["../math/Constants"], function(exports_1) {
                     var frac = f - int;
                     return { int: int, frac: frac };
                 };
-                MathUtils.clampInt = function (x, lo, hi) {
+                MathUtils.clamp = function (x, lo, hi) {
                     if (x < lo) {
                         return lo;
                     }

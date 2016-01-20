@@ -13,6 +13,10 @@ export class TraceWorkerManager {
     private pixelMemory:Uint8ClampedArray;
 
     private jobs:Array<TraceJob>;
+    private _initialized:boolean;
+    get initialized():boolean{
+        return this._initialized;
+    }
     iterations:number = 0;
 
     constructor() {
@@ -105,22 +109,38 @@ export class TraceWorkerManager {
     }
 
     init():void {
+        console.time("init");
         this.initNext();
+        //this.initParallel();
     }
-
+    initParallel(){
+        console.time("initParallel");
+        this.jobs[0].init();
+        this.jobs.forEach(function (w:TraceJob, index:number) {
+            if(index == 0){
+                return;
+            }
+            w.init();
+        });
+        console.timeEnd("initParallel");
+        console.timeEnd("init");
+    }
     private initCount:number = 0;
     private totalThreads:number = 0;
 
     initNext() {
-        console.time("initNext");
+        //console.time("initNext");
         //console.log("initCount:" + this.initCount + ", totalThreads:" + this.totalThreads);
         var self = this;
-        if (this.initCount == this.totalThreads) {
+        this._initialized = false;
+        if (this.initCount >= this.totalThreads) {
+            this._initialized = true;
+            console.timeEnd("init");
             return;
         }
         this.jobs[this.initCount++].init(function () {
             self.initNext.bind(self)();
-            console.timeEnd("initNext");
+            //console.timeEnd("initNext");
         });
     }
 
@@ -142,5 +162,15 @@ export class TraceWorkerManager {
             }
         }
         return isAllFinished;
+    }
+
+    get workersInitialized():boolean {
+        var isAllInitialized:boolean = true;
+        for (var i = 0; i < this.jobs.length; i++) {
+            if (!this.jobs[i].thread.initialized) {
+                isAllInitialized = false;
+            }
+        }
+        return isAllInitialized;
     }
 }

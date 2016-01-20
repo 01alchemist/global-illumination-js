@@ -34,10 +34,10 @@ export class Example1 extends CanvasDisplay {
         console.info("onInit");
         var scene:SharedScene = new SharedScene();
         var glass = new ClearMaterial(1.05, MathUtils.radians(1));
-        var red = new GlossyMaterial(new Color(1,0,0), 1.5, MathUtils.radians(0));
         glass.transparent = true;
+        var red = new GlossyMaterial(new Color(1,0,0), 1.5, MathUtils.radians(0));
         scene.add(Sphere.newSphere(new Vector3(-3, 0.5, 1), 0.5, red));
-        scene.add(Sphere.newSphere(new Vector3(-1, 0.5, 1), 2, glass));
+        //scene.add(Sphere.newSphere(new Vector3(-1, 0.5, 1), 2, glass));
         scene.add(Sphere.newSphere(new Vector3(1.5, 1, 0), 1, new SpecularMaterial(Color.hexColor(0x334D5C), 2)));
         scene.add(Sphere.newSphere(new Vector3(-1, 1, 2), 1, new SpecularMaterial(Color.hexColor(0xEFC94C), 2)));
         scene.add(Cube.newCube(new Vector3(-100, -1, -100), new Vector3(100, 0, 100), new DiffuseMaterial(new Color(1, 1, 1))));

@@ -55,6 +55,7 @@ System.register(["../math/Color", "./Scene", "./materials/Material", "./shapes/S
                     box.write(memory);
                     SharedTree_1.SharedTree.buildAndWrite(memory, this.shapes);
                     console.timeEnd("getMemory");
+                    console.log("Memory size:" + memory.position);
                     return memory;
                 };
                 SharedScene.getScene = function (memory) {

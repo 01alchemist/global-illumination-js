@@ -47,16 +47,18 @@ export class Example3 extends CanvasDisplay {
                 scene.add(Cube.newCube(min, max, material));
             }
         }
-        scene.add(Cube.newCube(new Vector3(-5, 10, -5), new Vector3(5, 11, 5), new LightMaterial(new Color(1, 1, 1), 5, new QuadraticAttenuation(0.05))));
+        scene.add(Cube.newCube(new Vector3(-5, 10, -5), new Vector3(5, 11, 5), new LightMaterial(new Color(1, 0, 0), 5, new QuadraticAttenuation(0.05))));
         var camera:Camera = Camera.lookAt(new Vector3(20, 10, 0), new Vector3(8, 0, 0), new Vector3(0, 1, 0), 45);
         
         
         this.renderer = new Renderer();
-        this.i_width = 2560 / 2;
-        this.i_height = 1440 / 2;
+        /*this.i_width = 2560 / 2;
+        this.i_height = 1440 / 2;*/
+        this.i_width = 1280/8;
+        this.i_height = 720/8;
         var cameraSamples:number = 2;
-        var hitSamples:number = 4;
-        var bounces:number = 5;
+        var hitSamples:number = 1;
+        var bounces:number = 3;
 
         this.pixels = this.renderer.initParallelRender(
             scene, camera, this.i_width, this.i_height, cameraSamples, hitSamples, bounces

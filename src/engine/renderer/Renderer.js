@@ -18,6 +18,13 @@ System.register(["../math/Color", "./worker/TraceWorkerManager"], function(expor
                         this.workerManager = new TraceWorkerManager_1.TraceWorkerManager();
                     }
                 }
+                Object.defineProperty(Renderer.prototype, "initialized", {
+                    get: function () {
+                        return this.workerManager.initialized;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
                 Object.defineProperty(Renderer.prototype, "iterations", {
                     get: function () {
                         return this.workerManager.iterations;

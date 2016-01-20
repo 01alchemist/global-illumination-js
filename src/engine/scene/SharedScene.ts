@@ -90,6 +90,7 @@ export class SharedScene extends Scene {
         SharedTree.buildAndWrite(memory, this.shapes);
 
         console.timeEnd("getMemory");
+        console.log("Memory size:"+memory.position);
         return memory;
     }
 

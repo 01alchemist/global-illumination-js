@@ -13,6 +13,13 @@ System.register(["./TraceJob"], function(exports_1) {
                     this.initCount = 0;
                     this.totalThreads = 0;
                 }
+                Object.defineProperty(TraceWorkerManager.prototype, "initialized", {
+                    get: function () {
+                        return this._initialized;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
                 TraceWorkerManager.prototype.configure = function (param, scene) {
                     console.log("configure");
                     var width = param.width;
@@ -86,17 +93,31 @@ System.register(["./TraceJob"], function(exports_1) {
                     configurable: true
                 });
                 TraceWorkerManager.prototype.init = function () {
+                    console.time("init");
                     this.initNext();
                 };
+                TraceWorkerManager.prototype.initParallel = function () {
+                    console.time("initParallel");
+                    this.jobs[0].init();
+                    this.jobs.forEach(function (w, index) {
+                        if (index == 0) {
+                            return;
+                        }
+                        w.init();
+                    });
+                    console.timeEnd("initParallel");
+                    console.timeEnd("init");
+                };
                 TraceWorkerManager.prototype.initNext = function () {
-                    console.time("initNext");
                     var self = this;
-                    if (this.initCount == this.totalThreads) {
+                    this._initialized = false;
+                    if (this.initCount >= this.totalThreads) {
+                        this._initialized = true;
+                        console.timeEnd("init");
                         return;
                     }
                     this.jobs[this.initCount++].init(function () {
                         self.initNext.bind(self)();
-                        console.timeEnd("initNext");
                     });
                 };
                 TraceWorkerManager.prototype.render = function () {
@@ -117,6 +138,19 @@ System.register(["./TraceJob"], function(exports_1) {
                     }
                     return isAllFinished;
                 };
+                Object.defineProperty(TraceWorkerManager.prototype, "workersInitialized", {
+                    get: function () {
+                        var isAllInitialized = true;
+                        for (var i = 0; i < this.jobs.length; i++) {
+                            if (!this.jobs[i].thread.initialized) {
+                                isAllInitialized = false;
+                            }
+                        }
+                        return isAllInitialized;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
                 return TraceWorkerManager;
             })();
             exports_1("TraceWorkerManager", TraceWorkerManager);

@@ -29,7 +29,6 @@ System.register(["../../scene/Camera", "../../math/Color", "../Renderer", "../..
                         }
                         else if (self.command == TraceWorker.INIT) {
                             TraceWorker.id = e.data.id;
-                            console.time("WOKER_INIT:" + TraceWorker.id);
                             self.command = null;
                             self.pixelMemory = new Uint8ClampedArray(e.data.pixelBuffer);
                             self.sceneMemory = new DirectMemory_1.DirectMemory(e.data.sceneBuffer);
@@ -45,7 +44,7 @@ System.register(["../../scene/Camera", "../../math/Color", "../Renderer", "../..
                             self.hitSamples = e.data.hitSamples;
                             self.bounces = e.data.bounces;
                             self.init(e.data.width, e.data.height, e.data.xoffset, e.data.yoffset);
-                            console.timeEnd("WOKER_INIT:" + TraceWorker.id);
+                            console.info("WOKER_INIT:" + TraceWorker.id);
                             postMessage(TraceWorker.INITED);
                         }
                         else if (self.command == TraceWorker.TRACE) {

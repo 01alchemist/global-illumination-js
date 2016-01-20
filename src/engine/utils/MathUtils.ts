@@ -54,7 +54,7 @@ export class MathUtils {
         return {int: int, frac: frac};
     }
 
-    static clampInt(x:number, lo:number, hi:number):number {
+    static clamp(x:number, lo:number, hi:number):number {
         if (x < lo) {
             return lo;
         }

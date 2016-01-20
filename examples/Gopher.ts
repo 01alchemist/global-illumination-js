@@ -30,14 +30,6 @@ export class Gopher extends CanvasDisplay {
     onInit() {
 
         var scene:SharedScene = new SharedScene();
-        //scene.add(Sphere.newSphere(new Vector3(-2, 5, -3), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
-        //scene.add(Sphere.newSphere(new Vector3(5, 5, -3), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
-        //scene.add(Cube.newCube(new Vector3(-30, -1, -30), new Vector3(30, 0.376662, 30), new SpecularMaterial(Color.hexColor(0xFCFAE1), 2)));
-
-        var glass = new GlossyMaterial(new Color(1,0,0), 1.5, MathUtils.radians(0));
-        //glass.transparent = true;
-        scene.add(Sphere.newSphere(new Vector3(-0.5, 1, 0), 0.5, glass));
-
         var wall = new SpecularMaterial(Color.hexColor(0xFCFAE1), 2);
         scene.add(Sphere.newSphere(new Vector3(4, 7, 3), 2, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
         scene.add(Cube.newCube(new Vector3(-30, -1, -30), new Vector3(-8, 10, 30), wall));
@@ -45,7 +37,6 @@ export class Gopher extends CanvasDisplay {
 
         var loader:OBJLoader = new OBJLoader();
         loader.parentMaterial = new GlossyMaterial(new Color(),1.5, MathUtils.radians(30));
-        //loader.parentMaterial = new TransparentMaterial(Color.hexColor(0xFFFFFF), 1.31, MathUtils.radians(60), 0);
 
         var self = this;
         var mesh;
@@ -56,9 +47,9 @@ export class Gopher extends CanvasDisplay {
         //this.i_height = 720;
         //this.i_width = 1920;
         //this.i_height = 1080;
-        var cameraSamples:number = 4;
-        var hitSamples:number = 16;
-        var bounces:number = 8;
+        var cameraSamples:number = 1;
+        var hitSamples:number = 1;
+        var bounces:number = 4;
         var camera:Camera = Camera.lookAt(new Vector3(8, 3, 0.5), new Vector3(-1, 2.5, 0.5), new Vector3(0, 1, 0), 45);
 
         loader.load("gopher.obj", function (_mesh) {
@@ -67,11 +58,8 @@ export class Gopher extends CanvasDisplay {
             } else {
                 console.log("Obj file loaded");
                 mesh = _mesh;
+                mesh.smoothNormals();
                 scene.add(mesh);
-
-                //console.time("compile");
-                //mesh.compile();
-                //console.timeEnd("compile");
 
                 self.pixels = self.renderer.initParallelRender(
                     scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples, bounces

@@ -25,7 +25,7 @@ System.register(["./DirectMemory"], function(exports_1) {
                     if (Pointer.initialized) {
                         return;
                     }
-                    var maxMemory = 512 * 1024 * 1024;
+                    var maxMemory = 64 * 1024 * 1024;
                     Pointer.heap = new Uint8Array(new SharedArrayBuffer(maxMemory));
                     Pointer.memory = new DirectMemory_1.DirectMemory(Pointer.heap.buffer);
                     Pointer.initialized = true;

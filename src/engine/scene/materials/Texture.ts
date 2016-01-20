@@ -80,10 +80,10 @@ export class Texture extends ImageLoader {
         v = 1 - v;
         let x:number = Math.round(u * this.width);
         let y:number = Math.round(v * this.height);
-        let x1:number = MathUtils.clampInt(x - 1, 0, this.width - 1);
-        let x2:number = MathUtils.clampInt(x + 1, 0, this.width - 1);
-        let y1:number = MathUtils.clampInt(y - 1, 0, this.height - 1);
-        let y2:number = MathUtils.clampInt(y + 1, 0, this.height - 1);
+        let x1:number = MathUtils.clamp(x - 1, 0, this.width - 1);
+        let x2:number = MathUtils.clamp(x + 1, 0, this.width - 1);
+        let y1:number = MathUtils.clamp(y - 1, 0, this.height - 1);
+        let y2:number = MathUtils.clamp(y + 1, 0, this.height - 1);
         let cx:Color = this.data[y * this.width + x1].sub(this.data[y * this.width + x2]);
         let cy:Color = this.data[y1 * this.width + x].sub(this.data[y2 * this.width + x]);
         return new Vector3(cx.r, cy.r, 0);

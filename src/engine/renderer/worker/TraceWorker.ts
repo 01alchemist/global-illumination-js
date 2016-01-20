@@ -53,7 +53,7 @@ export class TraceWorker {
 
                 TraceWorker.id = e.data.id;
 
-                console.time("WOKER_INIT:" + TraceWorker.id);
+                //console.time("WOKER_INIT:" + TraceWorker.id);
                 self.command = null;
                 self.pixelMemory = new Uint8ClampedArray(e.data.pixelBuffer);
                 self.sceneMemory = new DirectMemory(e.data.sceneBuffer);
@@ -81,7 +81,8 @@ export class TraceWorker {
                     e.data.yoffset
                 );
 
-                console.timeEnd("WOKER_INIT:" + TraceWorker.id);
+                //console.timeEnd("WOKER_INIT:" + TraceWorker.id);
+                console.info("WOKER_INIT:" + TraceWorker.id);
                 postMessage(TraceWorker.INITED);
 
             } else if (self.command == TraceWorker.TRACE) {

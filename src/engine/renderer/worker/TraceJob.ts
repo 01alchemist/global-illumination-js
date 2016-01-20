@@ -27,7 +27,7 @@ export class TraceJob {
             self.finished = true;
         };
     }
-    init(onInit:Function){
+    init(onInit?:Function){
         this.onInit = onInit;
         this.thread.sendCommand(TraceWorker.INIT);
         this.thread.sendData(this.param,[this.param.pixelBuffer, this.param.sceneBuffer]);

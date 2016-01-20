@@ -65,10 +65,9 @@ System.register(["../src/engine/math/Color", "../src/engine/scene/materials/Ligh
                     console.info("onInit");
                     var scene = new SharedScene_1.SharedScene();
                     var glass = new ClearMaterial_1.ClearMaterial(1.05, MathUtils_1.MathUtils.radians(1));
-                    var red = new GlossyMaterial_1.GlossyMaterial(new Color_1.Color(1, 0, 0), 1.5, MathUtils_1.MathUtils.radians(0));
                     glass.transparent = true;
+                    var red = new GlossyMaterial_1.GlossyMaterial(new Color_1.Color(1, 0, 0), 1.5, MathUtils_1.MathUtils.radians(0));
                     scene.add(Sphere_1.Sphere.newSphere(new Vector3_1.Vector3(-3, 0.5, 1), 0.5, red));
-                    scene.add(Sphere_1.Sphere.newSphere(new Vector3_1.Vector3(-1, 0.5, 1), 2, glass));
                     scene.add(Sphere_1.Sphere.newSphere(new Vector3_1.Vector3(1.5, 1, 0), 1, new SpecularMaterial_1.SpecularMaterial(Color_1.Color.hexColor(0x334D5C), 2)));
                     scene.add(Sphere_1.Sphere.newSphere(new Vector3_1.Vector3(-1, 1, 2), 1, new SpecularMaterial_1.SpecularMaterial(Color_1.Color.hexColor(0xEFC94C), 2)));
                     scene.add(Cube_1.Cube.newCube(new Vector3_1.Vector3(-100, -1, -100), new Vector3_1.Vector3(100, 0, 100), new DiffuseMaterial_1.DiffuseMaterial(new Color_1.Color(1, 1, 1))));

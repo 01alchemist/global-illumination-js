@@ -1,3 +1,6 @@
+interface String{
+    startsWith(value:string):boolean;
+}
 declare function postMessage(arg:any);
 
 interface SharedArrayBuffer {

@@ -78,10 +78,10 @@ System.register(["../../math/Color", "../../math/Vector3", "../../data/ImageLoad
                     v = 1 - v;
                     var x = Math.round(u * this.width);
                     var y = Math.round(v * this.height);
-                    var x1 = MathUtils_1.MathUtils.clampInt(x - 1, 0, this.width - 1);
-                    var x2 = MathUtils_1.MathUtils.clampInt(x + 1, 0, this.width - 1);
-                    var y1 = MathUtils_1.MathUtils.clampInt(y - 1, 0, this.height - 1);
-                    var y2 = MathUtils_1.MathUtils.clampInt(y + 1, 0, this.height - 1);
+                    var x1 = MathUtils_1.MathUtils.clamp(x - 1, 0, this.width - 1);
+                    var x2 = MathUtils_1.MathUtils.clamp(x + 1, 0, this.width - 1);
+                    var y1 = MathUtils_1.MathUtils.clamp(y - 1, 0, this.height - 1);
+                    var y2 = MathUtils_1.MathUtils.clamp(y + 1, 0, this.height - 1);
                     var cx = this.data[y * this.width + x1].sub(this.data[y * this.width + x2]);
                     var cy = this.data[y1 * this.width + x].sub(this.data[y2 * this.width + x]);
                     return new Vector3_1.Vector3(cx.r, cy.r, 0);
