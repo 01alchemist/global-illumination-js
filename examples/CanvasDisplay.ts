@@ -1,7 +1,8 @@
+import {GUI} from "./GUI";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
-export abstract class CanvasDisplay {
+export abstract class CanvasDisplay extends GUI{
 
     canvas:HTMLCanvasElement;
     ctx:CanvasRenderingContext2D;
@@ -18,6 +19,7 @@ export abstract class CanvasDisplay {
     abstract onInit();
 
     constructor(public width:number = 2560, public height:number = 1440) {
+        super();
         var self = this;
         this.canvas = <HTMLCanvasElement>document.getElementById("viewport");
         if(this.canvas){
@@ -30,6 +32,7 @@ export abstract class CanvasDisplay {
     }
 
     init() {
+        super.init();
         console.info("init");
         this.canvas = <HTMLCanvasElement>document.getElementById("viewport");
         //this.canvas.width = this.width;

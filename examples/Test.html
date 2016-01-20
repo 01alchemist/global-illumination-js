@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <title>Test</title>
     <script src="../node_modules/systemjs/dist/system.src.js"></script>
-    <style>
-        body{
-            font-family: "Courier New";
-        }
-    </style>
+    <script src="../node_modules/angular2/bundles/angular2-polyfills.js"></script>
+    <script src="../node_modules/rxjs/bundles/Rx.js"></script>
+    <script src="../node_modules/angular2/bundles/angular2.dev.js"></script>
     <script>
         System.config({
             packages: {
@@ -18,11 +16,10 @@
                 }
             }
         });
-        System.import('../examples/Test').then(null, console.error.bind(console));
+        System.import('./examples/Test').then(null, console.error.bind(console));
     </script>
 </head>
 <body>
-<div id="info">Please wait...</div>
-<canvas id="viewport" width="640" height="360"></canvas>
+<gui></gui>
 </body>
 </html>

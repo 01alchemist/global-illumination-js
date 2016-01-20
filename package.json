@@ -8,18 +8,25 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/01alchemist/ParallelRayJS.git"
+    "url": "https://github.com/01alchemist/global-illumination-js.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/01alchemist/ParallelRayJS/issues"
+    "url": "https://github.com/01alchemist/global-illumination-js/issues"
   },
-  "homepage": "https://github.com/01alchemist/ParallelRayJS",
+  "homepage": "https://github.com/01alchemist/global-illumination-js",
 
   "dependencies": {
-    "typescript": "^1.7.5",
     "systemjs": "0.19.6",
-    "bytearray": "latest"
+    "es6-promise": "^3.0.2",
+    "es6-shim": "^0.33.3",
+    "reflect-metadata": "0.1.2",
+    "rxjs": "5.0.0-beta.0",
+    "zone.js": "0.5.10",
+    "angular2": "^2.0.0-beta.0"
+  },
+  "devDependencies": {
+    "typescript": "^1.7.5"
   }
 }

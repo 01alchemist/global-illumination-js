@@ -2,28 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ParallelPathTracerJS</title>
+    <title>Test</title>
+    <script src="node_modules/es6-shim/es6-shim.min.js"></script>
+    <script src="node_modules/systemjs/dist/system-polyfills.js"></script>
+
+    <script src="node_modules/angular2/bundles/angular2-polyfills.js"></script>
     <script src="node_modules/systemjs/dist/system.src.js"></script>
-    <style>
-        body{
-            font-family: "Courier New";
-        }
-    </style>
-    <!--<script>
+    <script src="node_modules/rxjs/bundles/Rx.js"></script>
+    <script src="node_modules/angular2/bundles/angular2.dev.js"></script>
+    <script>
         System.config({
             packages: {
-                "src/parallelpath": {
+                ".": {
                     format: 'register',
                     defaultExtension: 'js'
                 }
             }
         });
-        System.import('src/parallelpath/Main').then(null, console.error.bind(console));
-    </script>-->
+        System.import('./examples/Test').then(null, console.error.bind(console));
+    </script>
 </head>
 <body>
-<div id="info">1&#34;x3&#34;</div>
-<canvas id="viewport" width="1920" height="1080"></canvas>
-<button id="toggle">start</button>
+<gui></gui>
 </body>
 </html>
