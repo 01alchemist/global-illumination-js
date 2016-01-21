@@ -14,6 +14,8 @@ import {BucketOrderFactory} from "./bucket/BucketOrderFactory";
 import {FilterFactory} from "./filter/FilterFactory";
 import {BoxFilter} from "./filter/BoxFilter";
 import {IDisplay} from "../display/IDisplay";
+import {BucketThread} from "./worker/BucketThread";
+import {Thread} from "./worker/Thread";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -147,153 +149,157 @@ export class BucketRenderer {
         return (depth < 0 ? "1/" : "")+(pixelAA * pixelAA)+" sample"+(depth == 0 ? "" : "s");
     }
 
-public render(display:IDisplay):void{
-    this.display = display;
-    display.imageBegin(this.imageWidth, this.imageHeight, this.bucketSize);
-    // set members variables
-    this.bucketCounter = 0;
-    // start task
-    UI.taskStart("Rendering", 0, this.bucketCoords.length);
-    var timer:Timer = new Timer();
-    timer.start();
-    var renderThreads:Thread[] = new Thread[scene.getThreads()];
-    for (var i = 0; i < renderThreads.length; i++) {
-        renderThreads[i] = new BucketThread(i);
-        renderThreads[i].setPriority(scene.getThreadPriority());
-        renderThreads[i].start();
-    }
-    for (var i = 0; i < renderThreads.length; i++) {
-        try {
-            renderThreads[i].join();
-        } catch (InterruptedException e) {
-            UI.printError(Module.BCKT, "Bucket processing thread %d of %d was interrupted", i + 1, renderThreads.length);
+    render(display:IDisplay):void{
+        this.display = display;
+        display.imageBegin(this.imageWidth, this.imageHeight, this.bucketSize);
+        // set members variables
+        this.bucketCounter = 0;
+        // start task
+        console.time("Rendering");
+        console.log("bucketCoords:"+this.bucketCoords.length);
+        var renderThreads:Thread[] = new Thread[scene.getThreads()];
+        for (var i = 0; i < renderThreads.length; i++) {
+            renderThreads[i] = new BucketThread(i);
+            renderThreads[i].setPriority(scene.getThreadPriority());
+            renderThreads[i].start();
         }
-    }
-    UI.taskStop();
-    timer.end();
-    UI.printInfo(Module.BCKT, "Render time: %s", timer.toString());
-    display.imageEnd();
-}
-
-private renderBucket(display:IDisplay, bx:number, by:number, threadID:number, istate:IntersectionState):void{
-    // pixel sized extents
-    var x0 = bx * bucketSize;
-    var y0 = by * bucketSize;
-    var bw = Math.min(bucketSize, imageWidth - x0);
-    var bh = Math.min(bucketSize, imageHeight - y0);
-
-    // prepare bucket
-    display.imagePrepare(x0, y0, bw, bh, threadID);
-
-    var bucketRGB:Color[] = [];//new Color[bw * bh];
-
-    // subpixel extents
-    var sx0 = x0 * subPixelSize - fs;
-    var sy0 = y0 * subPixelSize - fs;
-    var sbw = bw * subPixelSize + fs * 2;
-    var sbh = bh * subPixelSize + fs * 2;
-
-    // round up to align with maximum step size
-    sbw = (sbw + (maxStepSize - 1)) & (~(maxStepSize - 1));
-    sbh = (sbh + (maxStepSize - 1)) & (~(maxStepSize - 1));
-    // extra padding as needed
-    if (maxStepSize > 1) {
-        sbw++;
-        sbh++;
-    }
-    // allocate bucket memory
-    var samples:ImageSample[] = [];//new ImageSample[sbw * sbh];
-    // allocate samples and compute jitter offsets
-    float invSubPixelSize = 1.0f / subPixelSize;
-    for (var y = 0, index = 0; y < sbh; y++) {
-        for (var x = 0; x < sbw; x++, index++) {
-            var sx = sx0 + x;
-            var sy = sy0 + y;
-            var j = sx & (sigma.length - 1);
-            var k = sy & (sigma.length - 1);
-            var i = j * sigma.length + sigma[k];
-            float dx = useJitter ? (float) sigma[k] / (float) sigma.length : 0.5f;
-            float dy = useJitter ? (float) sigma[j] / (float) sigma.length : 0.5f;
-            float rx = (sx + dx) * invSubPixelSize;
-            float ry = (sy + dy) * invSubPixelSize;
-            ry = imageHeight - ry - 1;
-            samples[index] = new ImageSample(rx, ry, i);
-        }
-    }
-    for (var x = 0; x < sbw - 1; x += maxStepSize)
-    for (var y = 0; y < sbh - 1; y += maxStepSize)
-    refineSamples(samples, sbw, x, y, maxStepSize, thresh, istate);
-    if (dumpBuckets) {
-        UI.printInfo(Module.BCKT, "Dumping bucket [%d, %d] to file ...", bx, by);
-        Bitmap bitmap = new Bitmap(sbw, sbh, true);
-        for (var y = sbh - 1, index = 0; y >= 0; y--)
-        for (var x = 0; x < sbw; x++, index++)
-        bitmap.setPixel(x, y, samples[index].c.copy().toNonLinear());
-        bitmap.save(String.format("bucket_%04d_%04d.png", bx, by));
-    }
-    if (displayAA) {
-        // color coded image of what is visible
-        float invArea = invSubPixelSize * invSubPixelSize;
-        for (var y = 0, index = 0; y < bh; y++) {
-            for (var x = 0; x < bw; x++, index++) {
-                var sampled = 0;
-                for (var i = 0; i < subPixelSize; i++) {
-                    for (var j = 0; j < subPixelSize; j++) {
-                        var sx = x * subPixelSize + fs + i;
-                        var sy = y * subPixelSize + fs + j;
-                        var s = sx + sy * sbw;
-                        sampled += samples[s].sampled() ? 1 : 0;
-                    }
-                }
-                bucketRGB[index] = new Color(sampled * invArea);
+        for (var i = 0; i < renderThreads.length; i++) {
+            try {
+                renderThreads[i].join();
+            } catch (e) {
+                console.log("Bucket processing thread "+(i + 1)+" of "+renderThreads.length+" was interrupted");
             }
         }
-    } else {
-        // filter samples into pixels
-        float cy = imageHeight - 1 - (y0 + 0.5f);
-        for (var y = 0, index = 0; y < bh; y++, cy--) {
-            float cx = x0 + 0.5f;
-            for (var x = 0; x < bw; x++, index++, cx++) {
-                Color c = Color.black();
-                float weight = 0.0f;
-                for (var j = -fs, sy = y * subPixelSize; j <= fs; j++, sy++) {
-                    for (var i = -fs, sx = x * subPixelSize, s = sx + sy * sbw; i <= fs; i++, sx++, s++) {
-                        float dx = samples[s].rx - cx;
-                        if (Math.abs(dx) > fhs)
-                            continue;
-                        float dy = samples[s].ry - cy;
-                        if (Math.abs(dy) > fhs)
-                            continue;
-                        float f = filter.get(dx, dy);
-                        c.madd(f, samples[s].c);
-                        weight += f;
-                    }
-                }
-                c.mul(1.0f / weight);
-                bucketRGB[index] = c;
+
+        console.timeEnd("Rendering");
+        display.imageEnd();
+    }
+
+    private renderBucket(display:IDisplay, bx:number, by:number, threadID:number, istate:IntersectionState):void{
+        // pixel sized extents
+        var x0:number = bx * this.bucketSize;
+        var y0:number = by * this.bucketSize;
+        var bw:number = Math.min(this.bucketSize, this.imageWidth - x0);
+        var bh:number = Math.min(this.bucketSize, this.imageHeight - y0);
+
+        // prepare bucket
+        display.imagePrepare(x0, y0, bw, bh, threadID);
+
+        var bucketRGB:Color[] = [];//new Color[bw * bh];
+
+        // subpixel extents
+        var sx0:number = x0 * this.subPixelSize - this.fs;
+        var sy0:number = y0 * this.subPixelSize - this.fs;
+        var sbw:number = bw * this.subPixelSize + this.fs * 2;
+        var sbh:number = bh * this.subPixelSize + this.fs * 2;
+
+        // round up to align with maximum step size
+        sbw = (sbw + (this.maxStepSize - 1)) & (~(this.maxStepSize - 1));
+        sbh = (sbh + (this.maxStepSize - 1)) & (~(this.maxStepSize - 1));
+        // extra padding as needed
+        if (this.maxStepSize > 1) {
+            sbw++;
+            sbh++;
+        }
+        // allocate bucket memory
+        var samples:ImageSample[] = [];//new ImageSample[sbw * sbh];
+        // allocate samples and compute jitter offsets
+        var invSubPixelSize:number = 1.0 / this.subPixelSize;
+        for (var y:number = 0, index = 0; y < sbh; y++) {
+            for (var x:number = 0; x < sbw; x++, index++) {
+                var sx:number = sx0 + x;
+                var sy:number = sy0 + y;
+                var j:number = sx & (this.sigma.length - 1);
+                var k:number = sy & (this.sigma.length - 1);
+                var i:number = j * this.sigma.length + this.sigma[k];
+                var dx:number = this.useJitter ? this.sigma[k] / this.sigma.length : 0.5;
+                var dy:number = this.useJitter ? this.sigma[j] / this.sigma.length : 0.5;
+                var rx:number = (sx + dx) * this.invSubPixelSize;
+                var ry:number = (sy + dy) * this.invSubPixelSize;
+                ry = this.imageHeight - ry - 1;
+                this.samples[index] = new ImageSample(rx, ry, i);
             }
         }
+        for (var x = 0; x < sbw - 1; x += this.maxStepSize) {
+            for (var y = 0; y < sbh - 1; y += this.maxStepSize) {
+                this.refineSamples(samples, sbw, x, y, this.maxStepSize, this.thresh, istate);
+            }
+        }
+        if (this.dumpBuckets) {
+            console.log("Dumping bucket ["+bx+", "+by+"] to file ...");
+            var bitmap:Bitmap = new Bitmap(sbw, sbh, true);
+            for (var y:number = sbh - 1, index:number = 0; y >= 0; y--) {
+                for (var x:number = 0; x < sbw; x++, index++) {
+                    bitmap.setPixel(x, y, samples[index].c.copy().toNonLinear());
+                }
+            }
+            bitmap.save("bucket_"+bx+"_"+by+".png");
+        }
+        if (this.displayAA) {
+            // color coded image of what is visible
+            var invArea:number = invSubPixelSize * invSubPixelSize;
+            for (var y:number = 0, index:number = 0; y < bh; y++) {
+                for (var x:number = 0; x < bw; x++, index++) {
+                    var sampled:number = 0;
+                    for (var i:number = 0; i < this.subPixelSize; i++) {
+                        for (var j:number = 0; j < this.subPixelSize; j++) {
+                            var sx:number = x * this.subPixelSize + fs + i;
+                            var sy:number = y * this.subPixelSize + fs + j;
+                            var s:number = sx + sy * sbw;
+                            sampled += samples[s].sampled() ? 1 : 0;
+                        }
+                    }
+                    bucketRGB[index] = new Color(sampled * invArea);
+                }
+            }
+        } else {
+            // filter samples into pixels
+            var cy:number = this.imageHeight - 1 - (y0 + 0.5);
+            for (var y:number = 0, index:number = 0; y < bh; y++, cy--) {
+                var cx:number = x0 + 0.5;
+                for (var x:number = 0; x < bw; x++, index++, cx++) {
+                    var c:Color = Color.black();
+                    var weight:number = 0.0;
+                    for (var j:number = -fs, sy = y * subPixelSize; j <= fs; j++, sy++) {
+                        for (var i:number = -fs, sx = x * subPixelSize, s = sx + sy * sbw; i <= fs; i++, sx++, s++) {
+                            var dx:number = samples[s].rx - cx;
+                            if (Math.abs(dx) > fhs) {
+                                continue;
+                            }
+                            var dy:number = samples[s].ry - cy;
+                            if (Math.abs(dy) > fhs) {
+                                continue;
+                            }
+                            var f:number = filter.get(dx, dy);
+                            c.madd(f, samples[s].c);
+                            weight += f;
+                        }
+                    }
+                    c.mul(1.0 / weight);
+                    bucketRGB[index] = c;
+                }
+            }
+        }
+        // update pixels
+        display.imageUpdate(x0, y0, bw, bh, bucketRGB);
     }
-    // update pixels
-    display.imageUpdate(x0, y0, bw, bh, bucketRGB);
-}
 
-private void computeSubPixel(ImageSample sample, IntersectionState istate) {
-    float x = sample.rx;
-    float y = sample.ry;
-    double q0 = QMC.halton(1, sample.i);
-    double q1 = QMC.halton(2, sample.i);
-    double q2 = QMC.halton(3, sample.i);
+private computeSubPixel(sample:ImageSample, istate:IntersectionState):void{
+    var x = sample.rx;//float
+    var y = sample.ry;//float
+    var q0 = QMC.halton(1, sample.i);//double
+    var q1 = QMC.halton(2, sample.i);//double
+    var q2 = QMC.halton(3, sample.i);//double
     if (superSampling > 1) {
         // multiple sampling
         sample.add(scene.getRadiance(istate, x, y, q1, q2, q0, sample.i));
         for (var i = 1; i < superSampling; i++) {
-            double time = QMC.mod1(q0 + i * invSuperSampling);
-            double lensU = QMC.mod1(q1 + QMC.halton(0, i));
-            double lensV = QMC.mod1(q2 + QMC.halton(1, i));
+            var time = QMC.mod1(q0 + i * invSuperSampling);//double
+            var lensU = QMC.mod1(q1 + QMC.halton(0, i));//double
+            var lensV = QMC.mod1(q2 + QMC.halton(1, i));//double
             sample.add(scene.getRadiance(istate, x, y, lensU, lensV, time, sample.i + i));
         }
-        sample.scale((float) invSuperSampling);
+        sample.scale(invSuperSampling);
     } else {
         // single sample
         sample.set(scene.getRadiance(istate, x, y, q1, q2, q0, sample.i));
