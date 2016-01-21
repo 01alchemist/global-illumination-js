@@ -16,6 +16,7 @@ import {BoxFilter} from "./filter/BoxFilter";
 import {IDisplay} from "../display/IDisplay";
 import {BucketThread} from "./worker/BucketThread";
 import {Thread} from "./worker/Thread";
+import {ImageSample} from "../imaging/ImageSample";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -146,17 +147,17 @@ export class BucketRenderer {
 
     private aaDepthToString(depth:number):string {
         var pixelAA:number = (depth) < 0 ? -(1 << (-depth)) : (1 << depth);
-        return (depth < 0 ? "1/" : "")+(pixelAA * pixelAA)+" sample"+(depth == 0 ? "" : "s");
+        return (depth < 0 ? "1/" : "") + (pixelAA * pixelAA) + " sample" + (depth == 0 ? "" : "s");
     }
 
-    render(display:IDisplay):void{
+    render(display:IDisplay):void {
         this.display = display;
         display.imageBegin(this.imageWidth, this.imageHeight, this.bucketSize);
         // set members variables
         this.bucketCounter = 0;
         // start task
         console.time("Rendering");
-        console.log("bucketCoords:"+this.bucketCoords.length);
+        console.log("bucketCoords:" + this.bucketCoords.length);
         var renderThreads:Thread[] = new Thread[scene.getThreads()];
         for (var i = 0; i < renderThreads.length; i++) {
             renderThreads[i] = new BucketThread(i);
@@ -167,7 +168,7 @@ export class BucketRenderer {
             try {
                 renderThreads[i].join();
             } catch (e) {
-                console.log("Bucket processing thread "+(i + 1)+" of "+renderThreads.length+" was interrupted");
+                console.log("Bucket processing thread " + (i + 1) + " of " + renderThreads.length + " was interrupted");
             }
         }
 
@@ -175,7 +176,7 @@ export class BucketRenderer {
         display.imageEnd();
     }
 
-    private renderBucket(display:IDisplay, bx:number, by:number, threadID:number, istate:IntersectionState):void{
+    private renderBucket(display:IDisplay, bx:number, by:number, threadID:number, istate:IntersectionState):void {
         // pixel sized extents
         var x0:number = bx * this.bucketSize;
         var y0:number = by * this.bucketSize;
@@ -226,14 +227,14 @@ export class BucketRenderer {
             }
         }
         if (this.dumpBuckets) {
-            console.log("Dumping bucket ["+bx+", "+by+"] to file ...");
+            console.log("Dumping bucket [" + bx + ", " + by + "] to file ...");
             var bitmap:Bitmap = new Bitmap(sbw, sbh, true);
             for (var y:number = sbh - 1, index:number = 0; y >= 0; y--) {
                 for (var x:number = 0; x < sbw; x++, index++) {
                     bitmap.setPixel(x, y, samples[index].c.copy().toNonLinear());
                 }
             }
-            bitmap.save("bucket_"+bx+"_"+by+".png");
+            bitmap.save("bucket_" + bx + "_" + by + ".png");
         }
         if (this.displayAA) {
             // color coded image of what is visible
@@ -284,156 +285,65 @@ export class BucketRenderer {
         display.imageUpdate(x0, y0, bw, bh, bucketRGB);
     }
 
-private computeSubPixel(sample:ImageSample, istate:IntersectionState):void{
-    var x = sample.rx;//float
-    var y = sample.ry;//float
-    var q0 = QMC.halton(1, sample.i);//double
-    var q1 = QMC.halton(2, sample.i);//double
-    var q2 = QMC.halton(3, sample.i);//double
-    if (superSampling > 1) {
-        // multiple sampling
-        sample.add(scene.getRadiance(istate, x, y, q1, q2, q0, sample.i));
-        for (var i = 1; i < superSampling; i++) {
-            var time = QMC.mod1(q0 + i * invSuperSampling);//double
-            var lensU = QMC.mod1(q1 + QMC.halton(0, i));//double
-            var lensV = QMC.mod1(q2 + QMC.halton(1, i));//double
-            sample.add(scene.getRadiance(istate, x, y, lensU, lensV, time, sample.i + i));
-        }
-        sample.scale(invSuperSampling);
-    } else {
-        // single sample
-        sample.set(scene.getRadiance(istate, x, y, q1, q2, q0, sample.i));
-    }
-}
-
-private void refineSamples(ImageSample[] samples, int sbw, int x, int y, int stepSize, float thresh, IntersectionState istate) {
-    var dx = stepSize;
-    var dy = stepSize * sbw;
-    var i00 = x + y * sbw;
-    ImageSample s00 = samples[i00];
-    ImageSample s01 = samples[i00 + dy];
-    ImageSample s10 = samples[i00 + dx];
-    ImageSample s11 = samples[i00 + dx + dy];
-    if (!s00.sampled())
-        computeSubPixel(s00, istate);
-    if (!s01.sampled())
-        computeSubPixel(s01, istate);
-    if (!s10.sampled())
-        computeSubPixel(s10, istate);
-    if (!s11.sampled())
-        computeSubPixel(s11, istate);
-    if (stepSize > minStepSize) {
-        if (s00.isDifferent(s01, thresh) || s00.isDifferent(s10, thresh) || s00.isDifferent(s11, thresh) || s01.isDifferent(s11, thresh) || s10.isDifferent(s11, thresh) || s01.isDifferent(s10, thresh)) {
-            stepSize >>= 1;
-            thresh *= 2;
-            refineSamples(samples, sbw, x, y, stepSize, thresh, istate);
-            refineSamples(samples, sbw, x + stepSize, y, stepSize, thresh, istate);
-            refineSamples(samples, sbw, x, y + stepSize, stepSize, thresh, istate);
-            refineSamples(samples, sbw, x + stepSize, y + stepSize, stepSize, thresh, istate);
-            return;
+    private computeSubPixel(sample:ImageSample, istate:IntersectionState):void {
+        var x:float = sample.rx;
+        var y:float = sample.ry;
+        var q0:double = QMC.halton(1, sample.i);
+        var q1:double = QMC.halton(2, sample.i);
+        var q2:double = QMC.halton(3, sample.i);
+        if (superSampling > 1) {
+            // multiple sampling
+            sample.add(scene.getRadiance(istate, x, y, q1, q2, q0, sample.i));
+            for (var i:int = 1; i < superSampling; i++) {
+                var time:double = QMC.mod1(q0 + i * invSuperSampling);
+                var lensU:double = QMC.mod1(q1 + QMC.halton(0, i));
+                var lensV:double = QMC.mod1(q2 + QMC.halton(1, i));
+                sample.add(scene.getRadiance(istate, x, y, lensU, lensV, time, sample.i + i));
+            }
+            sample.scale(invSuperSampling);
+        } else {
+            // single sample
+            sample.set(scene.getRadiance(istate, x, y, q1, q2, q0, sample.i));
         }
     }
 
-    // interpolate remaining samples
-    float ds = 1.0f / stepSize;
-    for (var i = 0; i <= stepSize; i++)
-    for (var j = 0; j <= stepSize; j++)
-    if (!samples[x + i + (y + j) * sbw].processed())
-        ImageSample.bilerp(samples[x + i + (y + j) * sbw], s00, s01, s10, s11, i * ds, j * ds);
-}
+    private refineSamples(samples:ImageSample[], sbw:int, x:int, y:int, stepSize:int, thresh:float, istate:IntersectionState):void {
+        var dx:int = stepSize;
+        var dy:int = stepSize * sbw;
+        var i00:int = x + y * sbw;
+        var s00:ImageSample = samples[i00];
+        var s01:ImageSample = samples[i00 + dy];
+        var s10:ImageSample = samples[i00 + dx];
+        var s11:ImageSample = samples[i00 + dx + dy];
+        if (!s00.sampled())
+            computeSubPixel(s00, istate);
+        if (!s01.sampled())
+            computeSubPixel(s01, istate);
+        if (!s10.sampled())
+            computeSubPixel(s10, istate);
+        if (!s11.sampled())
+            computeSubPixel(s11, istate);
+        if (stepSize > minStepSize) {
+            if (s00.isDifferent(s01, thresh) || s00.isDifferent(s10, thresh) || s00.isDifferent(s11, thresh) || s01.isDifferent(s11, thresh) || s10.isDifferent(s11, thresh) || s01.isDifferent(s10, thresh)) {
+                stepSize >>= 1;
+                thresh *= 2;
+                refineSamples(samples, sbw, x, y, stepSize, thresh, istate);
+                refineSamples(samples, sbw, x + stepSize, y, stepSize, thresh, istate);
+                refineSamples(samples, sbw, x, y + stepSize, stepSize, thresh, istate);
+                refineSamples(samples, sbw, x + stepSize, y + stepSize, stepSize, thresh, istate);
+                return;
+            }
+        }
 
-private static final class ImageSample {
-    float rx, ry;
-    var i, n;
-    Color c;
-    Instance instance;
-    Shader shader;
-    float nx, ny, nz;
+        // interpolate remaining samples
+        var ds:float = 1.0 / stepSize;
+        for (var i = 0; i <= stepSize; i++) {
+            for (var j = 0; j <= stepSize; j++) {
+                if (!samples[x + i + (y + j) * sbw].processed()) {
+                    ImageSample.bilerp(samples[x + i + (y + j) * sbw], s00, s01, s10, s11, i * ds, j * ds);
+                }
 
-    ImageSample(float rx, float ry, int i) {
-    this.rx = rx;
-    this.ry = ry;
-    this.i = i;
-    n = 0;
-    c = null;
-    instance = null;
-    shader = null;
-    nx = ny = nz = 1;
-}
-
-final void set(ShadingState state) {
-    if (state == null)
-        c = Color.BLACK;
-    else {
-        c = state.getResult();
-        checkNanInf();
-        shader = state.getShader();
-        instance = state.getInstance();
-        if (state.getNormal() != null) {
-            nx = state.getNormal().x;
-            ny = state.getNormal().y;
-            nz = state.getNormal().z;
+            }
         }
     }
-    n = 1;
-}
-
-final void add(ShadingState state) {
-    if (n == 0)
-        c = Color.black();
-    if (state != null) {
-        c.add(state.getResult());
-        checkNanInf();
-    }
-    n++;
-}
-
-final void checkNanInf() {
-    if (c.isNan())
-        UI.printError(Module.BCKT, "NaN shading sample!");
-    else if (c.isInf())
-        UI.printError(Module.BCKT, "Inf shading sample!");
-
-}
-
-final void scale(float s) {
-    c.mul(s);
-}
-
-final boolean processed() {
-    return c != null;
-}
-
-final boolean sampled() {
-    return n > 0;
-}
-
-final boolean isDifferent(ImageSample sample, float thresh) {
-    if (instance != sample.instance)
-        return true;
-    if (shader != sample.shader)
-        return true;
-    if (Color.hasContrast(c, sample.c, thresh))
-        return true;
-    // only compare normals if this pixel has not been averaged
-    float dot = (nx * sample.nx + ny * sample.ny + nz * sample.nz);
-    return dot < 0.9f;
-}
-
-static final ImageSample bilerp(ImageSample result, ImageSample i00, ImageSample i01, ImageSample i10, ImageSample i11, float dx, float dy) {
-    float k00 = (1.0f - dx) * (1.0f - dy);
-    float k01 = (1.0f - dx) * dy;
-    float k10 = dx * (1.0f - dy);
-    float k11 = dx * dy;
-    Color c00 = i00.c;
-    Color c01 = i01.c;
-    Color c10 = i10.c;
-    Color c11 = i11.c;
-    Color c = Color.mul(k00, c00);
-    c.madd(k01, c01);
-    c.madd(k10, c10);
-    c.madd(k11, c11);
-    result.c = c;
-    return result;
-}
 }

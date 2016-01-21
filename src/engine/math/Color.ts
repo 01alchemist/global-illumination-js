@@ -82,7 +82,12 @@ export class Color {
     add(b:Color):Color {
         return new Color(this.r + b.r, this.g + b.g, this.b + b.b);
     }
-
+    madd(s:Color, c:Color):Color {
+        this.r += s.r * c.r;
+        this.g += s.g * c.g;
+        this.b += s.b * c.b;
+        return this;
+    }
     sub(b:Color):Color {
         return new Color(this.r - b.r, this.g - b.g, this.b - b.b);
     }
@@ -123,5 +128,13 @@ export class Color {
             this.g,
             this.b
         );
+    }
+
+    isNaN():boolean {
+        return isNaN(this.r) || isNaN(this.g) || isNaN(this.b);
+    }
+
+    isFinite():boolean {
+        return isFinite(this.r) || isFinite(this.g) || isFinite(this.b);
     }
 }
