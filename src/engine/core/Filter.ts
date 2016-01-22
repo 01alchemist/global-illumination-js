@@ -3,7 +3,7 @@
  *
  * Represents a multi-pixel image filter kernel.
  */
-export interface IFilter{
+export interface Filter{
     /**
      * Width in pixels of the filter extents. The filter will be applied to the
      * range of pixels within a box of <code>+/- getSize() / 2</code> around

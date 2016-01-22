@@ -2,7 +2,7 @@ import {Color} from "../math/Color";
 /**
  * Created by Nidin Vinayakan on 20/1/2016.
  */
-export interface IDisplay {
+export interface Display {
 
     /**
      * This is called before an image is rendered to indicate how large the

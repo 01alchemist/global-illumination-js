@@ -1,5 +1,5 @@
 import {SharedScene} from "../scene/SharedScene";
-import {IDisplay} from "./../display/IDisplay";
+import {IDisplay} from "./../core/IDisplay";
 /**
  * Created by Nidin Vinayakan on 21/1/2016.
  *

@@ -1,4 +1,4 @@
-import {IFilter} from "./IFilter";
+import {IFilter} from "./../../core/IFilter";
 import {BoxFilter} from "./BoxFilter";
 import {GaussianFilter} from "./GaussianFilter";
 import {MitchellFilter} from "./MitchellFilter";

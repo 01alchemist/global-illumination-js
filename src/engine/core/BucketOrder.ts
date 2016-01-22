@@ -7,7 +7,7 @@
  * screen is tiled. No attempt is made to check for duplicates or incomplete
  * coverage.
  */
-export interface IBucketOrder{
+export interface BucketOrder{
     /**
      * Computes the order in which each coordinate on the screen should be
      * visited.

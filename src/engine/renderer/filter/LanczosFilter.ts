@@ -1,4 +1,4 @@
-import {IFilter} from "./IFilter";
+import {IFilter} from "./../../core/IFilter";
 /**
  * Created by Nidin Vinayakan on 20/1/2016.
  */
