@@ -10,7 +10,7 @@ export class Vector3 {
     static NullVector:Vector3 = new Vector3(DirectMemory.MIN_FLOAT32_VALUE,DirectMemory.MIN_FLOAT32_VALUE,DirectMemory.MIN_FLOAT32_VALUE);
     memorySize:number = Vector3.SIZE;
 
-    constructor(public x:number = 0, public y:number = 0, public z:number = 0) {
+    constructor(x:number = 0, y:number = 0, z:number = 0) {
 
     }
 

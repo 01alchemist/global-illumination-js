@@ -3,13 +3,13 @@
  */
 export class ConstantSpectralCurve extends SpectralCurve {
 
-    private amp: number;
+    private amp:number;
 
-    public constructor (amp: number) {
+    constructor (amp:number) {
         this.amp = this.amp;
     }
 
-    public sample(lambda: number): number {
+    sample(lambda:number):number {
         return this.amp;
     }
 }

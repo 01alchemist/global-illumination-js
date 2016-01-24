@@ -1,562 +1,523 @@
+import {SharedScene} from "./scene/SharedScene";
+import {BucketRenderer} from "./renderer/BucketRenderer";
+import {ProgressiveRenderer} from "./renderer/ProgressiveRenderer";
+import {ParameterList} from "./core/ParameterList";
+import {RenderObjectMap} from "./renderer/utils/RenderObjectMap";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
-export class GlobalIlluminatiionAPI{
+export class GlobalIlluminationAPI {
 
-public static VERSION: String = "0.07.2";
+    static VERSION:string = "0.07.2";
 
-public static DEFAULT_OPTIONS: String = "::options";
+    static DEFAULT_OPTIONS:string = "::options";
 
-private scene: Scene;
+    private scene:SharedScene;
 
-private bucketRenderer: BucketRenderer;
+    private bucketRenderer:BucketRenderer;
 
-private progressiveRenderer: ProgressiveRenderer;
+    private progressiveRenderer:ProgressiveRenderer;
 
-private includeSearchPath: SearchPath;
+    private includeSearchPath:SearchPath;
 
-private textureSearchPath: SearchPath;
+    private textureSearchPath:SearchPath;
 
-private parameterList: ParameterList;
+    private parameterList:ParameterList;
 
-private renderObjects: RenderObjectMap;
+    private renderObjects:RenderObjectMap;
 
-private currentFrame: number;
+    private currentFrame:number;
 
-public static runSystemCheck() {
-    let RECOMMENDED_MAX_SIZE: number = 800;
-    let maxMb: number = (Runtime.getRuntime().maxMemory() / 1048576);
-    if ((maxMb < RECOMMENDED_MAX_SIZE)) {
-        UI.printError(Module.API, "JVM available memory is below %d MB (found %d MB only).
-        Please make sure you launched the program with the -Xmx command line options.", RECOMMENDED_MAX_SIZE, maxMb);
+    static runSystemCheck() {
+        //Nothing to check for now
     }
 
-    let compiler: String = System.getProperty("java.vm.name");
-    if (((compiler == null)
-        || !(compiler.contains("HotSpot") && compiler.contains("Server")))) {
-        UI.printError(Module.API, "You do not appear to be running Sun's server JVM
-        Performance may suffer");
+    constructor() {
+        this.reset();
     }
 
-    UI.printDetailed(Module.API, "Java environment settings:");
-    UI.printDetailed(Module.API, "  * Max memory available : %d MB", maxMb);
-    UI.printDetailed(Module.API, "  * Virtual machine name : %s", (compiler == null));
-    // TODO: Warning!!!, inline IF is not supported ?
-    UI.printDetailed(Module.API, "  * Operating system     : %s", System.getProperty("os.name"));
-    UI.printDetailed(Module.API, "  * CPU architecture     : %s", System.getProperty("os.arch"));
-}
-
-public constructor () {
-    this.reset();
-}
-
-public reset() {
-    this.scene = new Scene();
-    this.bucketRenderer = new BucketRenderer();
-    this.progressiveRenderer = new ProgressiveRenderer();
-    this.includeSearchPath = new SearchPath("include");
-    this.textureSearchPath = new SearchPath("texture");
-    this.parameterList = new ParameterList();
-    this.renderObjects = new RenderObjectMap();
-    this.currentFrame = 1;
-}
-
-public getUniqueName(prefix: String): String {
-    //  generate a unique name based on the given prefix
-    let counter: number = 1;
-    let name: String;
-    for (
-        ; this.renderObjects.has(name);
-    ) {
-        name = String.format("%s_%d", prefix, counter);
-        counter++;
+    reset() {
+        this.scene = new SharedScene();
+        this.bucketRenderer = new BucketRenderer();
+        this.progressiveRenderer = new ProgressiveRenderer();
+        this.includeSearchPath = new SearchPath("include");
+        this.textureSearchPath = new SearchPath("texture");
+        this.parameterList = new ParameterList();
+        this.renderObjects = new RenderObjectMap();
+        this.currentFrame = 1;
     }
 
-    return name;
-}
+    getUniqueName(prefix:string):string {
+        //  generate a unique name based on the given prefix
+        let counter:number = 1;
+        let name:string;
+        do {
+            name = prefix + "_" + counter;
+            counter++;
+        } while (renderObjects.has(name));
 
-public parameter(name: String, value: String) {
-    this.parameterList.addString(name, value);
-}
-
-public parameter(name: String, value: boolean) {
-    this.parameterList.addBoolean(name, value);
-}
-
-public parameter(name: String, value: number) {
-    this.parameterList.addInteger(name, value);
-}
-
-public parameter(name: String, value: number) {
-    this.parameterList.addFloat(name, value);
-}
-
-public parameter(name: String, value: Color) {
-    this.parameterList.addColor(name, value);
-}
-
-public parameter(name: String, value: Point3) {
-    this.parameterList.addPoints(name, InterpolationType.NONE, [
-        value.x,
-        value.y,
-        value.z]);
-}
-
-public parameter(name: String, value: Vector3) {
-    this.parameterList.addVectors(name, InterpolationType.NONE, [
-        value.x,
-        value.y,
-        value.z]);
-}
-
-public parameter(name: String, value: Matrix4) {
-    this.parameterList.addMatrices(name, InterpolationType.NONE, value.asRowMajor());
-}
-
-public parameter(name: String, value: number[]) {
-    this.parameterList.addIntegerArray(name, value);
-}
-
-public parameter(name: String, value: String[]) {
-    this.parameterList.addStringArray(name, value);
-}
-
-public parameter(name: String, type: String, interpolation: String, data: number[]) {
-    let interp: InterpolationType;
-    try {
-        interp = InterpolationType.valueOf(interpolation.toUpperCase());
-    }
-    catch (e /*:IllegalArgumentException*/) {
-        UI.printError(Module.API, "Unknown interpolation type: %s -- ignoring parameter \""%s\"""", interpolation, name)", return);
+        return name;
     }
 
-    if (type.equals("float")) {
-        this.parameterList.addFloats(name, interp, data);
-    }
-    else if (type.equals("point")) {
-        this.parameterList.addPoints(name, interp, data);
-    }
-    else if (type.equals("vector")) {
-        this.parameterList.addVectors(name, interp, data);
-    }
-    else if (type.equals("texcoord")) {
-        this.parameterList.addTexCoords(name, interp, data);
-    }
-    else if (type.equals("matrix")) {
-        this.parameterList.addMatrices(name, interp, data);
-    }
-    else {
-        UI.printError(Module.API, "Unknown parameter type: %s -- ignoring parameter \""%s\"""", type, name)");
+    parameter(name:string, value:string) {
+        this.parameterList.addString(name, value);
     }
 
-}
-
-public remove(name: String) {
-    this.renderObjects.remove(name);
-}
-
-public update(name: String): boolean {
-    let success: boolean = this.renderObjects.update(name, this.parameterList, this);
-    this.parameterList.clear(success);
-    return success;
-}
-
-public addIncludeSearchPath(path: String) {
-    this.includeSearchPath.addSearchPath(path);
-}
-
-public addTextureSearchPath(path: String) {
-    this.textureSearchPath.addSearchPath(path);
-}
-
-public resolveTextureFilename(filename: String): String {
-    return this.textureSearchPath.resolvePath(filename);
-}
-
-public resolveIncludeFilename(filename: String): String {
-    return this.includeSearchPath.resolvePath(filename);
-}
-
-public shader(name: String, shader: Shader) {
-    if ((shader != null)) {
-        //  we are declaring a shader for the first time
-        if (this.renderObjects.has(name)) {
-            UI.printError(Module.API, "Unable to declare shader \""%s\"", name is already in use", name);
-            this.parameterList.clear(true);
-            return;
-        }
-
-        this.renderObjects.put(name, shader);
+    parameter(name:string, value:boolean) {
+        this.parameterList.addBoolean(name, value);
     }
 
-    //  update existing shader (only if it is valid)
-    if ((this.lookupShader(name) != null)) {
-        this.update(name);
-    }
-    else {
-        UI.printError(Module.API, "Unable to update shader \""%s\"" - shader object was not found", name);
-        this.parameterList.clear(true);
+    parameter(name:string, value:number) {
+        this.parameterList.addInteger(name, value);
     }
 
-}
-
-public modifier(name: String, modifier: Modifier) {
-    if ((modifier != null)) {
-        //  we are declaring a shader for the first time
-        if (this.renderObjects.has(name)) {
-            UI.printError(Module.API, "Unable to declare modifier \""%s\"", name is already in use", name);
-            this.parameterList.clear(true);
-            return;
-        }
-
-        this.renderObjects.put(name, modifier);
+    parameter(name:string, value:number) {
+        this.parameterList.addFloat(name, value);
     }
 
-    //  update existing shader (only if it is valid)
-    if ((this.lookupModifier(name) != null)) {
-        this.update(name);
-    }
-    else {
-        UI.printError(Module.API, "Unable to update modifier \""%s\"" - modifier object was not found", name);
-        this.parameterList.clear(true);
+    parameter(name:string, value:Color) {
+        this.parameterList.addColor(name, value);
     }
 
-}
-
-public geometry(name: String, primitives: PrimitiveList) {
-    if ((primitives != null)) {
-        //  we are declaring a geometry for the first time
-        if (this.renderObjects.has(name)) {
-            UI.printError(Module.API, "Unable to declare geometry \""%s\"", name is already in use", name);
-            this.parameterList.clear(true);
-            return;
-        }
-
-        this.renderObjects.put(name, primitives);
+    parameter(name:string, value:Point3) {
+        this.parameterList.addPoints(name, InterpolationType.NONE, [
+            value.x,
+            value.y,
+            value.z]);
     }
 
-    if ((this.lookupGeometry(name) != null)) {
-        this.update(name);
-    }
-    else {
-        UI.printError(Module.API, "Unable to update geometry \""%s\"" - geometry object was not found", name);
-        this.parameterList.clear(true);
-    }
-
-}
-
-public geometry(name: String, tesselatable: Tesselatable) {
-    if ((tesselatable != null)) {
-        //  we are declaring a geometry for the first time
-        if (this.renderObjects.has(name)) {
-            UI.printError(Module.API, "Unable to declare geometry \""%s\"", name is already in use", name);
-            this.parameterList.clear(true);
-            return;
-        }
-
-        this.renderObjects.put(name, tesselatable);
+    parameter(name:string, value:Vector3) {
+        this.parameterList.addVectors(name, InterpolationType.NONE, [
+            value.x,
+            value.y,
+            value.z]);
     }
 
-    if ((this.lookupGeometry(name) != null)) {
-        this.update(name);
-    }
-    else {
-        UI.printError(Module.API, "Unable to update geometry \""%s\"" - geometry object was not found", name);
-        this.parameterList.clear(true);
+    parameter(name:string, value:Matrix4) {
+        this.parameterList.addMatrices(name, InterpolationType.NONE, value.asRowMajor());
     }
 
-}
-
-public instance(name: String, geoname: String) {
-    if ((geoname != null)) {
-        //  we are declaring this instance for the first time
-        if (this.renderObjects.has(name)) {
-            UI.printError(Module.API, "Unable to declare instance \""%s\"", name is already in use", name);
-            this.parameterList.clear(true);
-            return;
-        }
-
-        this.parameter("geometry", geoname);
-        this.renderObjects.put(name, new Instance());
+    parameter(name:string, value:number[]) {
+        this.parameterList.addIntegerArray(name, value);
     }
 
-    if ((this.lookupInstance(name) != null)) {
-        this.update(name);
-    }
-    else {
-        UI.printError(Module.API, "Unable to update instance \""%s\"" - instance object was not found", name);
-        this.parameterList.clear(true);
+    parameter(name:string, value:string[]) {
+        this.parameterList.addStringArray(name, value);
     }
 
-}
-
-public light(name: String, light: LightSource) {
-    if ((light != null)) {
-        //  we are declaring this light for the first time
-        if (this.renderObjects.has(name)) {
-            UI.printError(Module.API, "Unable to declare light \""%s\"", name is already in use", name);
-            this.parameterList.clear(true);
-            return;
-        }
-
-        this.renderObjects.put(name, light);
-    }
-
-    if ((this.lookupLight(name) != null)) {
-        this.update(name);
-    }
-    else {
-        UI.printError(Module.API, "Unable to update instance \""%s\"" - instance object was not found", name);
-        this.parameterList.clear(true);
-    }
-
-}
-
-public camera(name: String, lens: CameraLens) {
-    if ((lens != null)) {
-        //  we are declaring this camera for the first time
-        if (this.renderObjects.has(name)) {
-            UI.printError(Module.API, "Unable to declare camera \""%s\"", name is already in use", name);
-            this.parameterList.clear(true);
-            return;
-        }
-
-        this.renderObjects.put(name, new Camera(lens));
-    }
-
-    //  update existing shader (only if it is valid)
-    if ((this.lookupCamera(name) != null)) {
-        this.update(name);
-    }
-    else {
-        UI.printError(Module.API, "Unable to update camera \""%s\"" - camera object was not found", name);
-        this.parameterList.clear(true);
-    }
-
-}
-
-public options(name: String) {
-    if ((this.lookupOptions(name) == null)) {
-        if (this.renderObjects.has(name)) {
-            UI.printError(Module.API, "Unable to declare options \""%s\"", name is already in use", name);
-            this.parameterList.clear(true);
-            return;
-        }
-
-        this.renderObjects.put(name, new Options());
-    }
-
-    let lookupOptions: assert;
-    (name != null);
-    this.update(name);
-}
-
-public lookupGeometry(name: String): Geometry {
-    return this.renderObjects.lookupGeometry(name);
-}
-
-private lookupInstance(name: String): Instance {
-    return this.renderObjects.lookupInstance(name);
-}
-
-private lookupCamera(name: String): Camera {
-    return this.renderObjects.lookupCamera(name);
-}
-
-private lookupOptions(name: String): Options {
-    return this.renderObjects.lookupOptions(name);
-}
-
-public lookupShader(name: String): Shader {
-    return this.renderObjects.lookupShader(name);
-}
-
-public lookupModifier(name: String): Modifier {
-    return this.renderObjects.lookupModifier(name);
-}
-
-private lookupLight(name: String): LightSource {
-    return this.renderObjects.lookupLight(name);
-}
-
-public shaderOverride(name: String, photonOverride: boolean) {
-    this.scene.setShaderOverride(this.lookupShader(name), photonOverride);
-}
-
-public render(optionsName: String, display: Display) {
-    this.renderObjects.updateScene(this.scene);
-    let opt: Options = this.lookupOptions(optionsName);
-    if ((opt == null)) {
-        opt = new Options();
-    }
-
-    this.scene.setCamera(this.lookupCamera(opt.getString("camera", null)));
-    //  baking
-    let bakingInstanceName: String = opt.getString("baking.instance", null);
-    if ((bakingInstanceName != null)) {
-        let bakingInstance: Instance = this.lookupInstance(bakingInstanceName);
-        if ((bakingInstance == null)) {
-            UI.printError(Module.API, "Unable to bake instance \""%s\"" - not found", bakingInstanceName);
-            return;
-        }
-
-        this.scene.setBakingInstance(bakingInstance);
-    }
-    else {
-        this.scene.setBakingInstance(null);
-    }
-
-    let samplerName: String = opt.getString("sampler", "bucket");
-    let sampler: ImageSampler = null;
-    if ((samplerName.equals("none") || samplerName.equals("null"))) {
-        sampler = null;
-    }
-    else if (samplerName.equals("bucket")) {
-        sampler = this.bucketRenderer;
-    }
-    else if (samplerName.equals("ipr")) {
-        sampler = this.progressiveRenderer;
-    }
-    else if (samplerName.equals("fast")) {
-        sampler = new SimpleRenderer();
-    }
-    else {
-        UI.printError(Module.API, "Unknown sampler type: %s - aborting", samplerName);
-        return;
-    }
-
-    this.scene.render(opt, sampler, display);
-}
-
-public parse(filename: String): boolean {
-    if ((filename == null)) {
-        return false;
-    }
-
-    filename = this.includeSearchPath.resolvePath(filename);
-    let parser: SceneParser = null;
-    if (filename.endsWith(".sc")) {
-        parser = new SCParser();
-    }
-    else if (filename.endsWith(".ra2")) {
-        parser = new RA2Parser();
-    }
-    else if (filename.endsWith(".ra3")) {
-        parser = new RA3Parser();
-    }
-    else if (filename.endsWith(".tri")) {
-        parser = new TriParser();
-    }
-    else if (filename.endsWith(".rib")) {
-        parser = new ShaveRibParser();
-    }
-    else {
-        UI.printError(Module.API, "Unable to find a suitable parser for: \""%s\"""", filename)", false);
-    }
-
-    let currentFolder: String = (new File(filename) + getAbsoluteFile().getParentFile().getAbsolutePath());
-    this.includeSearchPath.addSearchPath(currentFolder);
-    this.textureSearchPath.addSearchPath(currentFolder);
-    return parser.parse(filename, this);
-}
-
-public getBounds(): BoundingBox {
-    return this.scene.getBounds();
-}
-
-public build() {
-
-}
-
-public static create(filename: String, frameNumber: number): GlobalIlluminatiionAPI {
-    if ((filename == null)) {
-        return new GlobalIlluminatiionAPI();
-    }
-
-    let api: GlobalIlluminatiionAPI = null;
-    if (filename.endsWith(".java")) {
-        let t: Timer = new Timer();
-        UI.printInfo(Module.API, "Compiling \"""" + filename + ", " ...");
-        t.start();
+    parameter(name:string, type:string, interpolation:string, data:number[]) {
+        let interp:InterpolationType;
         try {
-            let stream: FileInputStream = new FileInputStream(filename);
-            api = (<GlobalIlluminatiionAPI>(ClassBodyEvaluator.createFastClassBodyEvaluator(new Scanner(filename, stream), GlobalIlluminatiionAPI.class, ClassLoader.getSystemClassLoader())));
-            stream.close();
+            interp = InterpolationType.valueOf(interpolation.toUpperCase());
         }
-        catch (e /*:CompileException*/) {
-            UI.printError(Module.API, "Could not compile: \""%s\"""", filename)", UI.printError(Module.API, "%s", e.getMessage()));
-            return null;
-        }
-        catch (e /*:ParseException*/) {
-            UI.printError(Module.API, "Could not compile: \""%s\"""", filename)", UI.printError(Module.API, "%s", e.getMessage()));
-            return null;
-        }
-        catch (e /*:ScanException*/) {
-            UI.printError(Module.API, "Could not compile: \""%s\"""", filename)", UI.printError(Module.API, "%s", e.getMessage()));
-            return null;
-        }
-        catch (e /*:IOException*/) {
-            UI.printError(Module.API, "Could not compile: \""%s\"""", filename)", UI.printError(Module.API, "%s", e.getMessage()));
-            return null;
+        catch (e /*:IllegalArgumentException*/) {
+            console.error("Unknown interpolation type:" + interpolation + " -- ignoring parameter " + name);
         }
 
-        t.end();
-        UI.printInfo(Module.API, ("Compile time: " + t.toString()));
-        if ((api != null)) {
-            let currentFolder: String = (new File(filename) + getAbsoluteFile().getParentFile().getAbsolutePath());
-            api.includeSearchPath.addSearchPath(currentFolder);
-            api.textureSearchPath.addSearchPath(currentFolder);
+        switch (type) {
+            case "float":
+                this.parameterList.addFloats(name, interp, data);
+                break;
+            case "point":
+                this.parameterList.addPoints(name, interp, data);
+                break;
+            case "vector":
+                this.parameterList.addVectors(name, interp, data);
+                break;
+            case "texcoord":
+                this.parameterList.addTexCoords(name, interp, data);
+                break;
+            case "matrix":
+                this.parameterList.addMatrices(name, interp, data);
+                break;
+            default:
+                console.error("Unknown parameter type:" + type + " -- ignoring parameter " + name);
+                break;
         }
 
-        UI.printInfo(Module.API, "Build script running ...");
-        t.start();
-        api.setCurrentFrame(frameNumber);
-        api.build();
-        t.end();
-        UI.printInfo(Module.API, "Build script time: %s", t.toString());
-    }
-    else {
-        api = new GlobalIlluminatiionAPI();
-        api = api.parse(filename);
-        // TODO: Warning!!!, inline IF is not supported ?
     }
 
-    return api;
-}
+    remove(name:string) {
+        this.renderObjects.remove(name);
+    }
 
-public static compile(code: String): GlobalIlluminatiionAPI {
-    try {
-        let t: Timer = new Timer();
-        t.start();
-        let api: GlobalIlluminatiionAPI = (<GlobalIlluminatiionAPI>(ClassBodyEvaluator.createFastClassBodyEvaluator(new Scanner(null, new StringReader(code)), GlobalIlluminatiionAPI.class, (<ClassLoader>(null)))));
-        t.end();
-        UI.printInfo(Module.API, "Compile time: %s", t.toString());
+    update(name:string):boolean {
+        let success:boolean = this.renderObjects.update(name, this.parameterList, this);
+        this.parameterList.clear(success);
+        return success;
+    }
+
+    addIncludeSearchPath(path:string) {
+        this.includeSearchPath.addSearchPath(path);
+    }
+
+    addTextureSearchPath(path:string) {
+        this.textureSearchPath.addSearchPath(path);
+    }
+
+    resolveTextureFilename(filename:string):string {
+        return this.textureSearchPath.resolvePath(filename);
+    }
+
+    resolveIncludeFilename(filename:string):string {
+        return this.includeSearchPath.resolvePath(filename);
+    }
+
+    shader(name:string, shader:Shader) {
+        if ((shader != null)) {
+            //  we are declaring a shader for the first time
+            if (this.renderObjects.has(name)) {
+                console.error("Unable to declare shader " + name + ", name is already in use");
+                this.parameterList.clear(true);
+                return;
+            }
+
+            this.renderObjects.put(name, shader);
+        }
+
+        //  update existing shader (only if it is valid)
+        if ((this.lookupShader(name) != null)) {
+            this.update(name);
+        }
+        else {
+            console.error("Unable to update shader " + name + " - shader object was not found");
+            this.parameterList.clear(true);
+        }
+
+    }
+
+    modifier(name:string, modifier:Modifier) {
+        if ((modifier != null)) {
+            //  we are declaring a shader for the first time
+            if (this.renderObjects.has(name)) {
+                console.error("Unable to declare modifier " + name + ", name is already in use");
+                this.parameterList.clear(true);
+                return;
+            }
+
+            this.renderObjects.put(name, modifier);
+        }
+
+        //  update existing shader (only if it is valid)
+        if ((this.lookupModifier(name) != null)) {
+            this.update(name);
+        }
+        else {
+            console.error("Unable to update modifier " + name + " - modifier object was not found");
+            this.parameterList.clear(true);
+        }
+
+    }
+
+    geometry(name:string, primitives:PrimitiveList) {
+        if ((primitives != null)) {
+            //  we are declaring a geometry for the first time
+            if (this.renderObjects.has(name)) {
+                console.error("Unable to declare geometry " + name + ", name is already in use");
+                this.parameterList.clear(true);
+                return;
+            }
+
+            this.renderObjects.put(name, primitives);
+        }
+
+        if ((this.lookupGeometry(name) != null)) {
+            this.update(name);
+        }
+        else {
+            console.error("Unable to update geometry " + name + " - geometry object was not found");
+            this.parameterList.clear(true);
+        }
+
+    }
+
+    geometry(name:string, tesselatable:Tesselatable) {
+        if ((tesselatable != null)) {
+            //  we are declaring a geometry for the first time
+            if (this.renderObjects.has(name)) {
+                console.error("Unable to declare geometry " + name + ", name is already in use");
+                this.parameterList.clear(true);
+                return;
+            }
+
+            this.renderObjects.put(name, tesselatable);
+        }
+
+        if ((this.lookupGeometry(name) != null)) {
+            this.update(name);
+        }
+        else {
+            console.error("Unable to update geometry " + name + " - geometry object was not found");
+            this.parameterList.clear(true);
+        }
+
+    }
+
+    instance(name:string, geoname:string) {
+        if ((geoname != null)) {
+            //  we are declaring this instance for the first time
+            if (this.renderObjects.has(name)) {
+                console.error("Unable to declare instance " + name + ", name is already in use");
+                this.parameterList.clear(true);
+                return;
+            }
+
+            this.parameter("geometry", geoname);
+            this.renderObjects.put(name, new Instance());
+        }
+
+        if ((this.lookupInstance(name) != null)) {
+            this.update(name);
+        }
+        else {
+            console.error("Unable to update instance " + name + " - instance object was not found");
+            this.parameterList.clear(true);
+        }
+
+    }
+
+    light(name:string, light:LightSource) {
+        if ((light != null)) {
+            //  we are declaring this light for the first time
+            if (this.renderObjects.has(name)) {
+                console.error("Unable to declare light " + name + ", name is already in use");
+                this.parameterList.clear(true);
+                return;
+            }
+
+            this.renderObjects.put(name, light);
+        }
+
+        if ((this.lookupLight(name) != null)) {
+            this.update(name);
+        }
+        else {
+            console.error("Unable to update instance " + name + " - instance object was not found");
+            this.parameterList.clear(true);
+        }
+
+    }
+
+    camera(name:string, lens:CameraLens) {
+        if ((lens != null)) {
+            //  we are declaring this camera for the first time
+            if (this.renderObjects.has(name)) {
+                console.error("Unable to declare camera " + name + ", name is already in use");
+                this.parameterList.clear(true);
+                return;
+            }
+
+            this.renderObjects.put(name, new Camera(lens));
+        }
+
+        //  update existing shader (only if it is valid)
+        if ((this.lookupCamera(name) != null)) {
+            this.update(name);
+        }
+        else {
+            console.error("Unable to update camera " + name + " - camera object was not found");
+            this.parameterList.clear(true);
+        }
+
+    }
+
+    options(name:string) {
+        if ((this.lookupOptions(name) == null)) {
+            if (this.renderObjects.has(name)) {
+                console.error("Unable to declare options " + name + ", name is already in use");
+                this.parameterList.clear(true);
+                return;
+            }
+
+            this.renderObjects.put(name, new Options());
+        }
+
+        let lookupOptions:assert;
+        (name != null);
+        this.update(name);
+    }
+
+    lookupGeometry(name:string):Geometry {
+        return this.renderObjects.lookupGeometry(name);
+    }
+
+    private lookupInstance(name:string):Instance {
+        return this.renderObjects.lookupInstance(name);
+    }
+
+    private lookupCamera(name:string):Camera {
+        return this.renderObjects.lookupCamera(name);
+    }
+
+    private lookupOptions(name:string):Options {
+        return this.renderObjects.lookupOptions(name);
+    }
+
+    lookupShader(name:string):Shader {
+        return this.renderObjects.lookupShader(name);
+    }
+
+    lookupModifier(name:string):Modifier {
+        return this.renderObjects.lookupModifier(name);
+    }
+
+    private lookupLight(name:string):LightSource {
+        return this.renderObjects.lookupLight(name);
+    }
+
+    shaderOverride(name:string, photonOverride:boolean) {
+        this.scene.setShaderOverride(this.lookupShader(name), photonOverride);
+    }
+
+    render(optionsName:string, display:Display) {
+        this.renderObjects.updateScene(this.scene);
+        let opt:Options = this.lookupOptions(optionsName);
+        if ((opt == null)) {
+            opt = new Options();
+        }
+
+        this.scene.setCamera(this.lookupCamera(opt.getString("camera", null)));
+        //  baking
+        let bakingInstanceName:string = opt.getString("baking.instance", null);
+        if ((bakingInstanceName != null)) {
+            let bakingInstance:Instance = this.lookupInstance(bakingInstanceName);
+            if ((bakingInstance == null)) {
+                console.error("Unable to bake instance " + bakingInstanceName + " - not found");
+                return;
+            }
+
+            this.scene.setBakingInstance(bakingInstance);
+        }
+        else {
+            this.scene.setBakingInstance(null);
+        }
+
+        let samplerName:string = opt.getString("sampler", "bucket");
+        let sampler:ImageSampler = null;
+
+        if (samplerName == "" || samplerName == "none" || samplerName == "null") {
+            sampler = null;
+        }
+        else if (samplerName == "bucket") {
+            sampler = this.bucketRenderer;
+        }
+        else if (samplerName == "ipr") {
+            sampler = this.progressiveRenderer;
+        }
+        else if (samplerName == "fast") {
+            sampler = new SimpleRenderer();
+        }
+        else {
+            console.error("Unknown sampler type:" + samplerName + " - aborting");
+            return;
+        }
+
+        this.scene.render(opt, sampler, display);
+    }
+
+    parse(filename:string):boolean {
+        if ((filename == null)) {
+            return false;
+        }
+
+        filename = this.includeSearchPath.resolvePath(filename);
+        let parser:SceneParser = null;
+        if (filename.endsWith(".sc")) {
+            parser = new SCParser();
+        }
+        else if (filename.endsWith(".ra2")) {
+            parser = new RA2Parser();
+        }
+        else if (filename.endsWith(".ra3")) {
+            parser = new RA3Parser();
+        }
+        else if (filename.endsWith(".tri")) {
+            parser = new TriParser();
+        }
+        else if (filename.endsWith(".rib")) {
+            parser = new ShaveRibParser();
+        }
+        else {
+            console.error("Unable to find a suitable parser for:" + filename);
+        }
+
+        let currentFolder:string = (new File(filename) + getAbsoluteFile().getParentFile().getAbsolutePath());
+        this.includeSearchPath.addSearchPath(currentFolder);
+        this.textureSearchPath.addSearchPath(currentFolder);
+        return parser.parse(filename, this);
+    }
+
+    getBounds():BoundingBox {
+        return this.scene.getBounds();
+    }
+
+    build() {
+
+    }
+
+    static create(filename:string, frameNumber:number):GlobalIlluminationAPI {
+        if ((filename == null)) {
+            return new GlobalIlluminationAPI();
+        }
+
+        let api:GlobalIlluminationAPI = null;
+        if (filename.endsWith(".java")) {
+            let t:number = performance.now();
+            console.info("Compiling " + filename);
+            try {
+                let stream:FileInputStream = new FileInputStream(filename);
+                api = (<GlobalIlluminationAPI>(ClassBodyEvaluator.createFastClassBodyEvaluator(new Scanner(filename, stream), GlobalIlluminationAPI.class, ClassLoader.getSystemClassLoader())));
+                stream.close();
+            }
+            catch (e) {
+                console.error("Could not compile:" + filename);
+                console.error(e.message);
+                return null;
+            }
+
+            t = performance.now() - t;
+            console.info(("Compile time:" + (t / 1000).toFixed(2)));
+            if ((api != null)) {
+                let currentFolder:string = (new File(filename) + getAbsoluteFile().getParentFile().getAbsolutePath());
+                api.includeSearchPath.addSearchPath(currentFolder);
+                api.textureSearchPath.addSearchPath(currentFolder);
+            }
+
+            console.info("Build script running ...");
+            t = performance.now();
+            api.setCurrentFrame(frameNumber);
+            api.build();
+            t = performance.now() - t;
+            console.info("Build script time:" + (t / 1000).toFixed(2));
+        }
+        else {
+            api = new GlobalIlluminationAPI();
+            api = api.parse(filename);
+            // TODO:Warning!!!, inline IF is not supported ?
+        }
+
         return api;
     }
-    catch (e /*:CompileException*/) {
-        UI.printError(Module.API, "%s", e.getMessage());
-        return null;
-    }
-    catch (e /*:ParseException*/) {
-        UI.printError(Module.API, "%s", e.getMessage());
-        return null;
-    }
-    catch (e /*:ScanException*/) {
-        UI.printError(Module.API, "%s", e.getMessage());
-        return null;
-    }
-    catch (e /*:IOException*/) {
-        UI.printError(Module.API, "%s", e.getMessage());
-        return null;
+
+    static compile(code:string):GlobalIlluminationAPI {
+        /*try {
+         let t:number = performance.now();
+         let api:GlobalIlluminationAPI = (<GlobalIlluminationAPI>(ClassBodyEvaluator.createFastClassBodyEvaluator(new Scanner(null, new StringReader(code)), GlobalIlluminationAPI.class, (<ClassLoader>(null)))));
+         t = performance.now() - t;
+         console.info("Compile time:"+(t/1000).toFixed(2));
+         return api;
+         }
+         catch (e /!*:IOException*!/) {
+         console.error(e.message);
+         return null;
+         }*/
     }
 
-}
+    getCurrentFrame():number {
+        return this.currentFrame;
+    }
 
-public getCurrentFrame(): number {
-    return this.currentFrame;
-}
-
-public setCurrentFrame(currentFrame: number) {
-    this.currentFrame = this.currentFrame;
-}
+    setCurrentFrame(currentFrame:number) {
+        this.currentFrame = this.currentFrame;
+    }
 }

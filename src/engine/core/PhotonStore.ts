@@ -3,17 +3,17 @@
  */
 export interface PhotonStore {
 
-    numEmit(): number;
+    numEmit():number;
 
-    prepare(sceneBounds: BoundingBox);
+    prepare(sceneBounds:BoundingBox);
 
-    store(state: ShadingState, dir: Vector3, power: Color, diffuse: Color);
+    store(state:ShadingState, dir:Vector3, power:Color, diffuse:Color);
 
     init();
 
-    allowDiffuseBounced(): boolean;
+    allowDiffuseBounced():boolean;
 
-    allowReflectionBounced(): boolean;
+    allowReflectionBounced():boolean;
 
-    allowRefractionBounced(): boolean;
+    allowRefractionBounced():boolean;
 }

@@ -1,89 +1,70 @@
+import {Vector3} from "../math/Vector3";
+import {Point3} from "../math/Point3";
+import {Matrix4} from "../math/Matrix4";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
-export /* sealed */ class Ray {
+export class Ray {
 
-    public ox: number;
+    ox:float;
+    oy:float;
+    oz:float;
+    dx:float;
+    dy:float;
+    dz:float;
+    private tMin:float;
+    private tMax:float;
+    private static EPSILON:float = 0;//  0.01f;
 
-    public oy: number;
+    constructor ();
+    constructor (o:Point3, d:Vector3);
+    constructor (a:Point3, b:Point3);
+    constructor (ox:float=0, oy:float=0, oz:float=0, dx:float=0, dy:float=0, dz:float=0) {
 
-    public oz: number;
+        let arg = arguments;
+        let tMax = Infinity;
+        let _in:float;
 
-    public dx: number;
+        if(arg.length == 6){
+            this.ox = ox;
+            this.oy = oy;
+            this.oz = oz;
+            this.dx = dx;
+            this.dy = dy;
+            this.dz = dz;
+            _in = 1 /Math.sqrt(((this.dx * this.dx) + ((this.dy * this.dy) + (this.dz * this.dz))));
+            epsilon = Ray.EPSILON;
+        }else if(arg.length == 2){
+            this.ox = arg[0].x;
+            this.oy = arg[0].y;
+            this.oz = arg[0].z;
+            let n:float = Math.sqrt(((this.dx * this.dx) + ((this.dy * this.dy) + (this.dz * this.dz))));
+            _in = 1 / n;
+            if(arg[1] instanceof Point3){
+                this.dx = arg[1].x - this.ox;
+                this.dy = arg[1].y - this.oy;
+                this.dz = arg[1].z - this.oz;
+                tMax = n - Ray.EPSILON;
+            }else{
+                this.dx = arg[1].x;
+                this.dy = arg[1].y;
+                this.dz = arg[1].z;
+            }
+        }
 
-    public dy: number;
-
-    public dz: number;
-
-    private tMin: number;
-
-    private tMax: number;
-
-    private static EPSILON: number = 0;
-
-    //  0.01f;
-    private constructor () {
-
+        this.dx *= _in;
+        this.dy *= _in;
+        this.dz *= _in;
+        this.tMin = Ray.EPSILON;
+        this.tMax = tMax;//Float.POSITIVE_INFINITY;
     }
 
-    public constructor (ox: number, oy: number, oz: number, dx: number, dy: number, dz: number) {
-        this.ox = this.ox;
-        this.oy = this.oy;
-        this.oz = this.oz;
-        this.dx = this.dx;
-        this.dy = this.dy;
-        this.dz = this.dz;
-        let in: number = (1 / (<number>(Math.sqrt(((this.dx * this.dx)
-        + ((this.dy * this.dy)
-        + (this.dz * this.dz)))))));
-        this.dx = (this.dx * in);
-        this.dy = (this.dy * in);
-        this.dz = (this.dz * in);
-        this.tMin = EPSILON;
-        this.tMax = Float.POSITIVE_INFINITY;
-    }
-
-    public constructor (o: Point3, d: Vector3) {
-        this.ox = o.x;
-        this.oy = o.y;
-        this.oz = o.z;
-        this.dx = d.x;
-        this.dy = d.y;
-        this.dz = d.z;
-        let in: number = (1 / (<number>(Math.sqrt(((this.dx * this.dx)
-        + ((this.dy * this.dy)
-        + (this.dz * this.dz)))))));
-        this.dx = (this.dx * in);
-        this.dy = (this.dy * in);
-        this.dz = (this.dz * in);
-        this.tMin = EPSILON;
-        this.tMax = Float.POSITIVE_INFINITY;
-    }
-
-    public constructor (a: Point3, b: Point3) {
-        this.ox = a.x;
-        this.oy = a.y;
-        this.oz = a.z;
-        this.dx = (b.x - this.ox);
-        this.dy = (b.y - this.oy);
-        this.dz = (b.z - this.oz);
-        this.tMin = EPSILON;
-        let n: number = (<number>(Math.sqrt(((this.dx * this.dx)
-        + ((this.dy * this.dy)
-        + (this.dz * this.dz))))));
-        let in: number = (1 / n);
-        this.dx = (this.dx * in);
-        this.dy = (this.dy * in);
-        this.dz = (this.dz * in);
-        this.tMax = (n - EPSILON);
-    }
-
-    public transform(m: Matrix4): Ray {
+    transform(m:Matrix4):Ray {
         if ((m == null)) {
             return this;
         }
 
-        let r: Ray = new Ray();
+        let r:Ray = new Ray();
         r.ox = m.transformPX(this.ox, this.oy, this.oz);
         r.oy = m.transformPY(this.ox, this.oy, this.oz);
         r.oz = m.transformPZ(this.ox, this.oy, this.oz);
@@ -95,55 +76,48 @@ export /* sealed */ class Ray {
         return r;
     }
 
-    public normalize() {
-        let in: number = (1 / (<number>(Math.sqrt(((this.dx * this.dx)
+    normalize() {
+        let _in:number = (1 / (<number>(Math.sqrt(((this.dx * this.dx)
         + ((this.dy * this.dy)
         + (this.dz * this.dz)))))));
-        this.dx = (this.dx * in);
-        this.dy = (this.dy * in);
-        this.dz = (this.dz * in);
+        this.dx = (this.dx * _in);
+        this.dy = (this.dy * _in);
+        this.dz = (this.dz * _in);
     }
 
-    public getMin(): number {
+    getMin():number {
         return this.tMin;
     }
 
-    public getMax(): number {
+    getMax():number {
         return this.tMax;
     }
 
-    public getDirection(): Vector3 {
+    getDirection():Vector3 {
         return new Vector3(this.dx, this.dy, this.dz);
     }
 
-    public isInside(t: number): boolean {
+    isInside(t:number):boolean {
         return ((this.tMin < t)
         && (t < this.tMax));
     }
 
-    public getPoint(dest: Point3): Point3 {
-        dest.x = (this.ox
-        + (this.tMax * this.dx));
-        dest.y = (this.oy
-        + (this.tMax * this.dy));
-        dest.z = (this.oz
-        + (this.tMax * this.dz));
+    getPoint(dest:Point3):Point3 {
+        dest.x = (this.ox + (this.tMax * this.dx));
+        dest.y = (this.oy + (this.tMax * this.dy));
+        dest.z = (this.oz + (this.tMax * this.dz));
         return dest;
     }
 
-    public dot(v: Vector3): number {
-        return ((this.dx * v.x)
-        + ((this.dy * v.y)
-        + (this.dz * v.z)));
+    dot(v:Vector3):number {
+        return this.dx * v.x + this.dy * v.y + this.dz * v.z;
     }
 
-    public dot(vx: number, vy: number, vz: number): number {
-        return ((this.dx * vx)
-        + ((this.dy * vy)
-        + (this.dz * vz)));
+    dot(vx:number, vy:number, vz:number):number {
+        return this.dx * vx + this.dy * vy + this.dz * vz;
     }
 
-    public setMax(t: number) {
+    setMax(t:number) {
         this.tMax = t;
     }
 }

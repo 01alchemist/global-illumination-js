@@ -1,33 +1,33 @@
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
-export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface {
+export class CausticPhotonMap implements CausticPhotonMapInterface {
 
-    private photonList: ArrayList<Photon>;
+    private photonList:ArrayList<Photon>;
 
-    private photons: Photon[];
+    private photons:Photon[];
 
-    private storedPhotons: number;
+    private storedPhotons:number;
 
-    private halfStoredPhotons: number;
+    private halfStoredPhotons:number;
 
-    private log2n: number;
+    private log2n:number;
 
-    private gatherNum: number;
+    private gatherNum:number;
 
-    private gatherRadius: number;
+    private gatherRadius:number;
 
-    private bounds: BoundingBox;
+    private bounds:BoundingBox;
 
-    private filterValue: number;
+    private filterValue:number;
 
-    private maxPower: number;
+    private maxPower:number;
 
-    private maxRadius: number;
+    private maxRadius:number;
 
-    private numEmit: number;
+    private numEmit:number;
 
-    public constructor (options: Options) {
+    constructor (options:Options) {
         this.numEmit = options.getInt("caustics.emit", 10000);
         this.gatherNum = options.getInt("caustics.gather", 50);
         this.gatherRadius = options.getFloat("caustics.radius", 0.5);
@@ -37,7 +37,7 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
         this.maxRadius = 0;
     }
 
-    public prepare(sceneBounds: BoundingBox) {
+    prepare(sceneBounds:BoundingBox) {
         this.photonList = new ArrayList<Photon>();
         this.photonList.add(null);
         this.photons = null;
@@ -45,15 +45,15 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
         this.storedPhotons = 0;
     }
 
-    private locatePhotons(np: NearestPhotons) {
-        let dist1d2: number[] = new Array(this.log2n);
-        let chosen: number[] = new Array(this.log2n);
-        let i: number = 1;
-        let level: number = 0;
-        let cameFrom: number;
+    private locatePhotons(np:NearestPhotons) {
+        let dist1d2:number[] = new Array(this.log2n);
+        let chosen:number[] = new Array(this.log2n);
+        let i:number = 1;
+        let level:number = 0;
+        let cameFrom:number;
         while (true) {
             while ((i < this.halfStoredPhotons)) {
-                let dist1d: number = this.photons[i].getDist1(np.px, np.py, np.pz);
+                let dist1d:number = this.photons[i].getDist1(np.px, np.py, np.pz);
                 dist1d2[level] = (dist1d * dist1d);
                 i = (i + i);
                 if ((dist1d > 0)) {
@@ -91,15 +91,15 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
 
         this.photons = this.photonList.toArray(new Array(this.photonList.size()));
         this.photonList = null;
-        let temp: Photon[] = new Array((this.storedPhotons + 1));
+        let temp:Photon[] = new Array((this.storedPhotons + 1));
         this.balanceSegment(temp, 1, 1, this.storedPhotons);
         this.photons = temp;
         this.halfStoredPhotons = (this.storedPhotons / 2);
         this.log2n = (<number>(Math.ceil((Math.log(this.storedPhotons) / Math.log(2)))));
     }
 
-    private balanceSegment(temp: Photon[], index: number, start: number, end: number) {
-        let median: number = 1;
+    private balanceSegment(temp:Photon[], index:number, start:number, end:number) {
+        let median:number = 1;
         while (((4 * median)
         <= ((end - start)
         + 1))) {
@@ -118,8 +118,8 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
             + 1);
         }
 
-        let axis: number = Photon.SPLIT_Z;
-        let extents: Vector3 = this.bounds.getExtents();
+        let axis:number = Photon.SPLIT_Z;
+        let extents:Vector3 = this.bounds.getExtents();
         if (((extents.x > extents.y)
             && (extents.x > extents.z))) {
             axis = Photon.SPLIT_X;
@@ -128,12 +128,12 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
             axis = Photon.SPLIT_Y;
         }
 
-        let left: number = start;
-        let right: number = end;
+        let left:number = start;
+        let right:number = end;
         while ((right > left)) {
-            let v: number = this.photons[right].getCoord(axis);
-            let i: number = (left - 1);
-            let j: number = right;
+            let v:number = this.photons[right].getCoord(axis);
+            let i:number = (left - 1);
+            let j:number = right;
             while (true) {
                 while ((this.photons[++i].getCoord(axis) < v)) {
 
@@ -167,7 +167,7 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
         if ((median > start)) {
             if ((start
                 < (median - 1))) {
-                let tmp: number;
+                let tmp:number;
                 switch (axis) {
                     case Photon.SPLIT_X:
                         tmp = this.bounds.getMaximum().x;
@@ -199,7 +199,7 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
         if ((median < end)) {
             if (((median + 1)
                 < end)) {
-                let tmp: number;
+                let tmp:number;
                 switch (axis) {
                     case Photon.SPLIT_X:
                         tmp = this.bounds.getMinimum().x;
@@ -234,18 +234,18 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
 
     }
 
-    private swap(i: number, j: number) {
-        let tmp: Photon = this.photons[i];
+    private swap(i:number, j:number) {
+        let tmp:Photon = this.photons[i];
         this.photons[i] = this.photons[j];
         this.photons[j] = tmp;
     }
 
-    public store(state: ShadingState, dir: Vector3, power: Color, diffuse: Color) {
+    store(state:ShadingState, dir:Vector3, power:Color, diffuse:Color) {
         if (((state.getDiffuseDepth() == 0)
             && ((state.getReflectionDepth() > 0)
             || (state.getRefractionDepth() > 0)))) {
             //  this is a caustic photon
-            let p: Photon = new Photon(state.getPoint(), dir, power);
+            let p:Photon = new Photon(state.getPoint(), dir, power);
             this;
             this.storedPhotons++;
             this.photonList.add(p);
@@ -255,58 +255,58 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
 
     }
 
-    public init() {
+    init() {
         UI.printInfo(Module.LIGHT, "Balancing caustics photon map ...");
-        let t: Timer = new Timer();
+        let t:Timer = new Timer();
         t.start();
         this.balance();
         t.end();
         UI.printInfo(Module.LIGHT, "Caustic photon map:");
-        UI.printInfo(Module.LIGHT, "  * Photons stored:   %d", this.storedPhotons);
-        UI.printInfo(Module.LIGHT, "  * Photons/estimate: %d", this.gatherNum);
+        UI.printInfo(Module.LIGHT, "  * Photons stored:  %d", this.storedPhotons);
+        UI.printInfo(Module.LIGHT, "  * Photons/estimate:%d", this.gatherNum);
         this.maxRadius = (1.4 * (<number>(Math.sqrt((this.maxPower * this.gatherNum)))));
-        UI.printInfo(Module.LIGHT, "  * Estimate radius:  %.3f", this.gatherRadius);
-        UI.printInfo(Module.LIGHT, "  * Maximum radius:   %.3f", this.maxRadius);
-        UI.printInfo(Module.LIGHT, "  * Balancing time:   %s", t.toString());
+        UI.printInfo(Module.LIGHT, "  * Estimate radius: %.3f", this.gatherRadius);
+        UI.printInfo(Module.LIGHT, "  * Maximum radius:  %.3f", this.maxRadius);
+        UI.printInfo(Module.LIGHT, "  * Balancing time:  %s", t.toString());
         if ((this.gatherRadius > this.maxRadius)) {
             this.gatherRadius = this.maxRadius;
         }
 
     }
 
-    public getSamples(state: ShadingState) {
+    getSamples(state:ShadingState) {
         if ((this.storedPhotons == 0)) {
             return;
         }
 
-        let np: NearestPhotons = new NearestPhotons(state.getPoint(), this.gatherNum, (this.gatherRadius * this.gatherRadius));
+        let np:NearestPhotons = new NearestPhotons(state.getPoint(), this.gatherNum, (this.gatherRadius * this.gatherRadius));
         this.locatePhotons(np);
         if ((np.found < 8)) {
             return;
         }
 
-        let ppos: Point3 = new Point3();
-        let pdir: Vector3 = new Vector3();
-        let pvec: Vector3 = new Vector3();
-        let invArea: number = (1
+        let ppos:Point3 = new Point3();
+        let pdir:Vector3 = new Vector3();
+        let pvec:Vector3 = new Vector3();
+        let invArea:number = (1
         / ((<number>(Math.PI)) * np.dist2[0]));
-        let maxNDist: number = (np.dist2[0] * 0.05);
-        let f2r2: number = (1
+        let maxNDist:number = (np.dist2[0] * 0.05);
+        let f2r2:number = (1
         / (this.filterValue
         * (this.filterValue * np.dist2[0])));
-        let fInv: number = (1 / (1 - (2 / (3 * this.filterValue))));
-        for (let i: number = 1; (i <= np.found); i++) {
-            let phot: Photon = np.index[i];
+        let fInv:number = (1 / (1 - (2 / (3 * this.filterValue))));
+        for (let i:number = 1; (i <= np.found); i++) {
+            let phot:Photon = np.index[i];
             Vector3.decode(phot.dir, pdir);
-            let cos: number = (Vector3.dot(pdir, state.getNormal()) * -1);
+            let cos:number = (Vector3.dot(pdir, state.getNormal()) * -1);
             if ((cos > 0.001)) {
                 ppos.set(phot.x, phot.y, phot.z);
                 Point3.sub(ppos, state.getPoint(), pvec);
-                let pcos: number = Vector3.dot(pvec, state.getNormal());
+                let pcos:number = Vector3.dot(pvec, state.getNormal());
                 if (((pcos < maxNDist)
                     && (pcos
                     > (maxNDist * -1)))) {
-                    let sample: LightSample = new LightSample();
+                    let sample:LightSample = new LightSample();
                     sample.setShadowRay(new Ray(state.getPoint(), pdir.negate()));
                     sample.setRadiance((new Color() + setRGBE(np.index[i].power).mul((invArea / cos))), Color.BLACK);
                     sample.getDiffuseRadiance().mul(((1 - (<number>(Math.sqrt((np.dist2[i] * f2r2)))))
@@ -322,23 +322,23 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
 
     class NearestPhotons {
 
-    found: number;
+    found:number;
 
-    px: number;
+    px:number;
 
-    py: number;
+    py:number;
 
-    pz: number;
+    pz:number;
 
-    private max: number;
+    private max:number;
 
-    private gotHeap: boolean;
+    private gotHeap:boolean;
 
-    protected dist2: number[];
+    protected dist2:number[];
 
-    protected index: Photon[];
+    protected index:Photon[];
 
-    constructor (p: Point3, n: number, maxDist2: number) {
+    constructor (p:Point3, n:number, maxDist2:number) {
         this.max = n;
         this.found = 0;
         this.gotHeap = false;
@@ -350,7 +350,7 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
         this.dist2[0] = maxDist2;
     }
 
-    reset(p: Point3, maxDist2: number) {
+    reset(p:Point3, maxDist2:number) {
         this.found = 0;
         this.gotHeap = false;
         this.px = p.x;
@@ -359,8 +359,8 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
         this.dist2[0] = maxDist2;
     }
 
-    checkAddNearest(p: Photon) {
-        let fdist2: number = p.getDist2(this.px, this.py, this.pz);
+    checkAddNearest(p:Photon) {
+        let fdist2:number = p.getDist2(this.px, this.py, this.pz);
         if ((fdist2 < this.dist2[0])) {
             if ((this.found < this.max)) {
                 this.found++;
@@ -368,13 +368,13 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
                 this.index[this.found] = p;
             }
             else {
-                let j: number;
-                let parent: number;
+                let j:number;
+                let parent:number;
                 if (!this.gotHeap) {
-                    let dst2: number;
-                    let phot: Photon;
-                    let halfFound: number = (this.found + 1);
-                    for (let k: number = halfFound; (k >= 1); k--) {
+                    let dst2:number;
+                    let phot:Photon;
+                    let halfFound:number = (this.found + 1);
+                    for (let k:number = halfFound; (k >= 1); k--) {
                         parent = k;
                         phot = this.index[k];
                         dst2 = this.dist2[k];
@@ -431,27 +431,27 @@ export /* sealed */ class CausticPhotonMap implements CausticPhotonMapInterface 
 
 class Photon {
 
-    x: number;
+    x:number;
 
-    y: number;
+    y:number;
 
-    z: number;
+    z:number;
 
-    dir: number;
+    dir:number;
 
-    power: number;
+    power:number;
 
-    flags: number;
+    flags:number;
 
-    static SPLIT_X: number = 0;
+    static SPLIT_X:number = 0;
 
-    static SPLIT_Y: number = 1;
+    static SPLIT_Y:number = 1;
 
-    static SPLIT_Z: number = 2;
+    static SPLIT_Z:number = 2;
 
-    static SPLIT_MASK: number = 3;
+    static SPLIT_MASK:number = 3;
 
-    constructor (p: Point3, dir: Vector3, power: Color) {
+    constructor (p:Point3, dir:Vector3, power:Color) {
         this.x = p.x;
         this.y = p.y;
         this.z = p.z;
@@ -460,12 +460,12 @@ class Photon {
         this.flags = SPLIT_X;
     }
 
-    setSplitAxis(axis: number) {
+    setSplitAxis(axis:number) {
         SPLIT_MASK;
         this.flags = (this.flags | axis);
     }
 
-    getCoord(axis: number): number {
+    getCoord(axis:number):number {
         switch (axis) {
             case SPLIT_X:
                 return this.x;
@@ -480,7 +480,7 @@ class Photon {
 
     }
 
-    getDist1(px: number, py: number, pz: number): number {
+    getDist1(px:number, py:number, pz:number):number {
         switch ((this.flags & SPLIT_MASK)) {
             case SPLIT_X:
                 return (px - this.x);
@@ -495,29 +495,29 @@ class Photon {
 
     }
 
-    getDist2(px: number, py: number, pz: number): number {
-        let dx: number = (this.x - px);
-        let dy: number = (this.y - py);
-        let dz: number = (this.z - pz);
+    getDist2(px:number, py:number, pz:number):number {
+        let dx:number = (this.x - px);
+        let dy:number = (this.y - py);
+        let dz:number = (this.z - pz);
         return ((dx * dx)
         + ((dy * dy)
         + (dz * dz)));
     }
 }
 
-public allowDiffuseBounced(): boolean {
+allowDiffuseBounced():boolean {
     return false;
 }
 
-public allowReflectionBounced(): boolean {
+allowReflectionBounced():boolean {
     return true;
 }
 
-public allowRefractionBounced(): boolean {
+allowRefractionBounced():boolean {
     return true;
 }
 
-public numEmit(): number {
+numEmit():number {
     return this.numEmit;
 }
 }

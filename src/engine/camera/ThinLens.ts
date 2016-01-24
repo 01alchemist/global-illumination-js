@@ -23,7 +23,7 @@ export class ThinLens implements CameraLens {
 
     private lensRotationRadians:float;
 
-    public constructor() {
+    constructor() {
         this.focusDistance = 1;
         this.lensRadius = 0;
         this.fov = 90;
@@ -35,7 +35,7 @@ export class ThinLens implements CameraLens {
         //  this rotates polygonal lenses
     }
 
-    public update(pl:ParameterList, api:SunflowAPI):boolean {
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         //  get parameters
         this.fov = pl.getFloat("fov", this.fov);
         this.aspect = pl.getFloat("aspect", this.aspect);
@@ -53,7 +53,7 @@ export class ThinLens implements CameraLens {
         this.lensRotationRadians = (<float>(Math.toRadians(this.lensRotation)));
     }
 
-    public getRay(x:float, y:float, imageWidth:int, imageHeight:int, lensX:double, lensY:double, time:double):Ray {
+    getRay(x:float, y:float, imageWidth:int, imageHeight:int, lensX:double, lensY:double, time:double):Ray {
         let du:float = ((this.au * -1)
         + ((2
         * (this.au * x))
@@ -114,7 +114,7 @@ export class ThinLens implements CameraLens {
         }
         else {
             //  sample N-gon
-            //  FIXME: this could use concentric sampling
+            //  FIXME:this could use concentric sampling
             lensY = (lensY * this.lensSides);
             let side:float = (<int>(lensY));
             let offs:float = ((<float>(lensY)) - side);

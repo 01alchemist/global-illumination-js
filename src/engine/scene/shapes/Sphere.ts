@@ -19,10 +19,10 @@ export class Sphere implements Shape {
     memorySize:number = Vector3.SIZE + 3;// center, radius, material index, type
     index:number;
 
-    constructor(public center:Vector3 = new Vector3(),
-                public radius:number=1,
-                public material:Material=null,
-                public box:Box=null) {
+    constructor(center:Vector3 = new Vector3(),
+                radius:number=1,
+                material:Material=null,
+                box:Box=null) {
         if(!box && center){
             var min = new Vector3(center.x - radius, center.y - radius, center.z - radius);
             var max = new Vector3(center.x + radius, center.y + radius, center.z + radius);

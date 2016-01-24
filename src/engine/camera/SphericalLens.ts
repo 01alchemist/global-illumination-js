@@ -9,11 +9,11 @@ export class SphericalLens implements CameraLens {
 
     }
 
-    public update(pl:ParameterList, api:SunflowAPI):boolean {
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         return true;
     }
 
-    public getRay(x:float, y:float, imageWidth:int, imageHeight:int, lensX:double, lensY:double, time:double):Ray {
+    getRay(x:float, y:float, imageWidth:int, imageHeight:int, lensX:double, lensY:double, time:double):Ray {
         //  Generate environment camera ray direction
         let theta:number = ((2
         * (Math.PI

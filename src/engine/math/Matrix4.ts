@@ -12,10 +12,10 @@ export class Matrix4 {
 
     m:Float32Array;
 
-    constructor(public x00 = 0, public x01 = 0, public x02 = 0, public x03 = 0,
-                public x10 = 0, public x11 = 0, public x12 = 0, public x13 = 0,
-                public x20 = 0, public x21 = 0, public x22 = 0, public x23 = 0,
-                public x30 = 0, public x31 = 0, public x32 = 0, public x33 = 0) {
+    constructor(x00 = 0, x01 = 0, x02 = 0, x03 = 0,
+                x10 = 0, x11 = 0, x12 = 0, x13 = 0,
+                x20 = 0, x21 = 0, x22 = 0, x23 = 0,
+                x30 = 0, x31 = 0, x32 = 0, x33 = 0) {
         this.m = new Float32Array(16);
     }
 

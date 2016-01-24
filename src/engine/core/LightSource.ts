@@ -3,11 +3,11 @@
  */
 export interface LightSource extends RenderObject {
 
-    getNumSamples(): number;
+    getNumSamples():number;
 
-    getSamples(state: ShadingState);
+    getSamples(state:ShadingState);
 
-    getPhoton(randX1: number, randY1: number, randX2: number, randY2: number, p: Point3, dir: Vector3, power: Color);
+    getPhoton(randX1:number, randY1:number, randX2:number, randY2:number, p:Point3, dir:Vector3, power:Color);
 
-    getPower(): number;
+    getPower():number;
 }

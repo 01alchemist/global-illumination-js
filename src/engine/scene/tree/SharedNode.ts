@@ -3,9 +3,9 @@ import {Shape} from "../shapes/Shape";
 import {Ray} from "../../math/Ray";
 import {Hit} from "../../math/Hit";
 import {NoHit} from "../../math/Hit";
-import {append} from "../../utils/MapUtils";
+import {append} from "../../utils/ArrayUtils";
 import {Box} from "../shapes/Box";
-import {sortAscending} from "../../utils/MapUtils";
+import {sortAscending} from "../../utils/ArrayUtils";
 import {MathUtils} from "../../utils/MathUtils";
 import {Mesh} from "../shapes/Mesh";
 import {IPointer} from "../../../pointer/IPointer";
@@ -38,10 +38,10 @@ export class SharedNode {
     rightPtr:number;
     resolved:boolean = false;
 
-    constructor(public axis:Axis = null,
-                public point:number = null,
-                public shapes:Shape[] = null,
-                public shapeIndices:number[] = null,
+    constructor(axis:Axis = null,
+                point:number = null,
+                shapes:Shape[] = null,
+                shapeIndices:number[] = null,
                 private _left:SharedNode = null,
                 private _right:SharedNode = null) {
 
@@ -327,7 +327,7 @@ export class SharedNode {
                 right = append(right, shape);
             }
         });
-        return {left: left, right: right};
+        return {left:left, right:right};
     }
 
     split(depth:number) {

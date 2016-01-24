@@ -1,7 +1,7 @@
 import {Color} from "../math/Color";
 import {Shape} from "./shapes/Shape";
 import {Tree} from "./tree/Tree";
-import {append} from "../utils/MapUtils";
+import {append} from "../utils/ArrayUtils";
 import {Vector3} from "../math/Vector3";
 import {Ray} from "../math/Ray";
 import {Hit} from "../math/Hit";
@@ -28,11 +28,11 @@ export class Scene {
 
     shared:boolean = false;
 
-    constructor(public color:Color = new Color(),
-                public shapes:Shape[] = [],
-                public lights:Shape[] = [],
-                public tree:Tree|SharedTree=null,
-                public rays:number = 0) {
+    constructor(color:Color = new Color(),
+                shapes:Shape[] = [],
+                lights:Shape[] = [],
+                tree:Tree|SharedTree=null,
+                rays:number = 0) {
 
     }
 

@@ -10,8 +10,8 @@ import {NoHit} from "../../math/Hit";
 export class Tree{
 
     constructor(
-        public box:Box,
-        public root:Node
+        box:Box,
+        root:Node
     ){
 
     }

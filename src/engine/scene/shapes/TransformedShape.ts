@@ -24,9 +24,9 @@ export class TransformedShape implements Shape {
         }
     };
 
-    constructor(public shape:Shape = null,
-                public matrix:Matrix4 = new Matrix4(),
-                public inverse:Matrix4 = new Matrix4()) {
+    constructor(shape:Shape = null,
+                matrix:Matrix4 = new Matrix4(),
+                inverse:Matrix4 = new Matrix4()) {
     }
 
     directRead(memory:Float32Array, offset:number):number {

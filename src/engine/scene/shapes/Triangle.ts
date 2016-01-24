@@ -23,11 +23,11 @@ export class Triangle implements Shape {
     memorySize:number = Triangle.SIZE;
     index:number;
 
-    constructor(public material:Material = null,
-                public box:Box = new Box(),
-                public v1:Vector3 = new Vector3(), public v2:Vector3 = new Vector3(), public v3:Vector3 = new Vector3(),
-                public n1:Vector3 = new Vector3(), public n2:Vector3 = new Vector3(), public n3:Vector3 = new Vector3(),
-                public t1:Vector3 = new Vector3(), public t2:Vector3 = new Vector3(), public t3:Vector3 = new Vector3()) {
+    constructor(material:Material = null,
+                box:Box = new Box(),
+                v1:Vector3 = new Vector3(), v2:Vector3 = new Vector3(), v3:Vector3 = new Vector3(),
+                n1:Vector3 = new Vector3(), n2:Vector3 = new Vector3(), n3:Vector3 = new Vector3(),
+                t1:Vector3 = new Vector3(), t2:Vector3 = new Vector3(), t3:Vector3 = new Vector3()) {
 
     }
 
@@ -321,7 +321,7 @@ export class Triangle implements Shape {
     }
 
     getRandomPoint():Vector3 {
-        return new Vector3(); // TODO: fix
+        return new Vector3(); // TODO:fix
     }
 
     area():number {
@@ -346,7 +346,7 @@ export class Triangle implements Shape {
         var v = (d11 * d20 - d01 * d21) / d;
         var w = (d00 * d21 - d01 * d20) / d;
         var u = 1 - v - w;
-        return {u: u, v: v, w: w};
+        return {u:u, v:v, w:w};
     }
 
     updateBox() {

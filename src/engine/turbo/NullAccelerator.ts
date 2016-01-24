@@ -3,22 +3,22 @@
  */
 export class NullAccelerator implements AccelerationStructure {
 
-    private primitives: PrimitiveList;
+    private primitives:PrimitiveList;
 
-    private n: number;
+    private n:number;
 
-    public constructor () {
+    constructor () {
         this.primitives = null;
         this.n = 0;
     }
 
-    public build(primitives: PrimitiveList) {
+    build(primitives:PrimitiveList) {
         this.primitives = this.primitives;
         this.n = this.primitives.getNumPrimitives();
     }
 
-    public intersect(r: Ray, state: IntersectionState) {
-        for (let i: number = 0; (i < this.n); i++) {
+    intersect(r:Ray, state:IntersectionState) {
+        for (let i:number = 0; (i < this.n); i++) {
             this.primitives.intersectPrimitive(r, i, state);
         }
 

@@ -19,13 +19,13 @@ export class HitInfo{
      * @param material
      * @param inside
      */
-    constructor(public shape:Shape,
-                public position:Vector3,
-                public normal:Vector3,
-                public ray:Ray,
-                public color:Color,
-                public material:Material,
-                public inside:boolean){
+    constructor(shape:Shape,
+                position:Vector3,
+                normal:Vector3,
+                ray:Ray,
+                color:Color,
+                material:Material,
+                inside:boolean){
 
     }
 }

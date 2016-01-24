@@ -31,11 +31,11 @@ export class QMC {
                 prev = table[i - 1];
                 var med:number = (i - 1) >> 1;
                 for (var j = 0; j < med; j++) {
-                    table[i][j] = prev[j] + ((prev[j] >= med) ? 1 : 0);
+                    table[i][j] = prev[j] + ((prev[j] >= med) ? 1 :0);
                 }
                 table[i][med] = med;
                 for (var j = 0; j < med; j++) {
-                    table[i][med + j + 1] = prev[j + med] + ((prev[j + med] >= med) ? 1 : 0);
+                    table[i][med + j + 1] = prev[j + med] + ((prev[j + med] >= med) ? 1 :0);
                 }
             }
         }

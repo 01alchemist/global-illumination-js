@@ -3,17 +3,17 @@
  */
 export class BumpMappingModifier implements Modifier {
 
-    private bumpTexture: Texture;
+    private bumpTexture:Texture;
 
-    private scale: number;
+    private scale:number;
 
-    public constructor () {
+    constructor () {
         this.bumpTexture = null;
         this.scale = 1;
     }
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
-        let filename: String = pl.getString("texture", null);
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
+        let filename:string = pl.getString("texture", null);
         if ((filename != null)) {
             this.bumpTexture = TextureCache.getTexture(api.resolveTextureFilename(filename), true);
         }
@@ -22,7 +22,7 @@ export class BumpMappingModifier implements Modifier {
         return (this.bumpTexture != null);
     }
 
-    public modify(state: ShadingState) {
+    modify(state:ShadingState) {
         //  apply bump
         state.getNormal().set(this.bumpTexture.getBump(state.getUV().x, state.getUV().y, state.getBasis(), this.scale));
         state.setBasis(OrthoNormalBasis.makeFromW(state.getNormal()));

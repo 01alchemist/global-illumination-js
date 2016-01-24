@@ -3,17 +3,17 @@
  */
 export class SphereLight implements LightSource, Shader {
 
-    private radiance: Color;
+    private radiance:Color;
 
-    private numSamples: number;
+    private numSamples:number;
 
-    private center: Point3;
+    private center:Point3;
 
-    private radius: number;
+    private radius:number;
 
-    private r2: number;
+    private r2:number;
 
-    public constructor () {
+    constructor () {
         this.radiance = Color.WHITE;
         this.numSamples = 4;
         this.center = new Point3();
@@ -21,7 +21,7 @@ export class SphereLight implements LightSource, Shader {
         this.radius = 1;
     }
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         this.radiance = pl.getColor("radiance", this.radiance);
         this.numSamples = pl.getInt("samples", this.numSamples);
         this.radius = pl.getFloat("radius", this.radius);
@@ -30,7 +30,7 @@ export class SphereLight implements LightSource, Shader {
         return true;
     }
 
-    public init(name: String, api: SunflowAPI) {
+    init(name:string, api:GlobalIlluminationAPI) {
         api.light(name, this);
         api.geometry((name + ".geo"), new Sphere());
         api.shader((name + ".shader"), this);
@@ -39,91 +39,91 @@ export class SphereLight implements LightSource, Shader {
         api.instance((name + ".instance"), (name + ".geo"));
     }
 
-    public getNumSamples(): number {
+    getNumSamples():number {
         return this.numSamples;
     }
 
-    public getLowSamples(): number {
+    getLowSamples():number {
         return 1;
     }
 
-    public isVisible(state: ShadingState): boolean {
+    isVisible(state:ShadingState):boolean {
         return (state.getPoint().distanceToSquared(this.center) > this.r2);
     }
 
-    public getSamples(state: ShadingState) {
+    getSamples(state:ShadingState) {
         if ((this.getNumSamples() <= 0)) {
             return;
         }
 
-        let wc: Vector3 = Point3.sub(this.center, state.getPoint(), new Vector3());
-        let l2: number = wc.lengthSquared();
+        let wc:Vector3 = Point3.sub(this.center, state.getPoint(), new Vector3());
+        let l2:number = wc.lengthSquared();
         if ((l2 <= this.r2)) {
             return;
         }
 
         //  inside the sphere?
         //  top of the sphere as viewed from the current shading point
-        let topX: number = (wc.x
+        let topX:number = (wc.x
         + (state.getNormal().x * this.radius));
-        let topY: number = (wc.y
+        let topY:number = (wc.y
         + (state.getNormal().y * this.radius));
-        let topZ: number = (wc.z
+        let topZ:number = (wc.z
         + (state.getNormal().z * this.radius));
         if ((state.getNormal().dot(topX, topY, topZ) <= 0)) {
             return;
         }
 
         //  top of the sphere is below the horizon
-        let cosThetaMax: number = (<number>(Math.sqrt(Math.max(0, (1
+        let cosThetaMax:number = (<number>(Math.sqrt(Math.max(0, (1
         - (this.r2 / Vector3.dot(wc, wc)))))));
-        let basis: OrthoNormalBasis = OrthoNormalBasis.makeFromW(wc);
-        let samples: number = (state.getDiffuseDepth() > 0);
-        // TODO: Warning!!!, inline IF is not supported ?
-        let scale: number = (<number>((2
+        let basis:OrthoNormalBasis = OrthoNormalBasis.makeFromW(wc);
+        let samples:number = (state.getDiffuseDepth() > 0);
+        // TODO:Warning!!!, inline IF is not supported ?
+        let scale:number = (<number>((2
         * (Math.PI * (1 - cosThetaMax)))));
-        let c: Color = Color.mul((scale / samples), this.radiance);
-        for (let i: number = 0; (i < samples); i++) {
+        let c:Color = Color.mul((scale / samples), this.radiance);
+        for (let i:number = 0; (i < samples); i++) {
             //  random offset on unit square
-            let randX: number = state.getRandom(i, 0, samples);
-            let randY: number = state.getRandom(i, 1, samples);
+            let randX:number = state.getRandom(i, 0, samples);
+            let randY:number = state.getRandom(i, 1, samples);
             //  cone sampling
-            let cosTheta: number = (((1 - randX)
+            let cosTheta:number = (((1 - randX)
             * cosThetaMax)
             + randX);
-            let sinTheta: number = Math.sqrt((1
+            let sinTheta:number = Math.sqrt((1
             - (cosTheta * cosTheta)));
-            let phi: number = (randY * (2 * Math.PI));
-            let dir: Vector3 = new Vector3((<number>((Math.cos(phi) * sinTheta))), (<number>((Math.sin(phi) * sinTheta))), (<number>(cosTheta)));
+            let phi:number = (randY * (2 * Math.PI));
+            let dir:Vector3 = new Vector3((<number>((Math.cos(phi) * sinTheta))), (<number>((Math.sin(phi) * sinTheta))), (<number>(cosTheta)));
             basis.transform(dir);
             //  check that the direction of the sample is the same as the
             //  normal
-            let cosNx: number = Vector3.dot(dir, state.getNormal());
+            let cosNx:number = Vector3.dot(dir, state.getNormal());
             if ((cosNx <= 0)) {
-                // TODO: Warning!!! continue If
+                // TODO:Warning!!! continue If
             }
 
-            let ocx: number = (state.getPoint().x - this.center.x);
-            let ocy: number = (state.getPoint().y - this.center.y);
-            let ocz: number = (state.getPoint().z - this.center.z);
-            let qa: number = Vector3.dot(dir, dir);
-            let qb: number = (2
+            let ocx:number = (state.getPoint().x - this.center.x);
+            let ocy:number = (state.getPoint().y - this.center.y);
+            let ocz:number = (state.getPoint().z - this.center.z);
+            let qa:number = Vector3.dot(dir, dir);
+            let qb:number = (2
             * ((dir.x * ocx)
             + ((dir.y * ocy)
             + (dir.z * ocz))));
-            let qc: number = (((ocx * ocx)
+            let qc:number = (((ocx * ocx)
             + ((ocy * ocy)
             + (ocz * ocz)))
             - this.r2);
-            let t: number[] = Solvers.solveQuadric(qa, qb, qc);
+            let t:number[] = Solvers.solveQuadric(qa, qb, qc);
             if ((t == null)) {
-                // TODO: Warning!!! continue If
+                // TODO:Warning!!! continue If
             }
 
-            let dest: LightSample = new LightSample();
+            let dest:LightSample = new LightSample();
             //  compute shadow ray to the sampled point
             dest.setShadowRay(new Ray(state.getPoint(), dir));
-            //  FIXME: arbitrary bias, should handle as in other places
+            //  FIXME:arbitrary bias, should handle as in other places
             dest.getShadowRay().setMax(((<number>(t[0])) - 0.001));
             //  prepare sample
             dest.setRadiance(c, c);
@@ -133,27 +133,27 @@ export class SphereLight implements LightSource, Shader {
 
     }
 
-    public getPhoton(randX1: number, randY1: number, randX2: number, randY2: number, p: Point3, dir: Vector3, power: Color) {
-        let z: number = (<number>((1 - (2 * randX2))));
-        let r: number = (<number>(Math.sqrt(Math.max(0, (1
+    getPhoton(randX1:number, randY1:number, randX2:number, randY2:number, p:Point3, dir:Vector3, power:Color) {
+        let z:number = (<number>((1 - (2 * randX2))));
+        let r:number = (<number>(Math.sqrt(Math.max(0, (1
         - (z * z))))));
-        let phi: number = (<number>((2
+        let phi:number = (<number>((2
         * (Math.PI * randY2))));
-        let x: number = (r * (<number>(Math.cos(phi))));
-        let y: number = (r * (<number>(Math.sin(phi))));
+        let x:number = (r * (<number>(Math.cos(phi))));
+        let y:number = (r * (<number>(Math.sin(phi))));
         p.x = (this.center.x
         + (x * this.radius));
         p.y = (this.center.y
         + (y * this.radius));
         p.z = (this.center.z
         + (z * this.radius));
-        let basis: OrthoNormalBasis = OrthoNormalBasis.makeFromW(new Vector3(x, y, z));
+        let basis:OrthoNormalBasis = OrthoNormalBasis.makeFromW(new Vector3(x, y, z));
         phi = (<number>((2
         * (Math.PI * randX1))));
-        let cosPhi: number = (<number>(Math.cos(phi)));
-        let sinPhi: number = (<number>(Math.sin(phi)));
-        let sinTheta: number = (<number>(Math.sqrt(randY1)));
-        let cosTheta: number = (<number>(Math.sqrt((1 - randY1))));
+        let cosPhi:number = (<number>(Math.cos(phi)));
+        let sinPhi:number = (<number>(Math.sin(phi)));
+        let sinTheta:number = (<number>(Math.sqrt(randY1)));
+        let cosTheta:number = (<number>(Math.sqrt((1 - randY1))));
         dir.x = (cosPhi * sinTheta);
         dir.y = (sinPhi * sinTheta);
         dir.z = cosTheta;
@@ -163,12 +163,12 @@ export class SphereLight implements LightSource, Shader {
         * (Math.PI * (4 * this.r2))))));
     }
 
-    public getPower(): number {
+    getPower():number {
         return this.radiance.copy().mul((<number>((Math.PI
         * (Math.PI * (4 * this.r2)))))).getLuminance();
     }
 
-    public getRadiance(state: ShadingState): Color {
+    getRadiance(state:ShadingState):Color {
         if (!state.includeLights()) {
             return Color.BLACK;
         }
@@ -176,10 +176,10 @@ export class SphereLight implements LightSource, Shader {
         state.faceforward();
         //  emit constant radiance
         return state.isBehind();
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    public scatterPhoton(state: ShadingState, power: Color) {
+    scatterPhoton(state:ShadingState, power:Color) {
         //  do not scatter photons
     }
 }

@@ -3,5 +3,5 @@
  */
 export interface RenderObject {
 
-    update(pl: ParameterList, api: SunflowAPI): boolean;
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean;
 }

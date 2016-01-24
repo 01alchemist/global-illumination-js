@@ -41,7 +41,7 @@ export class BucketOrderFactory {
                 o = new RandomBucketOrder();
                 break;
             default:
-                console.log("Unrecognized bucket ordering: " + order + " - using hilbert");
+                console.log("Unrecognized bucket ordering:" + order + " - using hilbert");
                 o = new HilbertBucketOrder();
                 flip = false;
                 break;

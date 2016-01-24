@@ -1,33 +1,33 @@
 /**
  * Created by Nidin Vinayakan on 21/1/2016.
  */
-export /* sealed */ class UniformGrid implements AccelerationStructure {
+export class UniformGrid implements AccelerationStructure {
 
-    private nx: number;
+    private nx:number;
 
-    private ny: number;
+    private ny:number;
 
-    private nz: number;
+    private nz:number;
 
-    private primitives: PrimitiveList;
+    private primitives:PrimitiveList;
 
-    private bounds: BoundingBox;
+    private bounds:BoundingBox;
 
-    private cells: number[,];
+    private cells:number[,];
 
-    private voxelwx: number;
+    private voxelwx:number;
 
-    private voxelwy: number;
+    private voxelwy:number;
 
-    private voxelwz: number;
+    private voxelwz:number;
 
-    private invVoxelwx: number;
+    private invVoxelwx:number;
 
-    private invVoxelwy: number;
+    private invVoxelwy:number;
 
-    private invVoxelwz: number;
+    private invVoxelwz:number;
 
-    public constructor () {
+    constructor () {
         this.nz = 0;
         this.ny = 0;
         this.nx = 0;
@@ -43,17 +43,17 @@ export /* sealed */ class UniformGrid implements AccelerationStructure {
         this.invVoxelwx = 0;
     }
 
-    public build(primitives: PrimitiveList) {
-        let t: Timer = new Timer();
+    build(primitives:PrimitiveList) {
+        let t:Timer = new Timer();
         t.start();
         this.primitives = this.primitives;
-        let n: number = this.primitives.getNumPrimitives();
+        let n:number = this.primitives.getNumPrimitives();
         //  compute bounds
         this.bounds = this.primitives.getWorldBounds(null);
         //  create grid from number of objects
         this.bounds.enlargeUlps();
-        let w: Vector3 = this.bounds.getExtents();
-        let s: number = Math.pow(((w.x
+        let w:Vector3 = this.bounds.getExtents();
+        let s:number = Math.pow(((w.x
         * (w.y * w.z))
         / n), (1 / 3));
         this.nx = MathUtils.clamp((<number>(((w.x / s)
@@ -68,20 +68,20 @@ export /* sealed */ class UniformGrid implements AccelerationStructure {
         this.invVoxelwx = (1 / this.voxelwx);
         this.invVoxelwy = (1 / this.voxelwy);
         this.invVoxelwz = (1 / this.voxelwz);
-        UI.printDetailed(Module.ACCEL, "Creating grid: %dx%dx%d ...", this.nx, this.ny, this.nz);
-        let buildCells: IntArray[] = new Array((this.nx
+        UI.printDetailed(Module.ACCEL, "Creating grid:%dx%dx%d ...", this.nx, this.ny, this.nz);
+        let buildCells:IntArray[] = new Array((this.nx
         * (this.ny * this.nz)));
         //  add all objects into the grid cells they overlap
-        let imin: number[] = new Array(3);
-        let imax: number[] = new Array(3);
-        let numCellsPerObject: number = 0;
-        for (let i: number = 0; (i < n); i++) {
+        let imin:number[] = new Array(3);
+        let imax:number[] = new Array(3);
+        let numCellsPerObject:number = 0;
+        for (let i:number = 0; (i < n); i++) {
             this.getGridIndex(this.primitives.getPrimitiveBound(i, 0), this.primitives.getPrimitiveBound(i, 2), this.primitives.getPrimitiveBound(i, 4), imin);
             this.getGridIndex(this.primitives.getPrimitiveBound(i, 1), this.primitives.getPrimitiveBound(i, 3), this.primitives.getPrimitiveBound(i, 5), imax);
-            for (let ix: number = imin[0]; (ix <= imax[0]); ix++) {
-                for (let iy: number = imin[1]; (iy <= imax[1]); iy++) {
-                    for (let iz: number = imin[2]; (iz <= imax[2]); iz++) {
-                        let idx: number = (ix
+            for (let ix:number = imin[0]; (ix <= imax[0]); ix++) {
+                for (let iy:number = imin[1]; (iy <= imax[1]); iy++) {
+                    for (let iz:number = imin[2]; (iz <= imax[2]); iz++) {
+                        let idx:number = (ix
                         + ((this.nx * iy)
                         + (this.nx
                         * (this.ny * iz))));
@@ -100,12 +100,12 @@ export /* sealed */ class UniformGrid implements AccelerationStructure {
         }
 
         UI.printDetailed(Module.ACCEL, "Building cells ...");
-        let numEmpty: number = 0;
-        let numInFull: number = 0;
+        let numEmpty:number = 0;
+        let numInFull:number = 0;
         this.cells = new Array((this.nx
         * (this.ny * this.nz)));
-        let i: number = 0;
-        for (let cell: IntArray in buildCells) {
+        let i:number = 0;
+        for (let cell:IntArray in buildCells) {
             if ((cell != null)) {
                 if ((cell.getSize() == 0)) {
                     numEmpty++;
@@ -126,26 +126,26 @@ export /* sealed */ class UniformGrid implements AccelerationStructure {
 
         t.end();
         UI.printDetailed(Module.ACCEL, "Uniform grid statistics:");
-        UI.printDetailed(Module.ACCEL, "  * Grid cells:          %d", this.cells.length);
-        UI.printDetailed(Module.ACCEL, "  * Used cells:          %d", (this.cells.length - numEmpty));
-        UI.printDetailed(Module.ACCEL, "  * Empty cells:         %d", numEmpty);
-        UI.printDetailed(Module.ACCEL, "  * Occupancy:           %.2f%%", (100
+        UI.printDetailed(Module.ACCEL, "  * Grid cells:         %d", this.cells.length);
+        UI.printDetailed(Module.ACCEL, "  * Used cells:         %d", (this.cells.length - numEmpty));
+        UI.printDetailed(Module.ACCEL, "  * Empty cells:        %d", numEmpty);
+        UI.printDetailed(Module.ACCEL, "  * Occupancy:          %.2f%%", (100
         * ((this.cells.length - numEmpty)
         / this.cells.length)));
-        UI.printDetailed(Module.ACCEL, "  * Objects/Cell:        %.2f", ((<number>(numInFull)) / (<number>(this.cells.length))));
-        UI.printDetailed(Module.ACCEL, "  * Objects/Used Cell:   %.2f", ((<number>(numInFull)) / (<number>((this.cells.length - numEmpty)))));
-        UI.printDetailed(Module.ACCEL, "  * Cells/Object:        %.2f", ((<number>(numCellsPerObject)) / (<number>(n))));
-        UI.printDetailed(Module.ACCEL, "  * Build time:          %s", t.toString());
+        UI.printDetailed(Module.ACCEL, "  * Objects/Cell:       %.2f", ((<number>(numInFull)) / (<number>(this.cells.length))));
+        UI.printDetailed(Module.ACCEL, "  * Objects/Used Cell:  %.2f", ((<number>(numInFull)) / (<number>((this.cells.length - numEmpty)))));
+        UI.printDetailed(Module.ACCEL, "  * Cells/Object:       %.2f", ((<number>(numCellsPerObject)) / (<number>(n))));
+        UI.printDetailed(Module.ACCEL, "  * Build time:         %s", t.toString());
     }
 
-    public intersect(r: Ray, state: IntersectionState) {
-        let intervalMin: number = r.getMin();
-        let intervalMax: number = r.getMax();
-        let orgX: number = r.ox;
-        let invDirX: number = (1 / dirX);
-        let dirX: number = r.dx;
-        let t2: number;
-        let t1: number;
+    intersect(r:Ray, state:IntersectionState) {
+        let intervalMin:number = r.getMin();
+        let intervalMax:number = r.getMax();
+        let orgX:number = r.ox;
+        let invDirX:number = (1 / dirX);
+        let dirX:number = r.dx;
+        let t2:number;
+        let t1:number;
         t1 = ((this.bounds.getMinimum().x - orgX)
         * invDirX);
         t2 = ((this.bounds.getMaximum().x - orgX)
@@ -175,9 +175,9 @@ export /* sealed */ class UniformGrid implements AccelerationStructure {
             return;
         }
 
-        let orgY: number = r.oy;
-        let invDirY: number = (1 / dirY);
-        let dirY: number = r.dy;
+        let orgY:number = r.oy;
+        let invDirY:number = (1 / dirY);
+        let dirY:number = r.dy;
         t1 = ((this.bounds.getMinimum().y - orgY)
         * invDirY);
         t2 = ((this.bounds.getMaximum().y - orgY)
@@ -207,9 +207,9 @@ export /* sealed */ class UniformGrid implements AccelerationStructure {
             return;
         }
 
-        let orgZ: number = r.oz;
-        let invDirZ: number = (1 / dirZ);
-        let dirZ: number = r.dz;
+        let orgZ:number = r.oz;
+        let invDirZ:number = (1 / dirZ);
+        let dirZ:number = r.dz;
         t1 = ((this.bounds.getMinimum().z - orgZ)
         * invDirZ);
         t2 = ((this.bounds.getMaximum().z - orgZ)
@@ -248,21 +248,21 @@ export /* sealed */ class UniformGrid implements AccelerationStructure {
         + (intervalMin * dirZ));
         //  locate starting point inside the grid
         //  and set up 3D-DDA vars
-        let indxZ: number;
-        let indxX: number;
-        let indxY: number;
-        let stepZ: number;
-        let stepX: number;
-        let stepY: number;
-        let stopZ: number;
-        let stopX: number;
-        let stopY: number;
-        let deltaZ: number;
-        let deltaX: number;
-        let deltaY: number;
-        let tnextZ: number;
-        let tnextX: number;
-        let tnextY: number;
+        let indxZ:number;
+        let indxX:number;
+        let indxY:number;
+        let stepZ:number;
+        let stepX:number;
+        let stepY:number;
+        let stopZ:number;
+        let stopX:number;
+        let stopY:number;
+        let deltaZ:number;
+        let deltaX:number;
+        let deltaY:number;
+        let tnextZ:number;
+        let tnextX:number;
+        let tnextY:number;
         //  stepping factors along X
         indxX = (<number>(((orgX - this.bounds.getMinimum().x)
         * this.invVoxelwx)));
@@ -374,11 +374,11 @@ export /* sealed */ class UniformGrid implements AccelerationStructure {
             * invDirZ));
         }
 
-        let cellstepX: number = stepX;
-        let cellstepY: number = (stepY * this.nx);
-        let cellstepZ: number = (stepZ
+        let cellstepX:number = stepX;
+        let cellstepY:number = (stepY * this.nx);
+        let cellstepZ:number = (stepZ
         * (this.ny * this.nx));
-        let cell: number = (indxX
+        let cell:number = (indxX
         + ((indxY * this.nx)
         + (indxZ
         * (this.ny * this.nx))));
@@ -389,7 +389,7 @@ export /* sealed */ class UniformGrid implements AccelerationStructure {
             if (((tnextX < tnextY)
                 && (tnextX < tnextZ))) {
                 if ((this.cells[cell] != null)) {
-                    for (let i: number in this.cells[cell]) {
+                    for (let i:number in this.cells[cell]) {
                         this.primitives.intersectPrimitive(r, i, state);
                     }
 
@@ -416,7 +416,7 @@ export /* sealed */ class UniformGrid implements AccelerationStructure {
             }
             else if ((tnextY < tnextZ)) {
                 if ((this.cells[cell] != null)) {
-                    for (let i: number in this.cells[cell]) {
+                    for (let i:number in this.cells[cell]) {
                         this.primitives.intersectPrimitive(r, i, state);
                     }
 
@@ -443,7 +443,7 @@ export /* sealed */ class UniformGrid implements AccelerationStructure {
             }
             else {
                 if ((this.cells[cell] != null)) {
-                    for (let i: number in this.cells[cell]) {
+                    for (let i:number in this.cells[cell]) {
                         this.primitives.intersectPrimitive(r, i, state);
                     }
 
@@ -473,7 +473,7 @@ export /* sealed */ class UniformGrid implements AccelerationStructure {
 
     }
 
-    private getGridIndex(x: number, y: number, z: number, i: number[]) {
+    private getGridIndex(x:number, y:number, z:number, i:number[]) {
         i[0] = MathUtils.clamp((<number>(((x - this.bounds.getMinimum().x)
         * this.invVoxelwx))), 0, (this.nx - 1));
         i[1] = MathUtils.clamp((<number>(((y - this.bounds.getMinimum().y)

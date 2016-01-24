@@ -19,7 +19,7 @@ export class PinholeLens implements CameraLens {
         this.update();
     }
 
-    public update(pl:ParameterList, api:SunflowAPI):boolean {
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         //  get parameters
         this.fov = pl.getFloat("fov", this.fov);
         this.aspect = pl.getFloat("aspect", this.aspect);
@@ -32,7 +32,7 @@ export class PinholeLens implements CameraLens {
         this.av = (this.au / this.aspect);
     }
 
-    public getRay(x:float, y:float, imageWidth:int, imageHeight:int, lensX:double, lensY:double, time:double):Ray {
+    getRay(x:float, y:float, imageWidth:int, imageHeight:int, lensX:double, lensY:double, time:double):Ray {
         let du:float = ((this.au * -1) + ((2 * (this.au * x)) / (imageWidth - 1)));
         let dv:float = ((this.av * -1) + ((2 * (this.av * y)) / (imageHeight - 1)));
         return new Ray(0, 0, 0, du, dv, -1);

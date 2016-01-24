@@ -3,29 +3,29 @@
  */
 export class AmbientOcclusionShader implements Shader {
 
-    private bright: Color;
+    private bright:Color;
 
-    private dark: Color;
+    private dark:Color;
 
-    private samples: number;
+    private samples:number;
 
-    private maxDist: number;
+    private maxDist:number;
 
-    public constructor () {
+    constructor () {
         this.bright = Color.WHITE;
         this.dark = Color.BLACK;
         this.samples = 32;
         this.maxDist = Float.POSITIVE_INFINITY;
     }
 
-    public constructor (c: Color, d: number) :
+    constructor (c:Color, d:number) :
     this() {
     this.();
     this.bright = c;
     this.maxDist = d;
 }
 
-public update(pl: ParameterList, api: SunflowAPI): boolean {
+update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
     this.bright = pl.getColor("bright", this.bright);
     this.dark = pl.getColor("dark", this.dark);
     this.samples = pl.getInt("samples", this.samples);
@@ -37,15 +37,15 @@ public update(pl: ParameterList, api: SunflowAPI): boolean {
     return true;
 }
 
-public getBrightColor(state: ShadingState): Color {
+getBrightColor(state:ShadingState):Color {
     return this.bright;
 }
 
-public getRadiance(state: ShadingState): Color {
+getRadiance(state:ShadingState):Color {
     return state.occlusion(this.samples, this.maxDist, this.getBrightColor(state), this.dark);
 }
 
-public scatterPhoton(state: ShadingState, power: Color) {
+scatterPhoton(state:ShadingState, power:Color) {
 
 }
 }

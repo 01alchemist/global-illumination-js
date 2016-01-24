@@ -3,7 +3,7 @@
  */
 export interface Tesselatable extends RenderObject {
 
-    tesselate(): PrimitiveList;
+    tesselate():PrimitiveList;
 
-    getWorldBounds(o2w: Matrix4): BoundingBox;
+    getWorldBounds(o2w:Matrix4):BoundingBox;
 }

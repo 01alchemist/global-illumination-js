@@ -8,7 +8,7 @@ import {Ray} from "./Ray";
 export class Hit{
 
 
-    constructor(public shape:Shape, public T:number){
+    constructor(shape:Shape, T:number){
 
     }
     ok():boolean{

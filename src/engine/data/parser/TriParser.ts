@@ -3,12 +3,12 @@
  */
 export class TriParser implements SceneParser {
 
-    public parse(filename: String, api: SunflowAPI): boolean {
+    parse(filename:string, api:GlobalIlluminationAPI):boolean {
         try {
-            UI.printInfo(Module.USER, "TRI - Reading geometry: \""%s\"" ...", filename);
-            let p: Parser = new Parser(filename);
-            let verts: number[] = new Array((3 * p.getNextInt()));
-            for (let v: number = 0; (v < verts.length); v += 3) {
+            UI.printInfo(Module.USER, "TRI - Reading geometry:\""%s\"" ...", filename);
+            let p:Parser = new Parser(filename);
+            let verts:number[] = new Array((3 * p.getNextInt()));
+            for (let v:number = 0; (v < verts.length); v += 3) {
                 verts[(v + 0)] = p.getNextFloat();
                 verts[(v + 1)] = p.getNextFloat();
                 verts[(v + 2)] = p.getNextFloat();
@@ -16,8 +16,8 @@ export class TriParser implements SceneParser {
                 p.getNextToken();
             }
 
-            let triangles: number[] = new Array((p.getNextInt() * 3));
-            for (let t: number = 0; (t < triangles.length); t += 3) {
+            let triangles:number[] = new Array((p.getNextInt() * 3));
+            for (let t:number = 0; (t < triangles.length); t += 3) {
                 triangles[(t + 0)] = p.getNextInt();
                 triangles[(t + 1)] = p.getNextInt();
                 triangles[(t + 2)] = p.getNextInt();
@@ -34,19 +34,19 @@ export class TriParser implements SceneParser {
             api.instance((filename + ".instance"), filename);
             p.close();
             //  output to ra3 format
-            let stream: RandomAccessFile = new RandomAccessFile(filename.replace(".tri", ".ra3"), "rw");
-            let map: MappedByteBuffer = stream.getChannel().map(MapMode.READ_WRITE, 0, (8 + (4
+            let stream:RandomAccessFile = new RandomAccessFile(filename.replace(".tri", ".ra3"), "rw");
+            let map:MappedByteBuffer = stream.getChannel().map(MapMode.READ_WRITE, 0, (8 + (4
             * (verts.length + triangles.length))));
             map.order(ByteOrder.LITTLE_ENDIAN);
-            let ints: IntBuffer = map.asIntBuffer();
-            let floats: FloatBuffer = map.asFloatBuffer();
+            let ints:IntBuffer = map.asIntBuffer();
+            let floats:FloatBuffer = map.asFloatBuffer();
             ints.put(0, (verts.length / 3));
             ints.put(1, (triangles.length / 3));
-            for (let i: number = 0; (i < verts.length); i++) {
+            for (let i:number = 0; (i < verts.length); i++) {
                 floats.put((2 + i), verts[i]);
             }
 
-            for (let i: number = 0; (i < triangles.length); i++) {
+            for (let i:number = 0; (i < triangles.length); i++) {
                 ints.put((2
                 + (verts.length + i)), triangles[i]);
             }

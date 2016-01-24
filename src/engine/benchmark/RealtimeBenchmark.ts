@@ -1,12 +1,12 @@
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
-export class RealtimeBenchmark extends SunflowAPI {
+export class RealtimeBenchmark extends GlobalIlluminationAPI {
 
-    public constructor (showGUI: boolean, threads: number) {
-        let display: Display = showGUI;
-        // TODO: Warning!!!, inline IF is not supported ?
-        // TODO: Warning!!!, inline IF is not supported ?
+    constructor (showGUI:boolean, threads:number) {
+        let display:Display = showGUI;
+        // TODO:Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
         UI.printInfo(Module.BENCH, "Preparing benchmarking scene ...");
         //  settings
         parameter("threads", threads);
@@ -21,32 +21,32 @@ export class RealtimeBenchmark extends SunflowAPI {
         parameter("depths.refraction", 0);
         parameter("bucket.order", "hilbert");
         parameter("bucket.size", 32);
-        options(SunflowAPI.DEFAULT_OPTIONS);
+        options(GlobalIlluminationAPI.DEFAULT_OPTIONS);
         //  camera
-        let eye: Point3 = new Point3(30, 0, 10.967);
-        let target: Point3 = new Point3(0, 0, 5.4);
-        let up: Vector3 = new Vector3(0, 0, 1);
+        let eye:Point3 = new Point3(30, 0, 10.967);
+        let target:Point3 = new Point3(0, 0, 5.4);
+        let up:Vector3 = new Vector3(0, 0, 1);
         parameter("eye", eye);
         parameter("target", target);
         parameter("up", up);
         parameter("fov", 45);
-        let name: String = getUniqueName("camera");
+        let name:string = getUniqueName("camera");
         camera(name, new PinholeLens());
         parameter("camera", name);
-        options(SunflowAPI.DEFAULT_OPTIONS);
+        options(GlobalIlluminationAPI.DEFAULT_OPTIONS);
         //  geometry
         this.createGeometry();
         //  this first render is not timed, it caches the acceleration data
         //  structures and tesselations so they won't be
         //  included in the main timing
         UI.printInfo(Module.BENCH, "Rendering warmup frame ...");
-        render(SunflowAPI.DEFAULT_OPTIONS, display);
+        render(GlobalIlluminationAPI.DEFAULT_OPTIONS, display);
         //  now disable all output - and run the benchmark
         UI.set(null);
-        let t: Timer = new Timer();
+        let t:Timer = new Timer();
         t.start();
-        let phi: number = 0;
-        let frames: number = 0;
+        let phi:number = 0;
+        let frames:number = 0;
         while ((phi < (4 * Math.PI))) {
             eye.x = (30 * (<number>(Math.cos(phi))));
             eye.y = (30 * (<number>(Math.sin(phi))));
@@ -58,14 +58,14 @@ export class RealtimeBenchmark extends SunflowAPI {
             parameter("target", target);
             parameter("up", up);
             camera(name, null);
-            render(SunflowAPI.DEFAULT_OPTIONS, display);
+            render(GlobalIlluminationAPI.DEFAULT_OPTIONS, display);
         }
 
         t.end();
         UI.set(new ConsoleInterface());
         UI.printInfo(Module.BENCH, "Benchmark results:");
-        UI.printInfo(Module.BENCH, "  * Average FPS:         %.2f", (frames / t.seconds()));
-        UI.printInfo(Module.BENCH, "  * Total time:          %s", t);
+        UI.printInfo(Module.BENCH, "  * Average FPS:        %.2f", (frames / t.seconds()));
+        UI.printInfo(Module.BENCH, "  * Total time:         %s", t);
     }
 
     private createGeometry() {
@@ -92,7 +92,7 @@ export class RealtimeBenchmark extends SunflowAPI {
         parameter("subdivs", 10);
         geometry("teapot", (<Tesselatable>(new Teapot())));
         parameter("shaders", "default");
-        let m: Matrix4 = Matrix4.IDENTITY;
+        let m:Matrix4 = Matrix4.IDENTITY;
         m = Matrix4.scale(0.075).multiply(m);
         m = Matrix4.rotateZ((<number>(Math.toRadians(-45)))).multiply(m);
         m = Matrix4.translation(-7, 0, 0).multiply(m);

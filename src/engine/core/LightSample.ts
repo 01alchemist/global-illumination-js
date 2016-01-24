@@ -3,18 +3,18 @@
  */
 export class LightSample {
 
-    private shadowRay: Ray;
+    private shadowRay:Ray;
 
     //  ray to be used to evaluate if the point is in
     //  shadow
-    private ldiff: Color;
+    private ldiff:Color;
 
-    private lspec: Color;
+    private lspec:Color;
 
-    next: LightSample;
+    next:LightSample;
 
     //  pointer to next item in a linked list of samples
-    public constructor () {
+    constructor () {
         this.lspec = null;
         this.ldiff = null;
         this.ldiff = null;
@@ -22,40 +22,40 @@ export class LightSample {
         this.next = null;
     }
 
-    isValid(): boolean {
+    isValid():boolean {
         return ((this.ldiff != null)
         && ((this.lspec != null)
         && (this.shadowRay != null)));
     }
 
-    public setShadowRay(shadowRay: Ray) {
+    setShadowRay(shadowRay:Ray) {
         this.shadowRay = this.shadowRay;
     }
 
-    public traceShadow(state: ShadingState) {
-        let opacity: Color = state.traceShadow(this.shadowRay);
+    traceShadow(state:ShadingState) {
+        let opacity:Color = state.traceShadow(this.shadowRay);
         Color.blend(this.ldiff, Color.BLACK, opacity, this.ldiff);
         Color.blend(this.lspec, Color.BLACK, opacity, this.lspec);
     }
 
-    public getShadowRay(): Ray {
+    getShadowRay():Ray {
         return this.shadowRay;
     }
 
-    public getDiffuseRadiance(): Color {
+    getDiffuseRadiance():Color {
         return this.ldiff;
     }
 
-    public getSpecularRadiance(): Color {
+    getSpecularRadiance():Color {
         return this.lspec;
     }
 
-    public setRadiance(d: Color, s: Color) {
+    setRadiance(d:Color, s:Color) {
         this.ldiff = d.copy();
         this.lspec = s.copy();
     }
 
-    public dot(v: Vector3): number {
+    dot(v:Vector3):number {
         return this.shadowRay.dot(v);
     }
 }

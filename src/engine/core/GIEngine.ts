@@ -14,14 +14,14 @@ export interface GIEngine {
      * @param state shading state
      * @return color approximating global radiance
      */
-    getGlobalRadiance(state: ShadingState): Color;
+    getGlobalRadiance(state:ShadingState):Color;
     /**
      * Initialize the engine. This is called before rendering begins.
      *
      * @return <code>true</code> if the init phase succeeded,
      *         <code>false</code> otherwise
      */
-    init(scene: Scene): boolean;
+    init(scene:Scene):boolean;
     /**
      * Return the incomming irradiance due to indirect diffuse illumination at
      * the specified surface point.
@@ -32,5 +32,5 @@ export interface GIEngine {
      * @return irradiance from indirect diffuse illumination at the specified
      *         point
      */
-    getIrradiance(state: ShadingState, diffuseReflectance: Color): Color;
+    getIrradiance(state:ShadingState, diffuseReflectance:Color):Color;
 }

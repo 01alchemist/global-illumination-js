@@ -4,73 +4,73 @@
 class LightServer {
 
     //  parent
-    private scene: Scene;
+    private scene:Scene;
 
     //  lighting
-    private lights: LightSource[];
+    private lights:LightSource[];
 
     //  shading override
-    private shaderOverride: Shader;
+    private shaderOverride:Shader;
 
-    private shaderOverridePhotons: boolean;
+    private shaderOverridePhotons:boolean;
 
     //  direct illumination
-    private maxDiffuseDepth: number;
+    private maxDiffuseDepth:number;
 
-    private maxReflectionDepth: number;
+    private maxReflectionDepth:number;
 
-    private maxRefractionDepth: number;
+    private maxRefractionDepth:number;
 
     //  indirect illumination
-    private causticPhotonMap: CausticPhotonMapInterface;
+    private causticPhotonMap:CausticPhotonMapInterface;
 
-    private giEngine: GIEngine;
+    private giEngine:GIEngine;
 
-    private photonCounter: number;
+    private photonCounter:number;
 
     //  shading cache
-    private shadingCache: CacheEntry[];
+    private shadingCache:CacheEntry[];
 
-    private shadingCacheResolution: number;
+    private shadingCacheResolution:number;
 
-    private cacheLookups: number;
+    private cacheLookups:number;
 
-    private cacheEmptyEntryMisses: number;
+    private cacheEmptyEntryMisses:number;
 
-    private cacheWrongEntryMisses: number;
+    private cacheWrongEntryMisses:number;
 
-    private cacheEntryAdditions: number;
+    private cacheEntryAdditions:number;
 
-    private cacheHits: number;
+    private cacheHits:number;
 
     class CacheEntry {
 
-    cx: number;
+    cx:number;
 
-    cy: number;
+    cy:number;
 
-    first: Sample;
+    first:Sample;
 }
 
 class Sample {
 
-    i: Instance;
+    i:Instance;
 
-    s: Shader;
+    s:Shader;
 
     //  int prim;
-    nx: number;
+    nx:number;
 
-    ny: number;
+    ny:number;
 
-    nz: number;
+    nz:number;
 
-    c: Color;
+    c:Color;
 
-    next: Sample;
+    next:Sample;
 }
 
-constructor (scene: Scene) {
+constructor (scene:Scene) {
     this.scene = this.scene;
     this.lights = new Array(0);
     this.causticPhotonMap = null;
@@ -84,32 +84,32 @@ constructor (scene: Scene) {
     this.shadingCache(0);
 }
 
-setLights(lights: LightSource[]) {
+setLights(lights:LightSource[]) {
     this.lights = this.lights;
 }
 
-shadingCache(shadingRate: number) {
+shadingCache(shadingRate:number) {
     this.shadingCache = (shadingRate > 0);
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
     this.shadingCacheResolution = (<number>((1 / Math.sqrt(shadingRate))));
 }
 
-getScene(): Scene {
+getScene():Scene {
     return this.scene;
 }
 
-setShaderOverride(shader: Shader, photonOverride: boolean) {
+setShaderOverride(shader:Shader, photonOverride:boolean) {
     this.shaderOverride = shader;
     this.shaderOverridePhotons = photonOverride;
 }
 
-build(options: Options): boolean {
+build(options:Options):boolean {
     //  read options
     this.maxDiffuseDepth = options.getInt("depths.diffuse", this.maxDiffuseDepth);
     this.maxReflectionDepth = options.getInt("depths.reflection", this.maxReflectionDepth);
     this.maxRefractionDepth = options.getInt("depths.refraction", this.maxRefractionDepth);
     this.giEngine = GIEngineFactory.create(options);
-    let caustics: String = options.getString("caustics", null);
+    let caustics:string = options.getString("caustics", null);
     if (((caustics == null)
         || caustics.equals("none"))) {
         this.causticPhotonMap = null;
@@ -119,7 +119,7 @@ build(options: Options): boolean {
         this.causticPhotonMap = new CausticPhotonMap(options);
     }
     else {
-        UI.printWarning(Module.LIGHT, "Unrecognized caustics photon map engine \""%s\"" - ignoring", caustics);
+        console.warn(Module.LIGHT, "Unrecognized caustics photon map engine \""%s\"" - ignoring", caustics);
         this.causticPhotonMap = null;
     }
 
@@ -127,11 +127,11 @@ build(options: Options): boolean {
     this.maxDiffuseDepth = Math.max(0, this.maxDiffuseDepth);
     this.maxReflectionDepth = Math.max(0, this.maxReflectionDepth);
     this.maxRefractionDepth = Math.max(0, this.maxRefractionDepth);
-    let t: Timer = new Timer();
+    let t:Timer = new Timer();
     t.start();
     //  count total number of light samples
-    let numLightSamples: number = 0;
-    for (let i: number = 0; (i < this.lights.length); i++) {
+    let numLightSamples:number = 0;
+    for (let i:number = 0; (i < this.lights.length); i++) {
         numLightSamples = (numLightSamples + this.lights[i].getNumSamples());
     }
 
@@ -155,27 +155,27 @@ build(options: Options): boolean {
     this.cacheEntryAdditions = 0;
     if ((this.shadingCache != null)) {
         //  clear shading cache
-        for (let i: number = 0; (i < this.shadingCache.length); i++) {
+        for (let i:number = 0; (i < this.shadingCache.length); i++) {
             this.shadingCache[i] = null;
         }
 
     }
 
     UI.printInfo(Module.LIGHT, "Light Server stats:");
-    UI.printInfo(Module.LIGHT, "  * Light sources found: %d", this.lights.length);
-    UI.printInfo(Module.LIGHT, "  * Light samples:       %d", numLightSamples);
+    UI.printInfo(Module.LIGHT, "  * Light sources found:%d", this.lights.length);
+    UI.printInfo(Module.LIGHT, "  * Light samples:      %d", numLightSamples);
     UI.printInfo(Module.LIGHT, "  * Max raytrace depth:");
     UI.printInfo(Module.LIGHT, "      - Diffuse          %d", this.maxDiffuseDepth);
     UI.printInfo(Module.LIGHT, "      - Reflection       %d", this.maxReflectionDepth);
     UI.printInfo(Module.LIGHT, "      - Refraction       %d", this.maxRefractionDepth);
     UI.printInfo(Module.LIGHT, "  * GI engine            %s", options.getString("gi.engine", "none"));
-    UI.printInfo(Module.LIGHT, "  * Caustics:            %s", (caustics == null));
-    // TODO: Warning!!!, inline IF is not supported ?
-    UI.printInfo(Module.LIGHT, "  * Shader override:     %b", this.shaderOverride);
-    UI.printInfo(Module.LIGHT, "  * Photon override:     %b", this.shaderOverridePhotons);
-    UI.printInfo(Module.LIGHT, "  * Shading cache:       %s", (this.shadingCache == null));
-    // TODO: Warning!!!, inline IF is not supported ?
-    UI.printInfo(Module.LIGHT, "  * Build time:          %s", t.toString());
+    UI.printInfo(Module.LIGHT, "  * Caustics:           %s", (caustics == null));
+    // TODO:Warning!!!, inline IF is not supported ?
+    UI.printInfo(Module.LIGHT, "  * Shader override:    %b", this.shaderOverride);
+    UI.printInfo(Module.LIGHT, "  * Photon override:    %b", this.shaderOverridePhotons);
+    UI.printInfo(Module.LIGHT, "  * Shading cache:      %s", (this.shadingCache == null));
+    // TODO:Warning!!!, inline IF is not supported ?
+    UI.printInfo(Module.LIGHT, "  * Build time:         %s", t.toString());
     return true;
 }
 
@@ -184,75 +184,75 @@ showStats() {
         return;
     }
 
-    let numUsedEntries: number = 0;
-    for (let e: CacheEntry in this.shadingCache) {
+    let numUsedEntries:number = 0;
+    for (let e:CacheEntry in this.shadingCache) {
         numUsedEntries = (numUsedEntries
         + (e != null));
     }
 
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
     UI.printInfo(Module.LIGHT, "Shading cache stats:");
-    UI.printInfo(Module.LIGHT, "  * Used entries:        %d (%d%%)", numUsedEntries, ((100 * numUsedEntries)
+    UI.printInfo(Module.LIGHT, "  * Used entries:       %d (%d%%)", numUsedEntries, ((100 * numUsedEntries)
     / this.shadingCache.length));
-    UI.printInfo(Module.LIGHT, "  * Lookups:             %d", this.cacheLookups);
-    UI.printInfo(Module.LIGHT, "  * Hits:                %d", this.cacheHits);
-    UI.printInfo(Module.LIGHT, "  * Hit rate:            %d%%", ((100 * this.cacheHits)
+    UI.printInfo(Module.LIGHT, "  * Lookups:            %d", this.cacheLookups);
+    UI.printInfo(Module.LIGHT, "  * Hits:               %d", this.cacheHits);
+    UI.printInfo(Module.LIGHT, "  * Hit rate:           %d%%", ((100 * this.cacheHits)
     / this.cacheLookups));
-    UI.printInfo(Module.LIGHT, "  * Empty entry misses:  %d", this.cacheEmptyEntryMisses);
-    UI.printInfo(Module.LIGHT, "  * Wrong entry misses:  %d", this.cacheWrongEntryMisses);
-    UI.printInfo(Module.LIGHT, "  * Entry adds:          %d", this.cacheEntryAdditions);
+    UI.printInfo(Module.LIGHT, "  * Empty entry misses: %d", this.cacheEmptyEntryMisses);
+    UI.printInfo(Module.LIGHT, "  * Wrong entry misses: %d", this.cacheWrongEntryMisses);
+    UI.printInfo(Module.LIGHT, "  * Entry adds:         %d", this.cacheEntryAdditions);
 }
 
-calculatePhotons(map: PhotonStore, type: String, seed: number): boolean {
+calculatePhotons(map:PhotonStore, type:string, seed:number):boolean {
     if ((map == null)) {
         return true;
     }
 
     if ((this.lights.length == 0)) {
-        UI.printError(Module.LIGHT, "Unable to trace %s photons, no lights in scene", type);
+        console.error(Module.LIGHT, "Unable to trace %s photons, no lights in scene", type);
         return false;
     }
 
-    let histogram: number[] = new Array(this.lights.length);
+    let histogram:number[] = new Array(this.lights.length);
     histogram[0] = this.lights[0].getPower();
-    for (let i: number = 1; (i < this.lights.length); i++) {
+    for (let i:number = 1; (i < this.lights.length); i++) {
         histogram[i] = (histogram[(i - 1)] + this.lights[i].getPower());
     }
 
     UI.printInfo(Module.LIGHT, "Tracing %s photons ...", type);
-    let numEmittedPhotons: number = map.numEmit();
+    let numEmittedPhotons:number = map.numEmit();
     if (((numEmittedPhotons <= 0)
         || (histogram[(histogram.length - 1)] <= 0))) {
-        UI.printError(Module.LIGHT, "Photon mapping enabled, but no %s photons to emit", type);
+        console.error(Module.LIGHT, "Photon mapping enabled, but no %s photons to emit", type);
         return false;
     }
 
     map.prepare(this.scene.getBounds());
     UI.taskStart(("Tracing "
     + (type + " photons")), 0, numEmittedPhotons);
-    let photonThreads: Thread[] = new Array(this.scene.getThreads());
-    let scale: number = (1 / numEmittedPhotons);
-    let delta: number = (numEmittedPhotons / photonThreads.length);
+    let photonThreads:Thread[] = new Array(this.scene.getThreads());
+    let scale:number = (1 / numEmittedPhotons);
+    let delta:number = (numEmittedPhotons / photonThreads.length);
     this.photonCounter = 0;
-    let photonTimer: Timer = new Timer();
+    let photonTimer:Timer = new Timer();
     photonTimer.start();
-    for (let i: number = 0; (i < photonThreads.length); i++) {
-        let threadID: number = i;
-        let start: number = (threadID * delta);
-        let end: number = (threadID
+    for (let i:number = 0; (i < photonThreads.length); i++) {
+        let threadID:number = i;
+        let start:number = (threadID * delta);
+        let end:number = (threadID
         == (photonThreads.length - 1));
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
         photonThreads[i] = new Thread(new Runnable());
         photonThreads[i].setPriority(this.scene.getThreadPriority());
         photonThreads[i].start();
     }
 
-    for (let i: number = 0; (i < photonThreads.length); i++) {
+    for (let i:number = 0; (i < photonThreads.length); i++) {
         try {
             photonThreads[i].join();
         }
         catch (e /*:InterruptedException*/) {
-            UI.printError(Module.LIGHT, "Photon thread %d of %d was interrupted", (i + 1), photonThreads.length);
+            console.error(Module.LIGHT, "Photon thread %d of %d was interrupted", (i + 1), photonThreads.length);
             return false;
         }
 
@@ -266,14 +266,14 @@ calculatePhotons(map: PhotonStore, type: String, seed: number): boolean {
 
     photonTimer.end();
     UI.taskStop();
-    UI.printInfo(Module.LIGHT, "Tracing time for %s photons: %s", type, photonTimer.toString());
+    UI.printInfo(Module.LIGHT, "Tracing time for %s photons:%s", type, photonTimer.toString());
     map.init();
     return true;
 }
 
-shadePhoton(state: ShadingState, power: Color) {
+shadePhoton(state:ShadingState, power:Color) {
     state.getInstance().prepareShadingState(state);
-    let shader: Shader = this.getPhotonShader(state);
+    let shader:Shader = this.getPhotonShader(state);
     //  scatter photon
     if ((shader != null)) {
         shader.scatterPhoton(state, power);
@@ -281,75 +281,75 @@ shadePhoton(state: ShadingState, power: Color) {
 
 }
 
-traceDiffusePhoton(previous: ShadingState, r: Ray, power: Color) {
+traceDiffusePhoton(previous:ShadingState, r:Ray, power:Color) {
     if ((previous.getDiffuseDepth() >= this.maxDiffuseDepth)) {
         return;
     }
 
-    let istate: IntersectionState = previous.getIntersectionState();
+    let istate:IntersectionState = previous.getIntersectionState();
     this.scene.trace(r, istate);
     if (previous.getIntersectionState().hit()) {
         //  create a new shading context
-        let state: ShadingState = ShadingState.createDiffuseBounceState(previous, r, 0);
+        let state:ShadingState = ShadingState.createDiffuseBounceState(previous, r, 0);
         this.shadePhoton(state, power);
     }
 
 }
 
-traceReflectionPhoton(previous: ShadingState, r: Ray, power: Color) {
+traceReflectionPhoton(previous:ShadingState, r:Ray, power:Color) {
     if ((previous.getReflectionDepth() >= this.maxReflectionDepth)) {
         return;
     }
 
-    let istate: IntersectionState = previous.getIntersectionState();
+    let istate:IntersectionState = previous.getIntersectionState();
     this.scene.trace(r, istate);
     if (previous.getIntersectionState().hit()) {
         //  create a new shading context
-        let state: ShadingState = ShadingState.createReflectionBounceState(previous, r, 0);
+        let state:ShadingState = ShadingState.createReflectionBounceState(previous, r, 0);
         this.shadePhoton(state, power);
     }
 
 }
 
-traceRefractionPhoton(previous: ShadingState, r: Ray, power: Color) {
+traceRefractionPhoton(previous:ShadingState, r:Ray, power:Color) {
     if ((previous.getRefractionDepth() >= this.maxRefractionDepth)) {
         return;
     }
 
-    let istate: IntersectionState = previous.getIntersectionState();
+    let istate:IntersectionState = previous.getIntersectionState();
     this.scene.trace(r, istate);
     if (previous.getIntersectionState().hit()) {
         //  create a new shading context
-        let state: ShadingState = ShadingState.createRefractionBounceState(previous, r, 0);
+        let state:ShadingState = ShadingState.createRefractionBounceState(previous, r, 0);
         this.shadePhoton(state, power);
     }
 
 }
 
-private getShader(state: ShadingState): Shader {
+private getShader(state:ShadingState):Shader {
     return (this.shaderOverride != null);
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-private getPhotonShader(state: ShadingState): Shader {
+private getPhotonShader(state:ShadingState):Shader {
     return ((this.shaderOverride != null)
     && this.shaderOverridePhotons);
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-getRadiance(rx: number, ry: number, i: number, r: Ray, istate: IntersectionState): ShadingState {
+getRadiance(rx:number, ry:number, i:number, r:Ray, istate:IntersectionState):ShadingState {
     this.scene.trace(r, istate);
     if (istate.hit()) {
-        let state: ShadingState = ShadingState.createState(istate, rx, ry, r, i, this);
+        let state:ShadingState = ShadingState.createState(istate, rx, ry, r, i, this);
         state.getInstance().prepareShadingState(state);
-        let shader: Shader = this.getShader(state);
+        let shader:Shader = this.getShader(state);
         if ((shader == null)) {
             state.setResult(Color.BLACK);
             return state;
         }
 
         if ((this.shadingCache != null)) {
-            let c: Color = this.lookupShadingCache(state, shader);
+            let c:Color = this.lookupShadingCache(state, shader);
             if ((c != null)) {
                 state.setResult(c);
                 return state;
@@ -370,8 +370,8 @@ getRadiance(rx: number, ry: number, i: number, r: Ray, istate: IntersectionState
 
 }
 
-shadeBakeResult(state: ShadingState) {
-    let shader: Shader = this.getShader(state);
+shadeBakeResult(state:ShadingState) {
+    let shader:Shader = this.getShader(state);
     if ((shader != null)) {
         state.setResult(shader.getRadiance(state));
     }
@@ -381,14 +381,14 @@ shadeBakeResult(state: ShadingState) {
 
 }
 
-shadeHit(state: ShadingState): Color {
+shadeHit(state:ShadingState):Color {
     state.getInstance().prepareShadingState(state);
-    let shader: Shader = this.getShader(state);
+    let shader:Shader = this.getShader(state);
     return (shader != null);
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-private static hash(x: number, y: number): number {
+private static hash(x:number, y:number):number {
     //  long bits = java.lang.Double.doubleToLongBits(x);
     //  bits ^= java.lang.Double.doubleToLongBits(y) * 31;
     //  return (((int) bits) ^ ((int) (bits >> 32)));
@@ -396,16 +396,16 @@ private static hash(x: number, y: number): number {
     // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
 }
 
-private lookupShadingCache(state: ShadingState, shader: Shader): Color {
+private lookupShadingCache(state:ShadingState, shader:Shader):Color {
     if ((state.getNormal() == null)) {
         return null;
     }
 
     this.cacheLookups++;
-    let cx: number = (<number>((state.getRasterX() * this.shadingCacheResolution)));
-    let cy: number = (<number>((state.getRasterY() * this.shadingCacheResolution)));
-    let hash: number = LightServer.hash(cx, cy);
-    let e: CacheEntry = this.shadingCache[(hash
+    let cx:number = (<number>((state.getRasterX() * this.shadingCacheResolution)));
+    let cy:number = (<number>((state.getRasterY() * this.shadingCacheResolution)));
+    let hash:number = LightServer.hash(cx, cy);
+    let e:CacheEntry = this.shadingCache[(hash
     & (this.shadingCache.length - 1))];
     if ((e == null)) {
         this.cacheEmptyEntryMisses++;
@@ -416,19 +416,19 @@ private lookupShadingCache(state: ShadingState, shader: Shader): Color {
     if (((e.cx == cx)
         && (e.cy == cy))) {
         //  search further
-        for (let s: Sample = e.first; (s != null); s = s.next) {
+        for (let s:Sample = e.first; (s != null); s = s.next) {
             if ((s.i != state.getInstance())) {
-                // TODO: Warning!!! continue If
+                // TODO:Warning!!! continue If
             }
 
             //  if (s.prim != state.getPrimitiveID())
             //  continue;
             if ((s.s != shader)) {
-                // TODO: Warning!!! continue If
+                // TODO:Warning!!! continue If
             }
 
             if ((state.getNormal().dot(s.nx, s.ny, s.nz) < 0.95)) {
-                // TODO: Warning!!! continue If
+                // TODO:Warning!!! continue If
             }
 
             //  we have a match
@@ -444,25 +444,25 @@ private lookupShadingCache(state: ShadingState, shader: Shader): Color {
     return null;
 }
 
-private addShadingCache(state: ShadingState, shader: Shader, c: Color) {
+private addShadingCache(state:ShadingState, shader:Shader, c:Color) {
     //  don't cache samples with null normals
     if ((state.getNormal() == null)) {
         return;
     }
 
     this.cacheEntryAdditions++;
-    let cx: number = (<number>((state.getRasterX() * this.shadingCacheResolution)));
-    let cy: number = (<number>((state.getRasterY() * this.shadingCacheResolution)));
-    let h: number = (LightServer.hash(cx, cy)
+    let cx:number = (<number>((state.getRasterX() * this.shadingCacheResolution)));
+    let cy:number = (<number>((state.getRasterY() * this.shadingCacheResolution)));
+    let h:number = (LightServer.hash(cx, cy)
     & (this.shadingCache.length - 1));
-    let e: CacheEntry = this.shadingCache[h];
+    let e:CacheEntry = this.shadingCache[h];
     //  new entry ?
     if ((e == null)) {
         this.shadingCache[h] = new CacheEntry();
     }
 
     e = new CacheEntry();
-    let s: Sample = new Sample();
+    let s:Sample = new Sample();
     s.i = state.getInstance();
     //  s.prim = state.getPrimitiveID();
     s.s = shader;
@@ -486,57 +486,57 @@ private addShadingCache(state: ShadingState, shader: Shader, c: Color) {
 
 }
 
-traceGlossy(previous: ShadingState, r: Ray, i: number): Color {
+traceGlossy(previous:ShadingState, r:Ray, i:number):Color {
     //  limit path depth and disable caustic paths
     if (((previous.getReflectionDepth() >= this.maxReflectionDepth)
         || (previous.getDiffuseDepth() > 0))) {
         return Color.BLACK;
     }
 
-    let istate: IntersectionState = previous.getIntersectionState();
+    let istate:IntersectionState = previous.getIntersectionState();
     this.scene.trace(r, istate);
     return istate.hit();
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-traceReflection(previous: ShadingState, r: Ray, i: number): Color {
+traceReflection(previous:ShadingState, r:Ray, i:number):Color {
     //  limit path depth and disable caustic paths
     if (((previous.getReflectionDepth() >= this.maxReflectionDepth)
         || (previous.getDiffuseDepth() > 0))) {
         return Color.BLACK;
     }
 
-    let istate: IntersectionState = previous.getIntersectionState();
+    let istate:IntersectionState = previous.getIntersectionState();
     this.scene.trace(r, istate);
     return istate.hit();
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-traceRefraction(previous: ShadingState, r: Ray, i: number): Color {
+traceRefraction(previous:ShadingState, r:Ray, i:number):Color {
     //  limit path depth and disable caustic paths
     if (((previous.getRefractionDepth() >= this.maxRefractionDepth)
         || (previous.getDiffuseDepth() > 0))) {
         return Color.BLACK;
     }
 
-    let istate: IntersectionState = previous.getIntersectionState();
+    let istate:IntersectionState = previous.getIntersectionState();
     this.scene.trace(r, istate);
     return istate.hit();
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-traceFinalGather(previous: ShadingState, r: Ray, i: number): ShadingState {
+traceFinalGather(previous:ShadingState, r:Ray, i:number):ShadingState {
     if ((previous.getDiffuseDepth() >= this.maxDiffuseDepth)) {
         return null;
     }
 
-    let istate: IntersectionState = previous.getIntersectionState();
+    let istate:IntersectionState = previous.getIntersectionState();
     this.scene.trace(r, istate);
     return istate.hit();
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-getGlobalRadiance(state: ShadingState): Color {
+getGlobalRadiance(state:ShadingState):Color {
     if ((this.giEngine == null)) {
         return Color.BLACK;
     }
@@ -544,7 +544,7 @@ getGlobalRadiance(state: ShadingState): Color {
     return this.giEngine.getGlobalRadiance(state);
 }
 
-getIrradiance(state: ShadingState, diffuseReflectance: Color): Color {
+getIrradiance(state:ShadingState, diffuseReflectance:Color):Color {
     //  no gi engine, or we have already exceeded number of available bounces
     if (((this.giEngine == null)
         || (state.getDiffuseDepth() >= this.maxDiffuseDepth))) {
@@ -554,14 +554,14 @@ getIrradiance(state: ShadingState, diffuseReflectance: Color): Color {
     return this.giEngine.getIrradiance(state, diffuseReflectance);
 }
 
-initLightSamples(state: ShadingState) {
-    for (let l: LightSource in this.lights) {
+initLightSamples(state:ShadingState) {
+    for (let l:LightSource in this.lights) {
         l.getSamples(state);
     }
 
 }
 
-initCausticSamples(state: ShadingState) {
+initCausticSamples(state:ShadingState) {
     if ((this.causticPhotonMap != null)) {
         this.causticPhotonMap.getSamples(state);
     }

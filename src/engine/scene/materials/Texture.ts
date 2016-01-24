@@ -122,10 +122,10 @@ export class Texture extends ImageLoader {
                     var pi:number = y * (image.width * 4) + (x * 4);
                     var index:number = y * image.width + x;
                     var rgba:RGBA = {
-                        r: pixels[pi],
-                        g: pixels[pi + 1],
-                        b: pixels[pi + 2],
-                        a: pixels[pi + 3],
+                        r:pixels[pi],
+                        g:pixels[pi + 1],
+                        b:pixels[pi + 2],
+                        a:pixels[pi + 3],
                     };
                     self.data[index] = Color.newColor(rgba).pow(2.2);
                 }

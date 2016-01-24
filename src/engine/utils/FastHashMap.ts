@@ -1,55 +1,45 @@
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
-export class FastHashMap<K, V> implements Iterable<FastHashMap.Entry<K, V>> {
+export class Entry<K, V> {
 
-    private static MIN_SIZE: number = 4;
+    constructor (private k:K, private v:V) {}
 
-    export class Entry<K, V> {
-
-private k: K;
-
-private v: V;
-
-private constructor (k: K, v: V) {
-        this.k = this.k;
-        this.v = this.v;
-    }
-
-private isRemoved(): boolean {
+    private isRemoved():boolean {
         return (this.v == null);
     }
 
-private remove() {
+    private remove() {
         this.v = null;
     }
 
-public getKey(): K {
+    getKey():K {
         return this.k;
     }
 
-public getValue(): V {
+    getValue():V {
         return this.v;
     }
 }
+export class FastHashMap<K, V> implements Iterable<Entry<K, V>> {
 
-    private entries: Entry<K, V><K, V>[];
+    private static MIN_SIZE:number = 4;
+    private entries:Entry<K, V>[];
+    private size:number;
 
-    private size: number;
-
-    public constructor () {
+    constructor () {
         this.clear();
     }
 
-    public clear() {
+    clear() {
         this.size = 0;
         this.entries = this.alloc(MIN_SIZE);
     }
 
-    public put(k: K, v: V): V {
-        let t: number = 0;
-        let hash: number = k.hashCode();
-        let pos: number = this.entries.length;
+    put(k:K, v:V):V {
+        let t:number = 0;
+        let hash:number = k.hashCode();
+        let pos:number = this.entries.length;
         //  mark invalid position
         for (
             ; ;
@@ -69,7 +59,7 @@ public getValue(): V {
             //  store, but keep searching
             if (this.entries[hash].k.equals(k)) {
                 //  update entry
-                let old: V = this.entries[hash].v;
+                let old:V = this.entries[hash].v;
                 this.entries[hash].v = v;
                 return old;
             }
@@ -93,9 +83,9 @@ public getValue(): V {
         return null;
     }
 
-    public get(k: K): V {
-        let t: number = 0;
-        let hash: number = k.hashCode();
+    get(k:K):V {
+        let t:number = 0;
+        let hash:number = k.hashCode();
         for (
             ; ;
         ) {
@@ -115,9 +105,9 @@ public getValue(): V {
 
     }
 
-    public containsKey(k: K): boolean {
-        let t: number = 0;
-        let hash: number = k.hashCode();
+    containsKey(k:K):boolean {
+        let t:number = 0;
+        let hash:number = k.hashCode();
         for (
             ; ;
         ) {
@@ -137,9 +127,9 @@ public getValue(): V {
 
     }
 
-    public remove(k: K) {
-        let t: number = 0;
-        let hash: number = k.hashCode();
+    remove(k:K) {
+        let t:number = 0;
+        let hash:number = k.hashCode();
         for (
             ; ;
         ) {
@@ -170,50 +160,48 @@ public getValue(): V {
 
     }
 
-    private resize(capacity: number) {
-        (assert((capacity
-        & (capacity - 1))) == 0);
-        let capacity: assert;
-        MIN_SIZE;
-        let newentries: Entry<K, V><K, V>[] = this.alloc(capacity);
-        for (let e: Entry<K, V> in this.entries) {
-            if (((e == null)
-                || e.isRemoved())) {
-                // TODO: Warning!!! continue If
+    private resize(capacity:number) {
+        assert((capacity & (capacity - 1)) == 0);
+        assert(capacity >= FastHashMap.MIN_SIZE);
+
+        let newEntries:Entry<K, V>[] = this.alloc(capacity);
+        this.entries.forEech(function(e:Entry<K, V>){
+            if (e == null || e.isRemoved()) {
+                return;
             }
 
-            let t: number = 0;
-            let hash: number = e.k.hashCode();
-            for (
-                ; ;
-            ) {
-                hash = (hash
-                & (newentries.length - 1));
-                if ((newentries[hash] == null)) {
+            let t:number = 0;
+            let hash:number = e.k.hashCode();
+            for (; ;) {
+                hash &= newEntries.length - 1;
+                if (newEntries[hash] == null) {
                     break;
                 }
 
-                assert;
-                !newentries[hash].k.equals(e.k);
+                assert(!newEntries[hash].k.equals(e.k));
                 t++;
-                hash = (hash + t);
+                hash += t;
             }
 
-            newentries[hash] = new Entry<K, V>(e.k, e.v);
-        }
+            newEntries[hash] = new Entry<K, V>(e.k, e.v);
+        });
 
         //  copy new entries over old ones
-        this.entries = newentries;
+        this.entries = newEntries;
     }
 
     @SuppressWarnings("unchecked")
-    private alloc(size: number): Entry<K, V><K, V>[] {
-    return new Array(this.size);
-}
+    private alloc(size:number):Entry<K, V>[] {
+        return new Entry(this.size);
+    }
 
+    iterator():Iterator<Entry<K, V>> {
+        return new EntryIterator();
+    }
+}
 class EntryIterator implements Iterator<Entry<K, V>> {
 
-    private index: number;
+    private index:number;
 
     private constructor () {
         this.index = 0;
@@ -223,7 +211,7 @@ class EntryIterator implements Iterator<Entry<K, V>> {
 
     }
 
-    private readable(): boolean {
+    private readable():boolean {
         return !((entries[this.index] == null)
         || entries[this.index].isRemoved());
     }
@@ -238,11 +226,11 @@ class EntryIterator implements Iterator<Entry<K, V>> {
 
     }
 
-    public hasNext(): boolean {
+    hasNext():boolean {
         return (this.index < entries.length);
     }
 
-    public next(): Entry<K, V> {
+    next():Entry<K, V> {
         try {
             return entries[this.index];
         }
@@ -252,12 +240,7 @@ class EntryIterator implements Iterator<Entry<K, V>> {
 
     }
 
-    public remove() {
-        throw new UnsupportedOperationException();
+    remove() {
+        throw "UnsupportedOperationException";
     }
-}
-
-public iterator(): Iterator<Entry<K, V>> {
-    return new EntryIterator();
-}
 }

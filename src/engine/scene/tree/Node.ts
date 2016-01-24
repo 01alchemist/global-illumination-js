@@ -3,9 +3,9 @@ import {Shape} from "../shapes/Shape";
 import {Ray} from "../../math/Ray";
 import {Hit} from "../../math/Hit";
 import {NoHit} from "../../math/Hit";
-import {append} from "../../utils/MapUtils";
+import {append} from "../../utils/ArrayUtils";
 import {Box} from "../shapes/Box";
-import {sortAscending} from "../../utils/MapUtils";
+import {sortAscending} from "../../utils/ArrayUtils";
 import {MathUtils} from "../../utils/MathUtils";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
@@ -16,11 +16,11 @@ export class Node {
 
     index:number;
 
-    constructor(public axis:Axis,
-                public point:number,
-                public shapes:Shape[],
-                public left:Node,
-                public right:Node) {
+    constructor(axis:Axis,
+                point:number,
+                shapes:Shape[],
+                left:Node,
+                right:Node) {
 
         this.index = Node.map.push(this) - 1;
     }
@@ -124,7 +124,7 @@ export class Node {
                 right = append(right, shape);
             }
         });
-        return {left: left, right: right};
+        return {left:left, right:right};
     }
 
     split(depth:number) {

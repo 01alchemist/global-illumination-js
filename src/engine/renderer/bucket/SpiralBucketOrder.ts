@@ -3,25 +3,25 @@
  */
 export class SpiralBucketOrder implements BucketOrder {
 
-    public getBucketSequence(nbw: number, nbh: number): number[] {
-        let coords: number[] = new Array((2
+    getBucketSequence(nbw:number, nbh:number):number[] {
+        let coords:number[] = new Array((2
         * (nbw * nbh)));
-        for (let i: number = 0; (i
+        for (let i:number = 0; (i
         < (nbw * nbh)); i++) {
-            let by: number;
-            let bx: number;
-            let center: number = ((Math.min(nbw, nbh) - 1)
+            let by:number;
+            let bx:number;
+            let center:number = ((Math.min(nbw, nbh) - 1)
             / 2);
-            let nx: number = nbw;
-            let ny: number = nbh;
+            let nx:number = nbw;
+            let ny:number = nbh;
             while ((i
             < (nx * ny))) {
                 nx--;
                 ny--;
             }
 
-            let nxny: number = (nx * ny);
-            let minnxny: number = Math.min(nx, ny);
+            let nxny:number = (nx * ny);
+            let minnxny:number = Math.min(nx, ny);
             if (((minnxny & 1)
                 == 1)) {
                 if ((i

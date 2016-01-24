@@ -3,15 +3,15 @@
  */
 export class SimpleShader implements Shader {
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         return true;
     }
 
-    public getRadiance(state: ShadingState): Color {
+    getRadiance(state:ShadingState):Color {
         return new Color(Math.abs(state.getRay().dot(state.getNormal())));
     }
 
-    public scatterPhoton(state: ShadingState, power: Color) {
+    scatterPhoton(state:ShadingState, power:Color) {
 
     }
 }

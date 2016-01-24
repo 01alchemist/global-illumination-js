@@ -3,25 +3,25 @@
  */
 export class FileDisplay implements Display {
 
-    private bitmap: Bitmap;
+    private bitmap:Bitmap;
 
-    private filename: String;
+    private filename:string;
 
-    public constructor (saveImage: boolean) {
+    constructor (saveImage:boolean) {
         //  a constructor that allows the image to not be saved
         //  usefull for benchmarking purposes
         this.bitmap = null;
         this.filename = saveImage;
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    public constructor (filename: String) {
+    constructor (filename:string) {
         this.bitmap = null;
         this.filename = (this.filename == null);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    public imageBegin(w: number, h: number, bucketSize: number) {
+    imageBegin(w:number, h:number, bucketSize:number) {
         if (((this.bitmap == null)
             || ((this.bitmap.getWidth() != w)
             || (this.bitmap.getHeight() != h)))) {
@@ -31,26 +31,26 @@ export class FileDisplay implements Display {
 
     }
 
-    public imagePrepare(x: number, y: number, w: number, h: number, id: number) {
+    imagePrepare(x:number, y:number, w:number, h:number, id:number) {
 
     }
 
-    public imageUpdate(x: number, y: number, w: number, h: number, data: Color[]) {
-        for (let index: number = 0; (j < h); j++) {
-            for (let i: number = 0; (i < w); i++) {
+    imageUpdate(x:number, y:number, w:number, h:number, data:Color[]) {
+        for (let index:number = 0; (j < h); j++) {
+            for (let i:number = 0; (i < w); i++) {
                 this.bitmap.setPixel((x + i), (this.bitmap.getHeight() - (1
                 - (y + j))), data[index]);
             }
 
         }
 
-        let j: number = 0;
+        let j:number = 0;
     }
 
-    public imageFill(x: number, y: number, w: number, h: number, c: Color) {
-        let cg: Color = c;
-        for (let j: number = 0; (j < h); j++) {
-            for (let i: number = 0; (i < w); i++) {
+    imageFill(x:number, y:number, w:number, h:number, c:Color) {
+        let cg:Color = c;
+        for (let j:number = 0; (j < h); j++) {
+            for (let i:number = 0; (i < w); i++) {
                 this.bitmap.setPixel((x + i), (this.bitmap.getHeight() - (1
                 - (y + j))), cg);
             }
@@ -59,7 +59,7 @@ export class FileDisplay implements Display {
 
     }
 
-    public imageEnd() {
+    imageEnd() {
         if ((this.filename != null)) {
             this.bitmap.save(this.filename);
         }

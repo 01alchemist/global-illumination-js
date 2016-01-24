@@ -15,9 +15,9 @@ export class Color {
 
     static SIZE:number = 3;
 
-    constructor(public r:number = 0,
-                public g:number = 0,
-                public b:number = 0) {
+    constructor(r:number = 0,
+                g:number = 0,
+                b:number = 0) {
     }
 
     directWrite(mem:Float32Array, offset:number):number {
@@ -76,7 +76,7 @@ export class Color {
         _c[0] = Math.max(0, Math.min(255, a.r * 255));
         _c[1] = Math.max(0, Math.min(255, a.g * 255));
         _c[2] = Math.max(0, Math.min(255, a.b * 255));
-        return {r: _c[0], g: _c[1], b: _c[2], a: 255};
+        return {r:_c[0], g:_c[1], b:_c[2], a:255};
     }
 
     add(b:Color):Color {

@@ -9,5 +9,5 @@ export interface CausticPhotonMapInterface extends PhotonStore {
      *
      * @param state
      */
-    getSamples(state: ShadingState);
+    getSamples(state:ShadingState);
 }

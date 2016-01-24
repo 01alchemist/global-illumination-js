@@ -35,12 +35,12 @@ export class Renderer {
             this.workerManager = new TraceWorkerManager();
         }
         this.workerManager.configure({
-                camera: camera,
-                width: w,
-                height: h,
-                cameraSamples: cameraSamples,
-                hitSamples: hitSamples,
-                bounces: bounces
+                camera:camera,
+                width:w,
+                height:h,
+                cameraSamples:cameraSamples,
+                hitSamples:hitSamples,
+                bounces:bounces
             },
             scene
         );
@@ -152,17 +152,17 @@ export class Renderer {
                     var index = y * w + x;
                     var pi = y * (w * 4) + (x * 4);
                     var c = Color.newColor({
-                        r: frame[pi],
-                        g: frame[pi + 1],
-                        b: frame[pi + 2],
-                        a: frame[pi + 3]
+                        r:frame[pi],
+                        g:frame[pi + 1],
+                        b:frame[pi + 2],
+                        a:frame[pi + 3]
                     });
                     pixels[index] = pixels[index].add(c);
                     var avg = pixels[index].divScalar(i);
                     result[index] = avg.RGBA();
                 }
             }
-            //TODO: draw to canvas
+            //TODO:draw to canvas
         }
         return null;
     }

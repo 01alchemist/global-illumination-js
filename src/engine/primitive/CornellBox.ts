@@ -3,50 +3,50 @@
  */
 export class CornellBox implements PrimitiveList, Shader, LightSource {
 
-    private minX: number;
+    private minX:number;
 
-    private minY: number;
+    private minY:number;
 
-    private minZ: number;
+    private minZ:number;
 
-    private maxX: number;
+    private maxX:number;
 
-    private maxY: number;
+    private maxY:number;
 
-    private maxZ: number;
+    private maxZ:number;
 
-    private left: Color;
+    private left:Color;
 
-    private right: Color;
+    private right:Color;
 
-    private top: Color;
+    private top:Color;
 
-    private bottom: Color;
+    private bottom:Color;
 
-    private back: Color;
+    private back:Color;
 
-    private radiance: Color;
+    private radiance:Color;
 
-    private samples: number;
+    private samples:number;
 
-    private lxmin: number;
+    private lxmin:number;
 
-    private lymin: number;
+    private lymin:number;
 
-    private lxmax: number;
+    private lxmax:number;
 
-    private lymax: number;
+    private lymax:number;
 
-    private area: number;
+    private area:number;
 
-    private lightBounds: BoundingBox;
+    private lightBounds:BoundingBox;
 
-    public constructor () {
+    constructor () {
         this.updateGeometry(new Point3(-1, -1, -1), new Point3(1, 1, 1));
         //  cube colors
         this.left = new Color(0.8, 0.25, 0.25);
         this.right = new Color(0.25, 0.25, 0.8);
-        let gray: Color = new Color(0.7, 0.7, 0.7);
+        let gray:Color = new Color(0.7, 0.7, 0.7);
         this.back = gray;
         this.bottom = gray;
         this.top = gray;
@@ -55,7 +55,7 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
         this.samples = 16;
     }
 
-    private updateGeometry(c0: Point3, c1: Point3) {
+    private updateGeometry(c0:Point3, c1:Point3) {
         //  figure out cube extents
         this.lightBounds = new BoundingBox(c0);
         this.lightBounds.include(c1);
@@ -81,9 +81,9 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
         * (this.lymax - this.lymin));
     }
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
-        let corner0: Point3 = pl.getPoint("corner0", null);
-        let corner1: Point3 = pl.getPoint("corner1", null);
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
+        let corner0:Point3 = pl.getPoint("corner0", null);
+        let corner1:Point3 = pl.getPoint("corner1", null);
         if (((corner0 != null)
             && (corner1 != null))) {
             this.updateGeometry(corner0, corner1);
@@ -101,7 +101,7 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
         return true;
     }
 
-    public init(name: String, api: SunflowAPI) {
+    init(name:string, api:GlobalIlluminationAPI) {
         //  register with the api properly
         api.geometry(name, this);
         api.shader((name + ".shader"), this);
@@ -110,11 +110,11 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
         api.light((name + ".light"), this);
     }
 
-    public getBounds(): BoundingBox {
+    getBounds():BoundingBox {
         return this.lightBounds;
     }
 
-    public getBound(i: number): number {
+    getBound(i:number):number {
         switch (i) {
             case 0:
                 return this.minX;
@@ -141,9 +141,9 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
 
     }
 
-    public intersects(box: BoundingBox): boolean {
+    intersects(box:BoundingBox):boolean {
         //  this could be optimized
-        let b: BoundingBox = new BoundingBox();
+        let b:BoundingBox = new BoundingBox();
         b.include(new Point3(this.minX, this.minY, this.minZ));
         b.include(new Point3(this.maxX, this.maxY, this.maxZ));
         if (b.intersects(box)) {
@@ -187,10 +187,10 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
         return false;
     }
 
-    public prepareShadingState(state: ShadingState) {
+    prepareShadingState(state:ShadingState) {
         state.init();
         state.getRay().getPoint(state.getPoint());
-        let n: number = state.getPrimitiveID();
+        let n:number = state.getPrimitiveID();
         switch (n) {
             case 0:
                 state.getNormal().set(new Vector3(1, 0, 0));
@@ -220,19 +220,19 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
         state.setShader(this);
     }
 
-    public intersectPrimitive(r: Ray, primID: number, state: IntersectionState) {
-        let intervalMin: number = Float.NEGATIVE_INFINITY;
-        let intervalMax: number = Float.POSITIVE_INFINITY;
-        let orgX: number = r.ox;
-        let invDirX: number = (1 / r.dx);
-        let t2: number;
-        let t1: number;
+    intersectPrimitive(r:Ray, primID:number, state:IntersectionState) {
+        let intervalMin:number = Float.NEGATIVE_INFINITY;
+        let intervalMax:number = Float.POSITIVE_INFINITY;
+        let orgX:number = r.ox;
+        let invDirX:number = (1 / r.dx);
+        let t2:number;
+        let t1:number;
         t1 = ((this.minX - orgX)
         * invDirX);
         t2 = ((this.maxX - orgX)
         * invDirX);
-        let sideOut: number = -1;
-        let sideIn: number = -1;
+        let sideOut:number = -1;
+        let sideIn:number = -1;
         if ((invDirX > 0)) {
             if ((t1 > intervalMin)) {
                 intervalMin = t1;
@@ -262,8 +262,8 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
             return;
         }
 
-        let orgY: number = r.oy;
-        let invDirY: number = (1 / r.dy);
+        let orgY:number = r.oy;
+        let invDirY:number = (1 / r.dy);
         t1 = ((this.minY - orgY)
         * invDirY);
         t2 = ((this.maxY - orgY)
@@ -297,8 +297,8 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
             return;
         }
 
-        let orgZ: number = r.oz;
-        let invDirZ: number = (1 / r.dz);
+        let orgZ:number = r.oz;
+        let invDirZ:number = (1 / r.dz);
         t1 = ((this.minZ - orgZ)
         * invDirZ);
         //  no front wall
@@ -333,9 +333,9 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
             return;
         }
 
-        let sideIn: assert;
+        let sideIn:assert;
         -1;
-        let sideOut: assert;
+        let sideOut:assert;
         -1;
         //  can't hit minY wall, there is none
         if (((sideIn != 2)
@@ -351,9 +351,9 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
 
     }
 
-    public getRadiance(state: ShadingState): Color {
-        let side: number = state.getPrimitiveID();
-        let kd: Color = null;
+    getRadiance(state:ShadingState):Color {
+        let side:number = state.getPrimitiveID();
+        let kd:Color = null;
         switch (side) {
             case 0:
                 kd = this.left;
@@ -368,8 +368,8 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
                 kd = this.bottom;
                 break;
             case 5:
-                let lx: number = state.getPoint().x;
-                let ly: number = state.getPoint().y;
+                let lx:number = state.getPoint().x;
+                let ly:number = state.getPoint().y;
                 if (((lx >= this.lxmin)
                     && ((lx < this.lxmax)
                     && ((ly >= this.lymin)
@@ -386,7 +386,7 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
                 break;
         }
 
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
         //  make sure we are on the right side of the material
         state.faceforward();
         //  setup lighting
@@ -395,9 +395,9 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
         return state.diffuse(kd);
     }
 
-    public scatterPhoton(state: ShadingState, power: Color) {
-        let side: number = state.getPrimitiveID();
-        let kd: Color = null;
+    scatterPhoton(state:ShadingState, power:Color) {
+        let side:number = state.getPrimitiveID();
+        let kd:Color = null;
         switch (side) {
             case 0:
                 kd = this.left;
@@ -412,8 +412,8 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
                 kd = this.bottom;
                 break;
             case 5:
-                let lx: number = state.getPoint().x;
-                let ly: number = state.getPoint().y;
+                let lx:number = state.getPoint().x;
+                let ly:number = state.getPoint().y;
                 if (((lx >= this.lxmin)
                     && ((lx < this.lxmax)
                     && ((ly >= this.lymin)
@@ -437,67 +437,67 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
         }
 
         state.storePhoton(state.getRay().getDirection(), power, kd);
-        let avg: number = kd.getAverage();
-        let rnd: number = state.getRandom(0, 0, 1);
+        let avg:number = kd.getAverage();
+        let rnd:number = state.getRandom(0, 0, 1);
         if ((rnd < avg)) {
             //  photon is scattered
             power.mul(kd).mul((1 / (<number>(avg))));
-            let onb: OrthoNormalBasis = OrthoNormalBasis.makeFromW(state.getNormal());
-            let u: number = (2
+            let onb:OrthoNormalBasis = OrthoNormalBasis.makeFromW(state.getNormal());
+            let u:number = (2
             * (Math.PI
             * (rnd / avg)));
-            let v: number = state.getRandom(0, 1, 1);
-            let s: number = (<number>(Math.sqrt(v)));
-            let s1: number = (<number>(Math.sqrt((1 - v))));
-            let w: Vector3 = new Vector3(((<number>(Math.cos(u))) * s), ((<number>(Math.sin(u))) * s), s1);
+            let v:number = state.getRandom(0, 1, 1);
+            let s:number = (<number>(Math.sqrt(v)));
+            let s1:number = (<number>(Math.sqrt((1 - v))));
+            let w:Vector3 = new Vector3(((<number>(Math.cos(u))) * s), ((<number>(Math.sin(u))) * s), s1);
             w = onb.transform(w, new Vector3());
             state.traceDiffusePhoton(new Ray(state.getPoint(), w), power);
         }
 
     }
 
-    public getNumSamples(): number {
+    getNumSamples():number {
         return this.samples;
     }
 
-    public getSamples(state: ShadingState) {
+    getSamples(state:ShadingState) {
         if ((this.lightBounds.contains(state.getPoint())
             && (state.getPoint().z < this.maxZ))) {
-            let n: number = (state.getDiffuseDepth() > 0);
-            // TODO: Warning!!!, inline IF is not supported ?
-            let a: number = (this.area / n);
-            for (let i: number = 0; (i < n); i++) {
+            let n:number = (state.getDiffuseDepth() > 0);
+            // TODO:Warning!!!, inline IF is not supported ?
+            let a:number = (this.area / n);
+            for (let i:number = 0; (i < n); i++) {
                 //  random offset on unit square, we use the infinite version of
                 //  getRandom
                 //  because the light sampling is adaptive
-                let randX: number = state.getRandom(i, 0);
-                let randY: number = state.getRandom(i, 1);
-                let p: Point3 = new Point3();
+                let randX:number = state.getRandom(i, 0);
+                let randY:number = state.getRandom(i, 1);
+                let p:Point3 = new Point3();
                 p.x = (<number>(((this.lxmin * (1 - randX))
                 + (this.lxmax * randX))));
                 p.y = (<number>(((this.lymin * (1 - randY))
                 + (this.lymax * randY))));
                 p.z = (this.maxZ - 0.001);
-                let dest: LightSample = new LightSample();
+                let dest:LightSample = new LightSample();
                 //  prepare shadow ray to sampled point
                 dest.setShadowRay(new Ray(state.getPoint(), p));
                 //  check that the direction of the sample is the same as the
                 //  normal
-                let cosNx: number = dest.dot(state.getNormal());
+                let cosNx:number = dest.dot(state.getNormal());
                 if ((cosNx <= 0)) {
                     return;
                 }
 
                 //  light source facing point ?
                 //  (need to check with light source's normal)
-                let cosNy: number = dest.getShadowRay().dz;
+                let cosNy:number = dest.getShadowRay().dz;
                 if ((cosNy > 0)) {
                     //  compute geometric attenuation and probability scale
                     //  factor
-                    let r: number = dest.getShadowRay().getMax();
-                    let g: number = (cosNy
+                    let r:number = dest.getShadowRay().getMax();
+                    let g:number = (cosNy
                     / (r * r));
-                    let scale: number = (g * a);
+                    let scale:number = (g * a);
                     //  set final sample radiance
                     dest.setRadiance(this.radiance, this.radiance);
                     dest.getDiffuseRadiance().mul(scale);
@@ -512,28 +512,28 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
 
     }
 
-    public getPhoton(randX1: number, randY1: number, randX2: number, randY2: number, p: Point3, dir: Vector3, power: Color) {
+    getPhoton(randX1:number, randY1:number, randX2:number, randY2:number, p:Point3, dir:Vector3, power:Color) {
         p.x = (<number>(((this.lxmin * (1 - randX2))
         + (this.lxmax * randX2))));
         p.y = (<number>(((this.lymin * (1 - randY2))
         + (this.lymax * randY2))));
         p.z = (this.maxZ - 0.001);
-        let u: number = (2
+        let u:number = (2
         * (Math.PI * randX1));
-        let s: number = Math.sqrt(randY1);
+        let s:number = Math.sqrt(randY1);
         dir.set((<number>((Math.cos(u) * s))), (<number>((Math.sin(u) * s))), (float - Math.sqrt((1 - randY1))));
         Color.mul(((<number>(Math.PI)) * this.area), this.radiance, power);
     }
 
-    public getPower(): number {
+    getPower():number {
         return this.radiance.copy().mul(((<number>(Math.PI)) * this.area)).getLuminance();
     }
 
-    public getNumPrimitives(): number {
+    getNumPrimitives():number {
         return 1;
     }
 
-    public getPrimitiveBound(primID: number, i: number): number {
+    getPrimitiveBound(primID:number, i:number):number {
         switch (i) {
             case 0:
                 return this.minX;
@@ -560,8 +560,8 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
 
     }
 
-    public getWorldBounds(o2w: Matrix4): BoundingBox {
-        let bounds: BoundingBox = new BoundingBox(this.minX, this.minY, this.minZ);
+    getWorldBounds(o2w:Matrix4):BoundingBox {
+        let bounds:BoundingBox = new BoundingBox(this.minX, this.minY, this.minZ);
         bounds.include(this.maxX, this.maxY, this.maxZ);
         if ((o2w == null)) {
             return bounds;
@@ -570,7 +570,7 @@ export class CornellBox implements PrimitiveList, Shader, LightSource {
         return o2w.transform(bounds);
     }
 
-    public getBakingPrimitives(): PrimitiveList {
+    getBakingPrimitives():PrimitiveList {
         return null;
     }
 }

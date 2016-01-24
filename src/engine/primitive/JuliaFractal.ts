@@ -3,28 +3,28 @@
  */
 export class JuliaFractal implements PrimitiveList {
 
-    private static BOUNDING_RADIUS: number = (<number>(Math.sqrt(3)));
+    private static BOUNDING_RADIUS:number = (<number>(Math.sqrt(3)));
 
-    private static BOUNDING_RADIUS2: number = 3;
+    private static BOUNDING_RADIUS2:number = 3;
 
-    private static ESCAPE_THRESHOLD: number = 10;
+    private static ESCAPE_THRESHOLD:number = 10;
 
-    private static DELTA: number = 0.0001;
+    private static DELTA:number = 0.0001;
 
     //  quaternion constant
-    private cx: number;
+    private cx:number;
 
-    private cy: number;
+    private cy:number;
 
-    private cz: number;
+    private cz:number;
 
-    private cw: number;
+    private cw:number;
 
-    private maxIterations: number;
+    private maxIterations:number;
 
-    private epsilon: number;
+    private epsilon:number;
 
-    public constructor () {
+    constructor () {
         //  good defaults?
         4;
         2;
@@ -34,18 +34,18 @@ export class JuliaFractal implements PrimitiveList {
         this.epsilon = 1E-05;
     }
 
-    public getNumPrimitives(): number {
+    getNumPrimitives():number {
         return 1;
     }
 
-    public getPrimitiveBound(primID: number, i: number): number {
+    getPrimitiveBound(primID:number, i:number):number {
         return ((i & 1)
         == 0);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    public getWorldBounds(o2w: Matrix4): BoundingBox {
-        let bounds: BoundingBox = new BoundingBox(BOUNDING_RADIUS);
+    getWorldBounds(o2w:Matrix4):BoundingBox {
+        let bounds:BoundingBox = new BoundingBox(BOUNDING_RADIUS);
         if ((o2w != null)) {
             bounds = o2w.transform(bounds);
         }
@@ -53,24 +53,24 @@ export class JuliaFractal implements PrimitiveList {
         return bounds;
     }
 
-    public intersectPrimitive(r: Ray, primID: number, state: IntersectionState) {
+    intersectPrimitive(r:Ray, primID:number, state:IntersectionState) {
         //  intersect with bounding sphere
-        let qc: number = (((r.ox * r.ox)
+        let qc:number = (((r.ox * r.ox)
         + ((r.oy * r.oy)
         + (r.oz * r.oz)))
         - BOUNDING_RADIUS2);
-        let qt: number = r.getMin();
+        let qt:number = r.getMin();
         if ((qc > 0)) {
             //  we are starting outside the sphere, find intersection on the
             //  sphere
-            let qa: number = ((r.dx * r.dx)
+            let qa:number = ((r.dx * r.dx)
             + ((r.dy * r.dy)
             + (r.dz * r.dz)));
-            let qb: number = (2
+            let qb:number = (2
             * ((r.dx * r.ox)
             + ((r.dy * r.oy)
             + (r.dz * r.oz))));
-            let t: number[] = Solvers.solveQuadric(qa, qb, qc);
+            let t:number[] = Solvers.solveQuadric(qa, qb, qc);
             //  early rejection
             if (((t == null)
                 || ((t[0] >= r.getMax())
@@ -81,39 +81,39 @@ export class JuliaFractal implements PrimitiveList {
             qt = (<number>(t[0]));
         }
 
-        let dist: number = Float.POSITIVE_INFINITY;
-        let rox: number = (r.ox
+        let dist:number = Float.POSITIVE_INFINITY;
+        let rox:number = (r.ox
         + (qt * r.dx));
-        let roy: number = (r.oy
+        let roy:number = (r.oy
         + (qt * r.dy));
-        let roz: number = (r.oz
+        let roz:number = (r.oz
         + (qt * r.dz));
-        let invRayLength: number = (<number>((1 / Math.sqrt(((r.dx * r.dx)
+        let invRayLength:number = (<number>((1 / Math.sqrt(((r.dx * r.dx)
         + ((r.dy * r.dy)
         + (r.dz * r.dz)))))));
         //  now we can start intersection
         while (true) {
-            let zw: number = rox;
-            let zx: number = roy;
-            let zy: number = roz;
-            let zz: number = 0;
-            let zpw: number = 1;
-            let zpx: number = 0;
-            let zpy: number = 0;
-            let zpz: number = 0;
+            let zw:number = rox;
+            let zx:number = roy;
+            let zy:number = roz;
+            let zz:number = 0;
+            let zpw:number = 1;
+            let zpx:number = 0;
+            let zpy:number = 0;
+            let zpz:number = 0;
             //  run several iterations
-            let dotz: number = 0;
-            for (let i: number = 0; (i < this.maxIterations); i++) {
+            let dotz:number = 0;
+            for (let i:number = 0; (i < this.maxIterations); i++) {
                 //  zp = 2 * (z * zp)
-                let nw: number = ((zw * zpw)
+                let nw:number = ((zw * zpw)
                 - ((zx * zpx)
                 - ((zy * zpy)
                 - (zz * zpz))));
-                let nx: number = ((zw * zpx)
+                let nx:number = ((zw * zpx)
                 + ((zx * zpw)
                 + ((zy * zpz)
                 - (zz * zpy))));
-                let ny: number = ((zw * zpy)
+                let ny:number = ((zw * zpy)
                 + ((zy * zpw)
                 + ((zz * zpx)
                 - (zx * zpz))));
@@ -126,7 +126,7 @@ export class JuliaFractal implements PrimitiveList {
                 zpx = (2 * nx);
                 zpy = (2 * ny);
                 //  z = z*z + c
-                let nw: number = (((zw * zw)
+                let nw:number = (((zw * zw)
                 - ((zx * zx)
                 - ((zy * zy)
                 - (zz * zz))))
@@ -151,7 +151,7 @@ export class JuliaFractal implements PrimitiveList {
 
             }
 
-            let normZ: number = (<number>(Math.sqrt(dotz)));
+            let normZ:number = (<number>(Math.sqrt(dotz)));
             dist = (0.5
             * (normZ
             * ((<number>(Math.log(normZ))) / JuliaFractal.length(zpw, zpx, zpy, zpz))));
@@ -190,39 +190,39 @@ export class JuliaFractal implements PrimitiveList {
 
     }
 
-    public prepareShadingState(state: ShadingState) {
+    prepareShadingState(state:ShadingState) {
         state.init();
         state.getRay().getPoint(state.getPoint());
-        let parent: Instance = state.getInstance();
+        let parent:Instance = state.getInstance();
         //  compute local normal
-        let p: Point3 = parent.transformWorldToObject(state.getPoint());
-        let gx1w: number = (p.x - DELTA);
-        let gx1x: number = p.y;
-        let gx1y: number = p.z;
-        let gx1z: number = 0;
-        let gx2w: number = (p.x + DELTA);
-        let gx2x: number = p.y;
-        let gx2y: number = p.z;
-        let gx2z: number = 0;
-        let gy1w: number = p.x;
-        let gy1x: number = (p.y - DELTA);
-        let gy1y: number = p.z;
-        let gy1z: number = 0;
-        let gy2w: number = p.x;
-        let gy2x: number = (p.y + DELTA);
-        let gy2y: number = p.z;
-        let gy2z: number = 0;
-        let gz1w: number = p.x;
-        let gz1x: number = p.y;
-        let gz1y: number = (p.z - DELTA);
-        let gz1z: number = 0;
-        let gz2w: number = p.x;
-        let gz2x: number = p.y;
-        let gz2y: number = (p.z + DELTA);
-        let gz2z: number = 0;
-        for (let i: number = 0; (i < this.maxIterations); i++) {
+        let p:Point3 = parent.transformWorldToObject(state.getPoint());
+        let gx1w:number = (p.x - DELTA);
+        let gx1x:number = p.y;
+        let gx1y:number = p.z;
+        let gx1z:number = 0;
+        let gx2w:number = (p.x + DELTA);
+        let gx2x:number = p.y;
+        let gx2y:number = p.z;
+        let gx2z:number = 0;
+        let gy1w:number = p.x;
+        let gy1x:number = (p.y - DELTA);
+        let gy1y:number = p.z;
+        let gy1z:number = 0;
+        let gy2w:number = p.x;
+        let gy2x:number = (p.y + DELTA);
+        let gy2y:number = p.z;
+        let gy2z:number = 0;
+        let gz1w:number = p.x;
+        let gz1x:number = p.y;
+        let gz1y:number = (p.z - DELTA);
+        let gz1z:number = 0;
+        let gz2w:number = p.x;
+        let gz2x:number = p.y;
+        let gz2y:number = (p.z + DELTA);
+        let gz2z:number = 0;
+        for (let i:number = 0; (i < this.maxIterations); i++) {
             //  z = z*z + c
-            let nw: number = (((gx1w * gx1w)
+            let nw:number = (((gx1w * gx1w)
             - ((gx1x * gx1x)
             - ((gx1y * gx1y)
             - (gx1z * gx1z))))
@@ -238,7 +238,7 @@ export class JuliaFractal implements PrimitiveList {
             + this.cz);
             gx1w = nw;
             //  z = z*z + c
-            let nw: number = (((gx2w * gx2w)
+            let nw:number = (((gx2w * gx2w)
             - ((gx2x * gx2x)
             - ((gx2y * gx2y)
             - (gx2z * gx2z))))
@@ -254,7 +254,7 @@ export class JuliaFractal implements PrimitiveList {
             + this.cz);
             gx2w = nw;
             //  z = z*z + c
-            let nw: number = (((gy1w * gy1w)
+            let nw:number = (((gy1w * gy1w)
             - ((gy1x * gy1x)
             - ((gy1y * gy1y)
             - (gy1z * gy1z))))
@@ -270,7 +270,7 @@ export class JuliaFractal implements PrimitiveList {
             + this.cz);
             gy1w = nw;
             //  z = z*z + c
-            let nw: number = (((gy2w * gy2w)
+            let nw:number = (((gy2w * gy2w)
             - ((gy2x * gy2x)
             - ((gy2y * gy2y)
             - (gy2z * gy2z))))
@@ -286,7 +286,7 @@ export class JuliaFractal implements PrimitiveList {
             + this.cz);
             gy2w = nw;
             //  z = z*z + c
-            let nw: number = (((gz1w * gz1w)
+            let nw:number = (((gz1w * gz1w)
             - ((gz1x * gz1x)
             - ((gz1y * gz1y)
             - (gz1z * gz1z))))
@@ -302,7 +302,7 @@ export class JuliaFractal implements PrimitiveList {
             + this.cz);
             gz1w = nw;
             //  z = z*z + c
-            let nw: number = (((gz2w * gz2w)
+            let nw:number = (((gz2w * gz2w)
             - ((gz2x * gz2x)
             - ((gz2y * gz2y)
             - (gz2z * gz2z))))
@@ -319,10 +319,10 @@ export class JuliaFractal implements PrimitiveList {
             gz2w = nw;
         }
 
-        let gradX: number = (JuliaFractal.length(gx2w, gx2x, gx2y, gx2z) - JuliaFractal.length(gx1w, gx1x, gx1y, gx1z));
-        let gradY: number = (JuliaFractal.length(gy2w, gy2x, gy2y, gy2z) - JuliaFractal.length(gy1w, gy1x, gy1y, gy1z));
-        let gradZ: number = (JuliaFractal.length(gz2w, gz2x, gz2y, gz2z) - JuliaFractal.length(gz1w, gz1x, gz1y, gz1z));
-        let n: Vector3 = new Vector3((<number>(gradX)), (<number>(gradY)), (<number>(gradZ)));
+        let gradX:number = (JuliaFractal.length(gx2w, gx2x, gx2y, gx2z) - JuliaFractal.length(gx1w, gx1x, gx1y, gx1z));
+        let gradY:number = (JuliaFractal.length(gy2w, gy2x, gy2y, gy2z) - JuliaFractal.length(gy1w, gy1x, gy1y, gy1z));
+        let gradZ:number = (JuliaFractal.length(gz2w, gz2x, gz2y, gz2z) - JuliaFractal.length(gz1w, gz1x, gz1y, gz1z));
+        let n:Vector3 = new Vector3((<number>(gradX)), (<number>(gradY)), (<number>(gradZ)));
         state.getNormal().set(parent.transformNormalObjectToWorld(n));
         state.getNormal().normalize();
         state.getGeoNormal().set(state.getNormal());
@@ -340,14 +340,14 @@ export class JuliaFractal implements PrimitiveList {
         state.setModifier(parent.getModifier(0));
     }
 
-    private static length(w: number, x: number, y: number, z: number): number {
+    private static length(w:number, x:number, y:number, z:number):number {
         return (<number>(Math.sqrt(((w * w)
         + ((x * x)
         + ((y * y)
         + (z * z)))))));
     }
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         this.maxIterations = pl.getInt("iterations", this.maxIterations);
         this.epsilon = pl.getFloat("epsilon", this.epsilon);
         this.cw = pl.getFloat("cw", this.cw);
@@ -357,7 +357,7 @@ export class JuliaFractal implements PrimitiveList {
         return true;
     }
 
-    public getBakingPrimitives(): PrimitiveList {
+    getBakingPrimitives():PrimitiveList {
         return null;
     }
 }

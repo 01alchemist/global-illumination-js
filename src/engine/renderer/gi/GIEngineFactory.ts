@@ -1,10 +1,10 @@
 /**
  * Created by Nidin Vinayakan on 21/1/2016.
  */
-export /* sealed */ class GIEngineFactory {
+export class GIEngineFactory {
 
-    public static create(options: Options): GIEngine {
-        let type: String = options.getString("gi.engine", null);
+    static create(options:Options):GIEngine {
+        let type:string = options.getString("gi.engine", null);
         if (((type == null)
             || (type.equals("null") || type.equals("none")))) {
             return null;

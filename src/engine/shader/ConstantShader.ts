@@ -3,22 +3,22 @@
  */
 export class ConstantShader implements Shader {
 
-    private c: Color;
+    private c:Color;
 
-    public constructor () {
+    constructor () {
         this.c = Color.WHITE;
     }
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         this.c = pl.getColor("color", this.c);
         return true;
     }
 
-    public getRadiance(state: ShadingState): Color {
+    getRadiance(state:ShadingState):Color {
         return this.c;
     }
 
-    public scatterPhoton(state: ShadingState, power: Color) {
+    scatterPhoton(state:ShadingState, power:Color) {
 
     }
 }

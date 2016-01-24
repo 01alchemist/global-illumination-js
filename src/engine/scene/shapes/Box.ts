@@ -15,7 +15,7 @@ export class Box implements IPointer {
 
     memorySize:number = Box.SIZE;
 
-    constructor(public min:Vector3 = new Vector3(), public max:Vector3 = new Vector3()) {
+    constructor(min:Vector3 = new Vector3(), max:Vector3 = new Vector3()) {
 
     }
 
@@ -116,7 +116,7 @@ export class Box implements IPointer {
         }
         var t1 = Math.max(Math.max(x1, y1), z1);
         var t2 = Math.min(Math.min(x2, y2), z2);
-        return {min: t1, max: t2};
+        return {min:t1, max:t2};
     }
 
     partition(axis:Axis, point:number):{left:boolean, right:boolean} {
@@ -136,7 +136,7 @@ export class Box implements IPointer {
                 right = this.max.z >= point;
                 break;
         }
-        return {left: left, right: right};
+        return {left:left, right:right};
     }
 
     toString():string {

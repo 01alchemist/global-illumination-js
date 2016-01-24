@@ -5,8 +5,8 @@ import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 export class TraceJob {
 
     private id:number;
-    public finished:boolean;
-    public thread:Thread;
+    finished:boolean;
+    thread:Thread;
     private onInit:Function;
 
     constructor(private param) {
@@ -14,7 +14,7 @@ export class TraceJob {
         this.finished = false;
         var self = this;
 
-        this.thread = new Thread("Worker: " + this.id);
+        this.thread = new Thread("Worker:" + this.id);
         this.thread.onInitComplete = function(){
             //console.timeEnd("INIT_"+self.id);
             self.finished = true;

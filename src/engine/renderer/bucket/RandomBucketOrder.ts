@@ -3,13 +3,13 @@
  */
 export class RandomBucketOrder implements BucketOrder {
 
-    public getBucketSequence(nbw: number, nbh: number): number[] {
-        let coords: number[] = new Array((2
+    getBucketSequence(nbw:number, nbh:number):number[] {
+        let coords:number[] = new Array((2
         * (nbw * nbh)));
-        for (let i: number = 0; (i
+        for (let i:number = 0; (i
         < (nbw * nbh)); i++) {
-            let by: number = (i / nbw);
-            let bx: number = (i % nbw);
+            let by:number = (i / nbw);
+            let bx:number = (i % nbw);
             if (((by & 1)
                 == 1)) {
                 bx = (nbw - (1 - bx));
@@ -21,14 +21,14 @@ export class RandomBucketOrder implements BucketOrder {
             + 1)] = by;
         }
 
-        let seed: number;
-        for (let i: number = 0; (i < coords.length); i++) {
+        let seed:number;
+        for (let i:number = 0; (i < coords.length); i++) {
             //  pick 2 random indices
             seed = this.xorshift(seed);
-            let src: number = this.mod((<number>(seed)), (nbw * nbh));
+            let src:number = this.mod((<number>(seed)), (nbw * nbh));
             seed = this.xorshift(seed);
-            let dst: number = this.mod((<number>(seed)), (nbw * nbh));
-            let tmp: number = coords[((2 * src)
+            let dst:number = this.mod((<number>(seed)), (nbw * nbh));
+            let tmp:number = coords[((2 * src)
             + 0)];
             coords[((2 * src)
             + 0)] = coords[((2 * dst)
@@ -47,17 +47,17 @@ export class RandomBucketOrder implements BucketOrder {
         return coords;
     }
 
-    private mod(a: number, b: number): number {
-        let m: number = (a % b);
+    private mod(a:number, b:number):number {
+        let m:number = (a % b);
         return (m < 0);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    private xorshift(y: number): number {
+    private xorshift(y:number):number {
         y = (y
         | (y + 13));
         // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-        let (: y;
+        let (:y;
         17;
         //  unsigned
         y = (y

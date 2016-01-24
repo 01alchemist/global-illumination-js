@@ -24,5 +24,5 @@ export interface CameraLens extends RenderObject {
      * @param time time sampling parameter
      * @return a new ray passing through the given pixel
      */
-    getRay(x: float, y: float, imageWidth: int, imageHeight: int, lensX: double, lensY: double, time: double): Ray;
+    getRay(x:float, y:float, imageWidth:int, imageHeight:int, lensX:double, lensY:double, time:double):Ray;
 }

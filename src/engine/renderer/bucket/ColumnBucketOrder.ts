@@ -3,7 +3,7 @@
  */
 export class ColumnBucketOrder implements BucketOrder {
 
-    public getBucketSequence(nbw:number, nbh:number):number[] {
+    getBucketSequence(nbw:number, nbh:number):number[] {
         let coords:number[] = new Array((2
         * (nbw * nbh)));
         for (let i:number = 0; (i

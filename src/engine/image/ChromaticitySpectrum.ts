@@ -42,7 +42,7 @@ export class ChromaticitySpectrum extends SpectralCurve {
 
     private M2:number;
 
-    public constructor(x:number, y:number) {
+    constructor(x:number, y:number) {
         this.M1 = ((((1.3515 - (1.7703 * x))
         * -1) + (5.9114 * y)) / (0.0241
         + ((0.2562 * x) - (0.7341 * y))));
@@ -50,13 +50,13 @@ export class ChromaticitySpectrum extends SpectralCurve {
         + ((0.2562 * x) - (0.7341 * y))));
     }
 
-    public sample(lambda:number):number {
+    sample(lambda:number):number {
         return (kS0Spectrum.sample(lambda)
         + ((this.M1 * kS1Spectrum.sample(lambda))
         + (this.M2 * kS2Spectrum.sample(lambda))));
     }
 
-    public static get(x:number, y:number):XYZColor {
+    static get(x:number, y:number):XYZColor {
         let M1:number = ((((1.3515 - (1.7703 * x))
         * -1) + (5.9114 * y)) / (0.0241
         + ((0.2562 * x) - (0.7341 * y))));

@@ -7,7 +7,7 @@ export class Attenuation {
 
     static SIZE:number = 3;
 
-    constructor(public constant:number=1, public linear:number=0, public quadratic:number=0) {
+    constructor(constant:number=1, linear:number=0, quadratic:number=0) {
 
     }
 

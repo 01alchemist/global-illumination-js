@@ -15,14 +15,14 @@ import {DirectMemory} from "../../../pointer/DirectMemory";
  */
 export class SharedTree {
 
-    constructor(public box:Box,
-                public root:SharedNode) {
+    constructor(box:Box,
+                root:SharedNode) {
 
     }
 
     static newTree(shapes:Shape[], box:Box = null):SharedTree {
         console.time("Building k-d tree (" + shapes.length + " shapes)... ");
-        box = box ? box : Box.boxForShapes(shapes);
+        box = box ? box :Box.boxForShapes(shapes);
         var node:SharedNode = SharedNode.newNode(shapes);
         node.split(0);
         console.timeEnd("Building k-d tree (" + shapes.length + " shapes)... ");

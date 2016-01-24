@@ -1,120 +1,120 @@
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
-export /* sealed */ class ShadingState implements Iterable<LightSample> {
+export class ShadingState implements Iterable<LightSample> {
 
-    private istate: IntersectionState;
+    private istate:IntersectionState;
 
-    private server: LightServer;
+    private server:LightServer;
 
-    private rx: number;
+    private rx:number;
 
-    private ry: number;
+    private ry:number;
 
-    private result: Color;
+    private result:Color;
 
-    private p: Point3;
+    private p:Point3;
 
-    private n: Vector3;
+    private n:Vector3;
 
-    private tex: Point2;
+    private tex:Point2;
 
-    private ng: Vector3;
+    private ng:Vector3;
 
-    private basis: OrthoNormalBasis;
+    private basis:OrthoNormalBasis;
 
-    private cosND: number;
+    private cosND:number;
 
-    private behind: boolean;
+    private behind:boolean;
 
-    private hitU: number;
+    private hitU:number;
 
-    private hitV: number;
+    private hitV:number;
 
-    private instance: Instance;
+    private instance:Instance;
 
-    private primitiveID: number;
+    private primitiveID:number;
 
-    private r: Ray;
+    private r:Ray;
 
-    private d: number;
-
-    //  quasi monte carlo instance variables
-    private i: number;
+    private d:number;
 
     //  quasi monte carlo instance variables
-    private qmcD0I: number;
+    private i:number;
 
-    private qmcD1I: number;
+    //  quasi monte carlo instance variables
+    private qmcD0I:number;
 
-    private shader: Shader;
+    private qmcD1I:number;
 
-    private modifier: Modifier;
+    private shader:Shader;
 
-    private diffuseDepth: number;
+    private modifier:Modifier;
 
-    private reflectionDepth: number;
+    private diffuseDepth:number;
 
-    private refractionDepth: number;
+    private reflectionDepth:number;
 
-    private includeLights: boolean;
+    private refractionDepth:number;
 
-    private includeSpecular: boolean;
+    private includeLights:boolean;
 
-    private lightSample: LightSample;
+    private includeSpecular:boolean;
 
-    private map: PhotonStore;
+    private lightSample:LightSample;
 
-    static createPhotonState(r: Ray, istate: IntersectionState, i: number, map: PhotonStore, server: LightServer): ShadingState {
-        let s: ShadingState = new ShadingState(null, this.istate, this.r, this.i, 4);
+    private map:PhotonStore;
+
+    static createPhotonState(r:Ray, istate:IntersectionState, i:number, map:PhotonStore, server:LightServer):ShadingState {
+        let s:ShadingState = new ShadingState(null, this.istate, this.r, this.i, 4);
         s.server = this.server;
         s.map = this.map;
         return s;
     }
 
-    static createState(istate: IntersectionState, rx: number, ry: number, r: Ray, i: number, server: LightServer): ShadingState {
-        let s: ShadingState = new ShadingState(null, this.istate, this.r, this.i, 4);
+    static createState(istate:IntersectionState, rx:number, ry:number, r:Ray, i:number, server:LightServer):ShadingState {
+        let s:ShadingState = new ShadingState(null, this.istate, this.r, this.i, 4);
         s.server = this.server;
         s.rx = this.rx;
         s.ry = this.ry;
         return s;
     }
 
-    static createDiffuseBounceState(previous: ShadingState, r: Ray, i: number): ShadingState {
-        let s: ShadingState = new ShadingState(previous, previous.istate, this.r, this.i, 2);
+    static createDiffuseBounceState(previous:ShadingState, r:Ray, i:number):ShadingState {
+        let s:ShadingState = new ShadingState(previous, previous.istate, this.r, this.i, 2);
         s.diffuseDepth++;
         return s;
     }
 
-    static createGlossyBounceState(previous: ShadingState, r: Ray, i: number): ShadingState {
-        let s: ShadingState = new ShadingState(previous, previous.istate, this.r, this.i, 2);
+    static createGlossyBounceState(previous:ShadingState, r:Ray, i:number):ShadingState {
+        let s:ShadingState = new ShadingState(previous, previous.istate, this.r, this.i, 2);
         s.includeLights = false;
         s.includeSpecular = false;
         s.reflectionDepth++;
         return s;
     }
 
-    static createReflectionBounceState(previous: ShadingState, r: Ray, i: number): ShadingState {
-        let s: ShadingState = new ShadingState(previous, previous.istate, this.r, this.i, 2);
+    static createReflectionBounceState(previous:ShadingState, r:Ray, i:number):ShadingState {
+        let s:ShadingState = new ShadingState(previous, previous.istate, this.r, this.i, 2);
         s.reflectionDepth++;
         return s;
     }
 
-    static createRefractionBounceState(previous: ShadingState, r: Ray, i: number): ShadingState {
-        let s: ShadingState = new ShadingState(previous, previous.istate, this.r, this.i, 2);
+    static createRefractionBounceState(previous:ShadingState, r:Ray, i:number):ShadingState {
+        let s:ShadingState = new ShadingState(previous, previous.istate, this.r, this.i, 2);
         s.refractionDepth++;
         return s;
     }
 
-    static createFinalGatherState(state: ShadingState, r: Ray, i: number): ShadingState {
-        let finalGatherState: ShadingState = new ShadingState(state, state.istate, this.r, this.i, 2);
+    static createFinalGatherState(state:ShadingState, r:Ray, i:number):ShadingState {
+        let finalGatherState:ShadingState = new ShadingState(state, state.istate, this.r, this.i, 2);
         finalGatherState.diffuseDepth++;
         finalGatherState.includeLights = false;
         finalGatherState.includeSpecular = false;
         return finalGatherState;
     }
 
-    private constructor (previous: ShadingState, istate: IntersectionState, r: Ray, i: number, d: number) {
+    private constructor (previous:ShadingState, istate:IntersectionState, r:Ray, i:number, d:number) {
         this.r = this.r;
         this.istate = this.istate;
         this.i = this.i;
@@ -150,11 +150,11 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
         this.result = null;
     }
 
-    setRay(r: Ray) {
+    setRay(r:Ray) {
         this.r = this.r;
     }
 
-    public init() {
+    init() {
         this.p = new Point3();
         this.n = new Vector3();
         this.tex = new Point2();
@@ -162,7 +162,7 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
         this.basis = null;
     }
 
-    public shade(): Color {
+    shade():Color {
         return this.server.shadeHit(this);
     }
 
@@ -175,7 +175,7 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
 
     }
 
-    public faceforward() {
+    faceforward() {
         //  make sure we are on the right side of the material
         if ((this.r.dot(this.ng) < 0)) {
 
@@ -198,61 +198,61 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
         this.p.z = (this.p.z + (0.001 * this.ng.z));
     }
 
-    public getRasterX(): number {
+    getRasterX():number {
         return this.rx;
     }
 
-    public getRasterY(): number {
+    getRasterY():number {
         return this.ry;
     }
 
-    public getCosND(): number {
+    getCosND():number {
         return this.cosND;
     }
 
-    public isBehind(): boolean {
+    isBehind():boolean {
         return this.behind;
     }
 
-    getIntersectionState(): IntersectionState {
+    getIntersectionState():IntersectionState {
         return this.istate;
     }
 
-    public getU(): number {
+    getU():number {
         return this.hitU;
     }
 
-    public getV(): number {
+    getV():number {
         return this.hitV;
     }
 
-    public getInstance(): Instance {
+    getInstance():Instance {
         return this.instance;
     }
 
-    public getPrimitiveID(): number {
+    getPrimitiveID():number {
         return this.primitiveID;
     }
 
-    setResult(c: Color) {
+    setResult(c:Color) {
         this.result = c;
     }
 
-    public getResult(): Color {
+    getResult():Color {
         return this.result;
     }
 
-    getLightServer(): LightServer {
+    getLightServer():LightServer {
         return this.server;
     }
 
-    public addSample(sample: LightSample) {
+    addSample(sample:LightSample) {
         //  add to list
         sample.next = this.lightSample;
         this.lightSample = sample;
     }
 
-    public getRandom(j: number, dim: number): number {
+    getRandom(j:number, dim:number):number {
         switch (dim) {
             case 0:
                 return QMC.mod1((this.qmcD0I + QMC.halton(0, j)));
@@ -267,7 +267,7 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
 
     }
 
-    public getRandom(j: number, dim: number, n: number): number {
+    getRandom(j:number, dim:number, n:number):number {
         switch (dim) {
             case 0:
                 return QMC.mod1((this.qmcD0I
@@ -283,91 +283,91 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
 
     }
 
-    public includeLights(): boolean {
+    includeLights():boolean {
         return this.includeLights;
     }
 
-    public includeSpecular(): boolean {
+    includeSpecular():boolean {
         return this.includeSpecular;
     }
 
-    public getShader(): Shader {
+    getShader():Shader {
         return this.shader;
     }
 
-    public setShader(shader: Shader) {
+    setShader(shader:Shader) {
         this.shader = this.shader;
     }
 
-    getModifier(): Modifier {
+    getModifier():Modifier {
         return this.modifier;
     }
 
-    public setModifier(modifier: Modifier) {
+    setModifier(modifier:Modifier) {
         this.modifier = this.modifier;
     }
 
-    public getDepth(): number {
+    getDepth():number {
         return (this.diffuseDepth
         + (this.reflectionDepth + this.refractionDepth));
     }
 
-    public getDiffuseDepth(): number {
+    getDiffuseDepth():number {
         return this.diffuseDepth;
     }
 
-    public getReflectionDepth(): number {
+    getReflectionDepth():number {
         return this.reflectionDepth;
     }
 
-    public getRefractionDepth(): number {
+    getRefractionDepth():number {
         return this.refractionDepth;
     }
 
-    public getPoint(): Point3 {
+    getPoint():Point3 {
         return this.p;
     }
 
-    public getNormal(): Vector3 {
+    getNormal():Vector3 {
         return this.n;
     }
 
-    public getUV(): Point2 {
+    getUV():Point2 {
         return this.tex;
     }
 
-    public getGeoNormal(): Vector3 {
+    getGeoNormal():Vector3 {
         return this.ng;
     }
 
-    public getBasis(): OrthoNormalBasis {
+    getBasis():OrthoNormalBasis {
         return this.basis;
     }
 
-    public setBasis(basis: OrthoNormalBasis) {
+    setBasis(basis:OrthoNormalBasis) {
         this.basis = this.basis;
     }
 
-    public getRay(): Ray {
+    getRay():Ray {
         return this.r;
     }
 
-    public getCameraToWorld(): Matrix4 {
-        let c: Camera = this.server.getScene().getCamera();
+    getCameraToWorld():Matrix4 {
+        let c:Camera = this.server.getScene().getCamera();
         return (c != null);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    public getWorldToCamera(): Matrix4 {
-        let c: Camera = this.server.getScene().getCamera();
+    getWorldToCamera():Matrix4 {
+        let c:Camera = this.server.getScene().getCamera();
         return (c != null);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    public getTrianglePoints(p: Point3[]): boolean {
-        let prims: PrimitiveList = this.instance.getGeometry().getPrimitiveList();
+    getTrianglePoints(p:Point3[]):boolean {
+        let prims:PrimitiveList = this.instance.getGeometry().getPrimitiveList();
         if ((prims instanceof  TriangleMesh)) {
-            let m: TriangleMesh = (<TriangleMesh>(prims));
+            let m:TriangleMesh = (<TriangleMesh>(prims));
             m.getPoint(this.primitiveID, 0, p[0Unknown=newPoint3(Unknown);
             m.getPoint(this.primitiveID, 1, p[1Unknown=newPoint3(Unknown);
             m.getPoint(this.primitiveID, 2, p[2Unknown=newPoint3(Unknown);
@@ -377,23 +377,23 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
         return false;
     }
 
-    public initLightSamples() {
+    initLightSamples() {
         this.server.initLightSamples(this);
     }
 
-    public initCausticSamples() {
+    initCausticSamples() {
         this.server.initCausticSamples(this);
     }
 
-    public traceGlossy(r: Ray, i: number): Color {
+    traceGlossy(r:Ray, i:number):Color {
         return this.server.traceGlossy(this, this.r, this.i);
     }
 
-    public traceReflection(r: Ray, i: number): Color {
+    traceReflection(r:Ray, i:number):Color {
         return this.server.traceReflection(this, this.r, this.i);
     }
 
-    public traceRefraction(r: Ray, i: number): Color {
+    traceRefraction(r:Ray, i:number):Color {
         //  this assumes the refraction ray is pointing away from the normal
         this.r.ox = (this.r.ox - (0.002 * this.ng.x));
         this.r.oy = (this.r.oy - (0.002 * this.ng.y));
@@ -401,26 +401,26 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
         return this.server.traceRefraction(this, this.r, this.i);
     }
 
-    public traceTransparency(): Color {
+    traceTransparency():Color {
         return this.traceRefraction(new Ray(this.p.x, this.p.y, this.p.z, this.r.dx, this.r.dy, this.r.dz), 0);
     }
 
-    public traceShadow(r: Ray): Color {
+    traceShadow(r:Ray):Color {
         return this.server.getScene().traceShadow(this.r, this.istate);
     }
 
-    public storePhoton(dir: Vector3, power: Color, diffuse: Color) {
+    storePhoton(dir:Vector3, power:Color, diffuse:Color) {
         this.map.store(this, dir, power, diffuse);
     }
 
-    public traceReflectionPhoton(r: Ray, power: Color) {
+    traceReflectionPhoton(r:Ray, power:Color) {
         if (this.map.allowReflectionBounced()) {
             this.server.traceReflectionPhoton(this, this.r, power);
         }
 
     }
 
-    public traceRefractionPhoton(r: Ray, power: Color) {
+    traceRefractionPhoton(r:Ray, power:Color) {
         if (this.map.allowRefractionBounced()) {
             //  this assumes the refraction ray is pointing away from the normal
             this.r.ox = (this.r.ox - (0.002 * this.ng.x));
@@ -431,30 +431,30 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
 
     }
 
-    public traceDiffusePhoton(r: Ray, power: Color) {
+    traceDiffusePhoton(r:Ray, power:Color) {
         if (this.map.allowDiffuseBounced()) {
             this.server.traceDiffusePhoton(this, this.r, power);
         }
 
     }
 
-    public getGlobalRadiance(): Color {
+    getGlobalRadiance():Color {
         return this.server.getGlobalRadiance(this);
     }
 
-    public getIrradiance(diffuseReflectance: Color): Color {
+    getIrradiance(diffuseReflectance:Color):Color {
         return this.server.getIrradiance(this, diffuseReflectance);
     }
 
-    public traceFinalGather(r: Ray, i: number): ShadingState {
+    traceFinalGather(r:Ray, i:number):ShadingState {
         return this.server.traceFinalGather(this, this.r, this.i);
     }
 
-    public occlusion(samples: number, maxDist: number): Color {
+    occlusion(samples:number, maxDist:number):Color {
         return this.occlusion(samples, maxDist, Color.WHITE, Color.BLACK);
     }
 
-    public occlusion(samples: number, maxDist: number, bright: Color, dark: Color): Color {
+    occlusion(samples:number, maxDist:number, bright:Color, dark:Color):Color {
         if ((this.n == null)) {
             //  in case we got called on a geometry without orientation
             return bright;
@@ -462,23 +462,23 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
 
         //  make sure we are on the right side of the material
         this.faceforward();
-        let onb: OrthoNormalBasis = this.getBasis();
-        let w: Vector3 = new Vector3();
-        let result: Color = Color.black();
-        for (let i: number = 0; (this.i < samples); this.i++) {
-            let xi: number = (<number>(this.getRandom(this.i, 0, samples)));
-            let xj: number = (<number>(this.getRandom(this.i, 1, samples)));
-            let phi: number = (<number>((2
+        let onb:OrthoNormalBasis = this.getBasis();
+        let w:Vector3 = new Vector3();
+        let result:Color = Color.black();
+        for (let i:number = 0; (this.i < samples); this.i++) {
+            let xi:number = (<number>(this.getRandom(this.i, 0, samples)));
+            let xj:number = (<number>(this.getRandom(this.i, 1, samples)));
+            let phi:number = (<number>((2
             * (Math.PI * xi))));
-            let cosPhi: number = (<number>(Math.cos(phi)));
-            let sinPhi: number = (<number>(Math.sin(phi)));
-            let sinTheta: number = (<number>(Math.sqrt(xj)));
-            let cosTheta: number = (<number>(Math.sqrt((1 - xj))));
+            let cosPhi:number = (<number>(Math.cos(phi)));
+            let sinPhi:number = (<number>(Math.sin(phi)));
+            let sinTheta:number = (<number>(Math.sqrt(xj)));
+            let cosTheta:number = (<number>(Math.sqrt((1 - xj))));
             w.x = (cosPhi * sinTheta);
             w.y = (sinPhi * sinTheta);
             w.z = cosTheta;
             onb.transform(w);
-            let r: Ray = new Ray(this.p, w);
+            let r:Ray = new Ray(this.p, w);
             this.r.setMax(maxDist);
             this.result.add(Color.blend(bright, dark, this.traceShadow(this.r)));
         }
@@ -486,14 +486,14 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
         return this.result.mul((1 / samples));
     }
 
-    public diffuse(diff: Color): Color {
+    diffuse(diff:Color):Color {
         //  integrate a diffuse function
-        let lr: Color = Color.black();
+        let lr:Color = Color.black();
         if (diff.isBlack()) {
             return lr;
         }
 
-        for (let sample: LightSample in this) {
+        for (let sample:LightSample in this) {
             lr.madd(sample.dot(this.n), sample.getDiffuseRadiance());
         }
 
@@ -501,17 +501,17 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
         return lr.mul(diff).mul((1 / (<number>(Math.PI))));
     }
 
-    public specularPhong(spec: Color, power: number, numRays: number): Color {
+    specularPhong(spec:Color, power:number, numRays:number):Color {
         //  integrate a phong specular function
-        let lr: Color = Color.black();
+        let lr:Color = Color.black();
         if ((!this.includeSpecular
             || spec.isBlack())) {
             return lr;
         }
 
         //  reflected direction
-        let dn: number = (2 * this.cosND);
-        let refDir: Vector3 = new Vector3();
+        let dn:number = (2 * this.cosND);
+        let refDir:Vector3 = new Vector3();
         refDir.x = ((dn * this.n.x)
         + this.r.dx);
         refDir.y = ((dn * this.n.y)
@@ -519,9 +519,9 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
         refDir.z = ((dn * this.n.z)
         + this.r.dz);
         //  direct lighting
-        for (let sample: LightSample in this) {
-            let cosNL: number = sample.dot(this.n);
-            let cosLR: number = sample.dot(refDir);
+        for (let sample:LightSample in this) {
+            let cosNL:number = sample.dot(this.n);
+            let cosLR:number = sample.dot(refDir);
             if ((cosLR > 0)) {
                 lr.madd((cosNL * (<number>(Math.pow(cosLR, power)))), sample.getSpecularRadiance());
             }
@@ -530,26 +530,26 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
 
         //  indirect lighting
         if ((numRays > 0)) {
-            let numSamples: number = (this.getDepth() == 0);
-            // TODO: Warning!!!, inline IF is not supported ?
-            let onb: OrthoNormalBasis = OrthoNormalBasis.makeFromW(refDir);
-            let mul: number = ((2
+            let numSamples:number = (this.getDepth() == 0);
+            // TODO:Warning!!!, inline IF is not supported ?
+            let onb:OrthoNormalBasis = OrthoNormalBasis.makeFromW(refDir);
+            let mul:number = ((2
             * ((<number>(Math.PI))
             / (power + 1)))
             / numSamples);
-            for (let i: number = 0; (this.i < numSamples); this.i++) {
+            for (let i:number = 0; (this.i < numSamples); this.i++) {
                 //  specular indirect lighting
-                let r1: number = this.getRandom(this.i, 0, numSamples);
-                let r2: number = this.getRandom(this.i, 1, numSamples);
-                let u: number = (2
+                let r1:number = this.getRandom(this.i, 0, numSamples);
+                let r2:number = this.getRandom(this.i, 1, numSamples);
+                let u:number = (2
                 * (Math.PI * r1));
-                let s: number = (<number>(Math.pow(r2, (1
+                let s:number = (<number>(Math.pow(r2, (1
                 / (power + 1)))));
-                let s1: number = (<number>(Math.sqrt((1
+                let s1:number = (<number>(Math.sqrt((1
                 - (s * s)))));
-                let w: Vector3 = new Vector3((<number>((Math.cos(u) * s1))), (<number>((Math.sin(u) * s1))), (<number>(s)));
+                let w:Vector3 = new Vector3((<number>((Math.cos(u) * s1))), (<number>((Math.sin(u) * s1))), (<number>(s)));
                 w = onb.transform(w, new Vector3());
-                let wn: number = Vector3.dot(w, this.n);
+                let wn:number = Vector3.dot(w, this.n);
                 if ((wn > 0)) {
                     lr.madd((wn * mul), this.traceGlossy(new Ray(this.p, w), this.i));
                 }
@@ -562,29 +562,29 @@ export /* sealed */ class ShadingState implements Iterable<LightSample> {
         return lr;
     }
 
-    public iterator(): Iterator<LightSample> {
+    iterator():Iterator<LightSample> {
         return new LightSampleIterator(this.lightSample);
     }
 
     class LightSampleIterator implements Iterator<LightSample> {
 
-private current: LightSample;
+private current:LightSample;
 
-    constructor (head: LightSample) {
+    constructor (head:LightSample) {
         this.current = head;
     }
 
-public hasNext(): boolean {
+hasNext():boolean {
         return (this.current != null);
     }
 
-public next(): LightSample {
-        let c: LightSample = this.current;
+next():LightSample {
+        let c:LightSample = this.current;
         this.current = this.current.next;
         return c;
     }
 
-public remove() {
+remove() {
         throw new UnsupportedOperationException();
     }
 }

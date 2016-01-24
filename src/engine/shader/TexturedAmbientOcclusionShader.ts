@@ -3,14 +3,14 @@
  */
 export class TexturedAmbientOcclusionShader extends AmbientOcclusionShader {
 
-    private tex: Texture;
+    private tex:Texture;
 
-    public constructor () {
+    constructor () {
         this.tex = null;
     }
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
-        let filename: String = pl.getString("texture", null);
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
+        let filename:string = pl.getString("texture", null);
         if ((filename != null)) {
             this.tex = TextureCache.getTexture(api.resolveTextureFilename(filename), false);
         }
@@ -20,7 +20,7 @@ export class TexturedAmbientOcclusionShader extends AmbientOcclusionShader {
     }
 
     @Override()
-    public getBrightColor(state: ShadingState): Color {
+    getBrightColor(state:ShadingState):Color {
         return this.tex.getPixel(state.getUV().x, state.getUV().y);
     }
 }

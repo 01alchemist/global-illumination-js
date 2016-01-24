@@ -6,7 +6,7 @@ import {HitInfo} from "./HitInfo";
  */
 export class Ray {
 
-    constructor(public origin:Vector3 = new Vector3(), public direction:Vector3 = new Vector3()) {
+    constructor(origin:Vector3 = new Vector3(), direction:Vector3 = new Vector3()) {
 
     }
 
@@ -70,14 +70,14 @@ export class Ray {
         if (p < n.reflectance(this, n1, n2)) {
             var reflected:Ray = n.reflect(this);
             var ray:Ray = reflected.coneBounce(info.material.gloss, u, v);
-            return {ray: ray, reflected: true};
+            return {ray:ray, reflected:true};
         } else if (info.material.transparent) {
             var refracted = n.Refract(this, n1, n2);
             var ray = refracted.coneBounce(info.material.gloss, u, v);
-            return {ray: ray, reflected: true};
+            return {ray:ray, reflected:true};
         } else {
             var ray:Ray = n.weightedBounce(u, v);
-            return {ray: ray, reflected: false};
+            return {ray:ray, reflected:false};
         }
     }
 

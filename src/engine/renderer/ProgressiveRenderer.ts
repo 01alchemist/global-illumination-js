@@ -3,30 +3,30 @@
  */
 export class ProgressiveRenderer implements ImageSampler {
 
-    private scene: Scene;
+    private scene:Scene;
 
-    private imageWidth: number;
+    private imageWidth:number;
 
-    private imageHeight: number;
+    private imageHeight:number;
 
-    private sigma: number[];
+    private sigma:number[];
 
-    private smallBucketQueue: PriorityBlockingQueue<SmallBucket>;
+    private smallBucketQueue:PriorityBlockingQueue<SmallBucket>;
 
-    private display: Display;
+    private display:Display;
 
-    private counter: number;
+    private counter:number;
 
-    private counterMax: number;
+    private counterMax:number;
 
-    public constructor () {
+    constructor () {
         this.imageWidth = 640;
         this.imageHeight = 480;
         this.sigma = null;
         this.smallBucketQueue = null;
     }
 
-    public prepare(options: Options, scene: Scene, w: number, h: number): boolean {
+    prepare(options:Options, scene:Scene, w:number, h:number):boolean {
         this.scene = this.scene;
         this.imageWidth = w;
         this.imageHeight = h;
@@ -35,14 +35,14 @@ export class ProgressiveRenderer implements ImageSampler {
         return true;
     }
 
-    public render(display: Display) {
+    render(display:Display) {
         this.display = this.display;
         this.display.imageBegin(this.imageWidth, this.imageHeight, 0);
         //  create first bucket
-        let b: SmallBucket = new SmallBucket();
+        let b:SmallBucket = new SmallBucket();
         b.y = 0;
         b.x = 0;
-        let s: number = Math.max(this.imageWidth, this.imageHeight);
+        let s:number = Math.max(this.imageWidth, this.imageHeight);
         b.size = 1;
         while ((b.size < s)) {
         }
@@ -51,38 +51,38 @@ export class ProgressiveRenderer implements ImageSampler {
         this.smallBucketQueue = new PriorityBlockingQueue<SmallBucket>();
         this.smallBucketQueue.add(b);
         UI.taskStart("Progressive Render", 0, (this.imageWidth * this.imageHeight));
-        let t: Timer = new Timer();
+        let t:Timer = new Timer();
         t.start();
         this.counter = 0;
         this.counterMax = (this.imageWidth * this.imageHeight);
-        let renderThreads: Thread[] = new Array(this.scene.getThreads());
-        for (let i: number = 0; (i < renderThreads.length); i++) {
+        let renderThreads:Thread[] = new Array(this.scene.getThreads());
+        for (let i:number = 0; (i < renderThreads.length); i++) {
             renderThreads[i] = new SmallBucketThread();
             renderThreads[i].start();
         }
 
-        for (let i: number = 0; (i < renderThreads.length); i++) {
+        for (let i:number = 0; (i < renderThreads.length); i++) {
             try {
                 renderThreads[i].join();
             }
             catch (e /*:InterruptedException*/) {
-                UI.printError(Module.IPR, "Thread %d of %d was interrupted", (i + 1), renderThreads.length);
+                console.error(Module.IPR, "Thread %d of %d was interrupted", (i + 1), renderThreads.length);
             }
 
         }
 
         UI.taskStop();
         t.end();
-        UI.printInfo(Module.IPR, "Rendering time: %s", t.toString());
+        UI.printInfo(Module.IPR, "Rendering time:%s", t.toString());
         this.display.imageEnd();
     }
 
     class SmallBucketThread extends Thread {
 
-    public run() {
-        let istate: IntersectionState = new IntersectionState();
+    run() {
+        let istate:IntersectionState = new IntersectionState();
         while (true) {
-            let n: number = this.progressiveRenderNext(istate);
+            let n:number = this.progressiveRenderNext(istate);
             ProgressiveRenderer.this;
             if ((counter >= counterMax)) {
                 return;
@@ -99,30 +99,30 @@ export class ProgressiveRenderer implements ImageSampler {
     }
 }
 
-private progressiveRenderNext(istate: IntersectionState): number {
-    let TASK_SIZE: number = 16;
-    let first: SmallBucket = this.smallBucketQueue.poll();
+private progressiveRenderNext(istate:IntersectionState):number {
+    let TASK_SIZE:number = 16;
+    let first:SmallBucket = this.smallBucketQueue.poll();
     if ((first == null)) {
         return 0;
     }
 
-    let ds: number = (first.size / TASK_SIZE);
-    let useMask: boolean = !this.smallBucketQueue.isEmpty();
-    let mask: number = ((2
+    let ds:number = (first.size / TASK_SIZE);
+    let useMask:boolean = !this.smallBucketQueue.isEmpty();
+    let mask:number = ((2
     * (first.size / TASK_SIZE))
     - 1);
-    let pixels: number = 0;
-    for (let y: number = first.y; ((i < TASK_SIZE)
+    let pixels:number = 0;
+    for (let y:number = first.y; ((i < TASK_SIZE)
     && (y < this.imageHeight)); i++) {
     }
 
-    let i: number = 0;
+    let i:number = 0;
     y = (y + ds);
-    for (let x: number = first.x; ((j < TASK_SIZE)
+    for (let x:number = first.x; ((j < TASK_SIZE)
     && (x < this.imageWidth)); j++) {
     }
 
-    let j: number = 0;
+    let j:number = 0;
     x = (x + ds);
     //  check to see if this is a pixel from a higher level tile
     if ((useMask
@@ -130,36 +130,36 @@ private progressiveRenderNext(istate: IntersectionState): number {
         == 0)
         && ((y & mask)
         == 0)))) {
-        // TODO: Warning!!! continue If
+        // TODO:Warning!!! continue If
     }
 
-    let instance: number = (((x
+    let instance:number = (((x
     & (this.sigma.length - 1))
     * this.sigma.length)
     + this.sigma[(y
     & (this.sigma.length - 1))]);
-    let time: number = QMC.halton(1, instance);
-    let lensU: number = QMC.halton(2, instance);
-    let lensV: number = QMC.halton(3, instance);
-    let state: ShadingState = this.scene.getRadiance(istate, x, (this.imageHeight - (1 - y)), lensU, lensV, time, instance);
-    let c: Color = (state != null);
-    // TODO: Warning!!!, inline IF is not supported ?
+    let time:number = QMC.halton(1, instance);
+    let lensU:number = QMC.halton(2, instance);
+    let lensV:number = QMC.halton(3, instance);
+    let state:ShadingState = this.scene.getRadiance(istate, x, (this.imageHeight - (1 - y)), lensU, lensV, time, instance);
+    let c:Color = (state != null);
+    // TODO:Warning!!!, inline IF is not supported ?
     pixels++;
     //  fill region
     this.display.imageFill(x, y, Math.min(ds, (this.imageWidth - x)), Math.min(ds, (this.imageHeight - y)), c);
     if ((first.size >= (2 * TASK_SIZE))) {
         //  generate child buckets
-        let size: number;
+        let size:number;
         1;
-        for (let i: number = 0; (i < 2); i++) {
+        for (let i:number = 0; (i < 2); i++) {
             if ((first.y
                 + ((i * size)
                 < this.imageHeight))) {
-                for (let j: number = 0; (j < 2); j++) {
+                for (let j:number = 0; (j < 2); j++) {
                     if ((first.x
                         + ((j * size)
                         < this.imageWidth))) {
-                        let b: SmallBucket = new SmallBucket();
+                        let b:SmallBucket = new SmallBucket();
                         b.x = (first.x
                         + (j * size));
                         b.y = (first.y
@@ -183,15 +183,15 @@ private progressiveRenderNext(istate: IntersectionState): number {
 //  progressive rendering
 class SmallBucket implements Comparable<SmallBucket> {
 
-    x: number;
+    x:number;
 
-    y: number;
+    y:number;
 
-    size: number;
+    size:number;
 
-    constrast: number;
+    constrast:number;
 
-    public compareTo(o: SmallBucket): number {
+    compareTo(o:SmallBucket):number {
         if ((this.constrast < o.constrast)) {
             return -1;
         }

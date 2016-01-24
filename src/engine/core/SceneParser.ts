@@ -3,5 +3,5 @@
  */
 export interface SceneParser {
 
-    parse(filename: String, api: SunflowAPI): boolean;
+    parse(filename:string, api:GlobalIlluminationAPI):boolean;
 }

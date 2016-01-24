@@ -4,40 +4,40 @@
 export class Scene {
 
     //  scene storage
-    private lightServer: LightServer;
+    private lightServer:LightServer;
 
-    private instanceList: InstanceList;
+    private instanceList:InstanceList;
 
-    private infiniteInstanceList: InstanceList;
+    private infiniteInstanceList:InstanceList;
 
-    private camera: Camera;
+    private camera:Camera;
 
-    private intAccel: AccelerationStructure;
+    private intAccel:AccelerationStructure;
 
-    private acceltype: String;
+    private acceltype:string;
 
     //  baking
-    private bakingViewDependent: boolean;
+    private bakingViewDependent:boolean;
 
-    private bakingInstance: Instance;
+    private bakingInstance:Instance;
 
-    private bakingPrimitives: PrimitiveList;
+    private bakingPrimitives:PrimitiveList;
 
-    private bakingAccel: AccelerationStructure;
+    private bakingAccel:AccelerationStructure;
 
-    private rebuildAccel: boolean;
+    private rebuildAccel:boolean;
 
     //  image size
-    private imageWidth: number;
+    private imageWidth:number;
 
-    private imageHeight: number;
+    private imageHeight:number;
 
     //  global options
-    private threads: number;
+    private threads:number;
 
-    private lowPriority: boolean;
+    private lowPriority:boolean;
 
-    public constructor () {
+    constructor () {
         this.lightServer = new LightServer(this);
         this.instanceList = new InstanceList();
         this.infiniteInstanceList = new InstanceList();
@@ -54,66 +54,66 @@ export class Scene {
         this.rebuildAccel = true;
     }
 
-    public getThreads(): number {
+    getThreads():number {
         return (this.threads <= 0);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    public getThreadPriority(): number {
+    getThreadPriority():number {
         return this.lowPriority;
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    public setCamera(camera: Camera) {
+    setCamera(camera:Camera) {
         this.camera = this.camera;
     }
 
-    getCamera(): Camera {
+    getCamera():Camera {
         return this.camera;
     }
 
-    public setInstanceLists(instances: Instance[], infinite: Instance[]) {
+    setInstanceLists(instances:Instance[], infinite:Instance[]) {
         this.infiniteInstanceList = new InstanceList(infinite);
         this.instanceList = new InstanceList(instances);
         this.rebuildAccel = true;
     }
 
-    public setLightList(lights: LightSource[]) {
+    setLightList(lights:LightSource[]) {
         this.lightServer.setLights(lights);
     }
 
-    public setShaderOverride(shader: Shader, photonOverride: boolean) {
+    setShaderOverride(shader:Shader, photonOverride:boolean) {
         this.lightServer.setShaderOverride(shader, photonOverride);
     }
 
-    public setBakingInstance(instance: Instance) {
+    setBakingInstance(instance:Instance) {
         this.bakingInstance = instance;
     }
 
-    public getRadiance(istate: IntersectionState, rx: number, ry: number, lensU: number, lensV: number, time: number, instance: number): ShadingState {
+    getRadiance(istate:IntersectionState, rx:number, ry:number, lensU:number, lensV:number, time:number, instance:number):ShadingState {
         if ((this.bakingPrimitives == null)) {
-            let r: Ray = this.camera.getRay(rx, ry, this.imageWidth, this.imageHeight, lensU, lensV, time);
+            let r:Ray = this.camera.getRay(rx, ry, this.imageWidth, this.imageHeight, lensU, lensV, time);
             return (r != null);
-            // TODO: Warning!!!, inline IF is not supported ?
+            // TODO:Warning!!!, inline IF is not supported ?
         }
         else {
-            let r: Ray = new Ray((rx / this.imageWidth), (ry / this.imageHeight), -1, 0, 0, 1);
+            let r:Ray = new Ray((rx / this.imageWidth), (ry / this.imageHeight), -1, 0, 0, 1);
             this.traceBake(r, istate);
             if (!istate.hit()) {
                 return null;
             }
 
-            let state: ShadingState = ShadingState.createState(istate, rx, ry, r, instance, this.lightServer);
+            let state:ShadingState = ShadingState.createState(istate, rx, ry, r, instance, this.lightServer);
             this.bakingPrimitives.prepareShadingState(state);
             if (this.bakingViewDependent) {
                 state.setRay(this.camera.getRay(state.getPoint()));
             }
             else {
-                let p: Point3 = state.getPoint();
-                let n: Vector3 = state.getNormal();
+                let p:Point3 = state.getPoint();
+                let n:Vector3 = state.getNormal();
                 //  create a ray coming from directly above the point being
                 //  shaded
-                let incoming: Ray = new Ray((p.x + n.x), (p.y + n.y), (p.z + n.z), (n.x * -1), (n.y * -1), (n.z * -1));
+                let incoming:Ray = new Ray((p.x + n.x), (p.y + n.y), (p.z + n.z), (n.x * -1), (n.y * -1), (n.z * -1));
                 incoming.setMax(1);
                 state.setRay(incoming);
             }
@@ -124,15 +124,15 @@ export class Scene {
 
     }
 
-    public getBounds(): BoundingBox {
+    getBounds():BoundingBox {
         return this.instanceList.getWorldBounds(null);
     }
 
-    trace(r: Ray, state: IntersectionState) {
+    trace(r:Ray, state:IntersectionState) {
         //  reset object
         state.instance = null;
         state.current = null;
-        for (let i: number = 0; (i < this.infiniteInstanceList.getNumPrimitives()); i++) {
+        for (let i:number = 0; (i < this.infiniteInstanceList.getNumPrimitives()); i++) {
             this.infiniteInstanceList.intersectPrimitive(r, i, state);
         }
 
@@ -141,13 +141,13 @@ export class Scene {
         this.intAccel.intersect(r, state);
     }
 
-    traceShadow(r: Ray, state: IntersectionState): Color {
+    traceShadow(r:Ray, state:IntersectionState):Color {
         this.trace(r, state);
         return state.hit();
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    traceBake(r: Ray, state: IntersectionState) {
+    traceBake(r:Ray, state:IntersectionState) {
         //  set the instance as if tracing a regular instanced object
         state.current = this.bakingInstance;
         //  reset object
@@ -155,7 +155,7 @@ export class Scene {
         this.bakingAccel.intersect(r, state);
     }
 
-    public render(options: Options, sampler: ImageSampler, display: Display) {
+    render(options:Options, sampler:ImageSampler, display:Display) {
         if ((display == null)) {
             display = new FrameDisplay();
         }
@@ -164,11 +164,11 @@ export class Scene {
             UI.printDetailed(Module.SCENE, "Creating primitives for lightmapping ...");
             this.bakingPrimitives = this.bakingInstance.getBakingPrimitives();
             if ((this.bakingPrimitives == null)) {
-                UI.printError(Module.SCENE, "Lightmap baking is not supported for the given instance.");
+                console.error(Module.SCENE, "Lightmap baking is not supported for the given instance.");
                 return;
             }
 
-            let n: number = this.bakingPrimitives.getNumPrimitives();
+            let n:number = this.bakingPrimitives.getNumPrimitives();
             UI.printInfo(Module.SCENE, "Building acceleration structure for lightmapping (%d num primitives) ...", n);
             this.bakingAccel = AccelerationStructureFactory.create("auto", n, true);
             this.bakingAccel.build(this.bakingPrimitives);
@@ -184,7 +184,7 @@ export class Scene {
             && (this.camera == null)))
             || ((this.bakingInstance == null)
             && (this.camera == null)))) {
-            UI.printError(Module.SCENE, "No camera found");
+            console.error(Module.SCENE, "No camera found");
             return;
         }
 
@@ -198,35 +198,35 @@ export class Scene {
         this.imageHeight = MathUtils.clamp(this.imageHeight, 1, (1 + 14));
         //  get acceleration structure info
         //  count scene primitives
-        let numPrimitives: number = 0;
-        for (let i: number = 0; (i < this.instanceList.getNumPrimitives()); i++) {
+        let numPrimitives:number = 0;
+        for (let i:number = 0; (i < this.instanceList.getNumPrimitives()); i++) {
             numPrimitives = (numPrimitives + this.instanceList.getNumPrimitives(i));
         }
 
         UI.printInfo(Module.SCENE, "Scene stats:");
-        UI.printInfo(Module.SCENE, "  * Infinite instances:  %d", this.infiniteInstanceList.getNumPrimitives());
-        UI.printInfo(Module.SCENE, "  * Instances:           %d", this.instanceList.getNumPrimitives());
-        UI.printInfo(Module.SCENE, "  * Primitives:          %d", numPrimitives);
-        let accelName: String = options.getString("accel", null);
+        UI.printInfo(Module.SCENE, "  * Infinite instances: %d", this.infiniteInstanceList.getNumPrimitives());
+        UI.printInfo(Module.SCENE, "  * Instances:          %d", this.instanceList.getNumPrimitives());
+        UI.printInfo(Module.SCENE, "  * Primitives:         %d", numPrimitives);
+        let accelName:string = options.getString("accel", null);
         if ((accelName != null)) {
             this.rebuildAccel = (this.rebuildAccel
             || !this.acceltype.equals(accelName));
             this.acceltype = accelName;
         }
 
-        UI.printInfo(Module.SCENE, "  * Instance accel:      %s", this.acceltype);
+        UI.printInfo(Module.SCENE, "  * Instance accel:     %s", this.acceltype);
         if (this.rebuildAccel) {
             this.intAccel = AccelerationStructureFactory.create(this.acceltype, this.instanceList.getNumPrimitives(), false);
             this.intAccel.build(this.instanceList);
             this.rebuildAccel = false;
         }
 
-        UI.printInfo(Module.SCENE, "  * Scene bounds:        %s", this.getBounds());
-        UI.printInfo(Module.SCENE, "  * Scene center:        %s", this.getBounds().getCenter());
-        UI.printInfo(Module.SCENE, "  * Scene diameter:      %.2f", this.getBounds().getExtents().length());
-        UI.printInfo(Module.SCENE, "  * Lightmap bake:       %s", (this.bakingInstance != null));
-        // TODO: Warning!!!, inline IF is not supported ?
-        // TODO: Warning!!!, inline IF is not supported ?
+        UI.printInfo(Module.SCENE, "  * Scene bounds:       %s", this.getBounds());
+        UI.printInfo(Module.SCENE, "  * Scene center:       %s", this.getBounds().getCenter());
+        UI.printInfo(Module.SCENE, "  * Scene diameter:     %.2f", this.getBounds().getExtents().length());
+        UI.printInfo(Module.SCENE, "  * Lightmap bake:      %s", (this.bakingInstance != null));
+        // TODO:Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
         if ((sampler == null)) {
             return;
         }
@@ -246,7 +246,7 @@ export class Scene {
         UI.printInfo(Module.SCENE, "Done.");
     }
 
-    public calculatePhotons(map: PhotonStore, type: String, seed: number): boolean {
+    calculatePhotons(map:PhotonStore, type:string, seed:number):boolean {
         return this.lightServer.calculatePhotons(map, type, seed);
     }
 }

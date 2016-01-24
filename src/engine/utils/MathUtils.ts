@@ -36,9 +36,9 @@ export class MathUtils {
         if (f < 1) {
             if (f < 0) {
                 let n = MathUtils.Modf(-f);
-                return {int: -n.int, frac: -n.frac};
+                return {int:-n.int, frac:-n.frac};
             }
-            return {int: 0, frac: f};
+            return {int:0, frac:f};
         }
 
         var x:number = f;
@@ -51,7 +51,7 @@ export class MathUtils {
         }
         var int = x;
         var frac = f - int;
-        return {int: int, frac: frac};
+        return {int:int, frac:frac};
     }
 
     static clamp(x:number, lo:number, hi:number):number {

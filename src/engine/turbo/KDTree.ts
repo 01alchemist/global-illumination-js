@@ -3,66 +3,66 @@
  */
 export class KDTree implements IAccelerationStructure {
 
-    private tree: number[];
+    private tree:number[];
 
-    private primitives: number[];
+    private primitives:number[];
 
-    private primitiveList: PrimitiveList;
+    private primitiveList:PrimitiveList;
 
-    private bounds: BoundingBox;
+    private bounds:BoundingBox;
 
-    private maxPrims: number;
+    private maxPrims:number;
 
-    private static INTERSECT_COST: number = 0.5;
+    private static INTERSECT_COST:number = 0.5;
 
-    private static TRAVERSAL_COST: number = 1;
+    private static TRAVERSAL_COST:number = 1;
 
-    private static EMPTY_BONUS: number = 0.2;
+    private static EMPTY_BONUS:number = 0.2;
 
-    private static MAX_DEPTH: number = 64;
+    private static MAX_DEPTH:number = 64;
 
-    private static dump: boolean = false;
+    private static dump:boolean = false;
 
-    private static dumpPrefix: String = "kdtree";
+    private static dumpPrefix:string = "kdtree";
 
-    public constructor () :
+    constructor () :
     this(0) {
     this.(0);
 }
 
-public constructor (maxPrims: number) {
+constructor (maxPrims:number) {
     this.maxPrims = this.maxPrims;
 }
 
 class BuildStats {
 
-    private numNodes: number;
+    private numNodes:number;
 
-    private numLeaves: number;
+    private numLeaves:number;
 
-    private sumObjects: number;
+    private sumObjects:number;
 
-    private minObjects: number;
+    private minObjects:number;
 
-    private maxObjects: number;
+    private maxObjects:number;
 
-    private sumDepth: number;
+    private sumDepth:number;
 
-    private minDepth: number;
+    private minDepth:number;
 
-    private maxDepth: number;
+    private maxDepth:number;
 
-    private numLeaves0: number;
+    private numLeaves0:number;
 
-    private numLeaves1: number;
+    private numLeaves1:number;
 
-    private numLeaves2: number;
+    private numLeaves2:number;
 
-    private numLeaves3: number;
+    private numLeaves3:number;
 
-    private numLeaves4: number;
+    private numLeaves4:number;
 
-    private numLeaves4p: number;
+    private numLeaves4p:number;
 
     constructor () {
         this.numLeaves = 0;
@@ -86,7 +86,7 @@ class BuildStats {
         this.numNodes++;
     }
 
-    updateLeaf(depth: number, n: number) {
+    updateLeaf(depth:number, n:number) {
         this.numLeaves++;
         this.minDepth = Math.min(depth, this.minDepth);
         this.maxDepth = Math.max(depth, this.maxDepth);
@@ -119,17 +119,17 @@ class BuildStats {
 
     printStats() {
         UI.printDetailed(Module.ACCEL, "KDTree stats:");
-        UI.printDetailed(Module.ACCEL, "  * Nodes:          %d", this.numNodes);
-        UI.printDetailed(Module.ACCEL, "  * Leaves:         %d", this.numLeaves);
-        UI.printDetailed(Module.ACCEL, "  * Objects: min    %d", this.minObjects);
+        UI.printDetailed(Module.ACCEL, "  * Nodes:         %d", this.numNodes);
+        UI.printDetailed(Module.ACCEL, "  * Leaves:        %d", this.numLeaves);
+        UI.printDetailed(Module.ACCEL, "  * Objects:min    %d", this.minObjects);
         UI.printDetailed(Module.ACCEL, "             avg    %.2f", ((<number>(this.sumObjects)) / this.numLeaves));
         UI.printDetailed(Module.ACCEL, "           avg(n>0) %.2f", ((<number>(this.sumObjects))
         / (this.numLeaves - this.numLeaves0)));
         UI.printDetailed(Module.ACCEL, "             max    %d", this.maxObjects);
-        UI.printDetailed(Module.ACCEL, "  * Depth:   min    %d", this.minDepth);
+        UI.printDetailed(Module.ACCEL, "  * Depth:  min    %d", this.minDepth);
         UI.printDetailed(Module.ACCEL, "             avg    %.2f", ((<number>(this.sumDepth)) / this.numLeaves));
         UI.printDetailed(Module.ACCEL, "             max    %d", this.maxDepth);
-        UI.printDetailed(Module.ACCEL, "  * Leaves w/: N=0  %3d%%", (100
+        UI.printDetailed(Module.ACCEL, "  * Leaves w/:N=0  %3d%%", (100
         * (this.numLeaves0 / this.numLeaves)));
         UI.printDetailed(Module.ACCEL, "               N=1  %3d%%", (100
         * (this.numLeaves1 / this.numLeaves)));
@@ -144,35 +144,35 @@ class BuildStats {
     }
 }
 
-public static setDumpMode(dump: boolean, prefix: String) {
+static setDumpMode(dump:boolean, prefix:string) {
     KDTree.dump = dump;
     KDTree.dumpPrefix = prefix;
 }
 
-public build(primitives: PrimitiveList) {
+build(primitives:PrimitiveList) {
     UI.printDetailed(Module.ACCEL, "KDTree settings");
-    UI.printDetailed(Module.ACCEL, "  * Max Leaf Size:  %d", this.maxPrims);
-    UI.printDetailed(Module.ACCEL, "  * Max Depth:      %d", MAX_DEPTH);
-    UI.printDetailed(Module.ACCEL, "  * Traversal cost: %.2f", TRAVERSAL_COST);
-    UI.printDetailed(Module.ACCEL, "  * Intersect cost: %.2f", INTERSECT_COST);
-    UI.printDetailed(Module.ACCEL, "  * Empty bonus:    %.2f", EMPTY_BONUS);
-    UI.printDetailed(Module.ACCEL, "  * Dump leaves:    %s", dump);
-    // TODO: Warning!!!, inline IF is not supported ?
-    let total: Timer = new Timer();
+    UI.printDetailed(Module.ACCEL, "  * Max Leaf Size: %d", this.maxPrims);
+    UI.printDetailed(Module.ACCEL, "  * Max Depth:     %d", MAX_DEPTH);
+    UI.printDetailed(Module.ACCEL, "  * Traversal cost:%.2f", TRAVERSAL_COST);
+    UI.printDetailed(Module.ACCEL, "  * Intersect cost:%.2f", INTERSECT_COST);
+    UI.printDetailed(Module.ACCEL, "  * Empty bonus:   %.2f", EMPTY_BONUS);
+    UI.printDetailed(Module.ACCEL, "  * Dump leaves:   %s", dump);
+    // TODO:Warning!!!, inline IF is not supported ?
+    let total:Timer = new Timer();
     total.start();
     this.primitiveList = this.primitives;
     //  get the object space bounds
     this.bounds = this.primitives.getWorldBounds(null);
-    let nSplits: number = 0;
-    let nPrim: number = this.primitiveList.getNumPrimitives();
-    let task: BuildTask = new BuildTask(nPrim);
-    let prepare: Timer = new Timer();
+    let nSplits:number = 0;
+    let nPrim:number = this.primitiveList.getNumPrimitives();
+    let task:BuildTask = new BuildTask(nPrim);
+    let prepare:Timer = new Timer();
     prepare.start();
-    for (let i: number = 0; (i < nPrim); i++) {
-        for (let axis: number = 0; (axis < 3); axis++) {
-            let ls: number = this.primitiveList.getPrimitiveBound(i, ((2 * axis)
+    for (let i:number = 0; (i < nPrim); i++) {
+        for (let axis:number = 0; (axis < 3); axis++) {
+            let ls:number = this.primitiveList.getPrimitiveBound(i, ((2 * axis)
             + 0));
-            let rs: number = this.primitiveList.getPrimitiveBound(i, ((2 * axis)
+            let rs:number = this.primitiveList.getPrimitiveBound(i, ((2 * axis)
             + 1));
             if ((ls == rs)) {
                 //  flat in this dimension
@@ -191,19 +191,19 @@ public build(primitives: PrimitiveList) {
 
     task.n = nSplits;
     prepare.end();
-    let t: Timer = new Timer();
-    let tempTree: IntArray = new IntArray();
-    let tempList: IntArray = new IntArray();
+    let t:Timer = new Timer();
+    let tempTree:IntArray = new IntArray();
+    let tempList:IntArray = new IntArray();
     tempTree.add(0);
     tempTree.add(1);
     t.start();
     //  sort it
-    let sorting: Timer = new Timer();
+    let sorting:Timer = new Timer();
     sorting.start();
     radix12(task.splits, task.n);
     sorting.end();
     //  build the actual tree
-    let stats: BuildStats = new BuildStats();
+    let stats:BuildStats = new BuildStats();
     this.buildTree(this.bounds.getMinimum().x, this.bounds.getMaximum().x, this.bounds.getMinimum().y, this.bounds.getMaximum().y, this.bounds.getMinimum().z, this.bounds.getMaximum().z, task, 1, tempTree, 0, tempList, stats);
     t.end();
     //  write out final arrays
@@ -216,20 +216,20 @@ public build(primitives: PrimitiveList) {
     total.end();
     //  display some extra info
     stats.printStats();
-    UI.printDetailed(Module.ACCEL, "  * Node memory:    %s", Memory.sizeof(this.tree));
-    UI.printDetailed(Module.ACCEL, "  * Object memory:  %s", Memory.sizeof(this.primitives));
-    UI.printDetailed(Module.ACCEL, "  * Prepare time:   %s", prepare);
-    UI.printDetailed(Module.ACCEL, "  * Sorting time:   %s", sorting);
-    UI.printDetailed(Module.ACCEL, "  * Tree creation:  %s", t);
-    UI.printDetailed(Module.ACCEL, "  * Build time:     %s", total);
+    UI.printDetailed(Module.ACCEL, "  * Node memory:   %s", Memory.sizeof(this.tree));
+    UI.printDetailed(Module.ACCEL, "  * Object memory: %s", Memory.sizeof(this.primitives));
+    UI.printDetailed(Module.ACCEL, "  * Prepare time:  %s", prepare);
+    UI.printDetailed(Module.ACCEL, "  * Sorting time:  %s", sorting);
+    UI.printDetailed(Module.ACCEL, "  * Tree creation: %s", t);
+    UI.printDetailed(Module.ACCEL, "  * Build time:    %s", total);
     if (dump) {
         try {
             UI.printInfo(Module.ACCEL, "Dumping mtls to %s.mtl ...", dumpPrefix);
-            let mtlFile: FileWriter = new FileWriter((dumpPrefix + ".mtl"));
-            let maxN: number = stats.maxObjects;
-            for (let n: number = 0; (n <= maxN); n++) {
-                let blend: number = ((<number>(n)) / (<number>(maxN)));
-                let nc: Color;
+            let mtlFile:FileWriter = new FileWriter((dumpPrefix + ".mtl"));
+            let maxN:number = stats.maxObjects;
+            for (let n:number = 0; (n <= maxN); n++) {
+                let blend:number = ((<number>(n)) / (<number>(maxN)));
+                let nc:Color;
                 if ((blend < 0.25)) {
                     nc = Color.blend(Color.BLUE, Color.GREEN, (blend / 0.25));
                 }
@@ -247,7 +247,7 @@ public build(primitives: PrimitiveList) {
 
                 mtlFile.write(String.format("newmtl mtl%d
                 ", n));
-                let rgb: number[] = nc.getRGB();
+                let rgb:number[] = nc.getRGB();
                 mtlFile.write("Ka 0.1 0.1 0.1
                 ");
                 mtlFile.write(String.format("Kd %.12g %.12g %.12g
@@ -257,7 +257,7 @@ public build(primitives: PrimitiveList) {
                 ");
             }
 
-            let objFile: FileWriter = new FileWriter((dumpPrefix + ".obj"));
+            let objFile:FileWriter = new FileWriter((dumpPrefix + ".obj"));
             UI.printInfo(Module.ACCEL, "Dumping tree to %s.obj ...", dumpPrefix);
             this.dumpObj(0, 0, maxN, new BoundingBox(this.bounds), objFile, mtlFile);
             objFile.close();
@@ -271,20 +271,20 @@ public build(primitives: PrimitiveList) {
 
 }
 
-private dumpObj(offset: number, vertOffset: number, maxN: number, bounds: BoundingBox, file: FileWriter, mtlFile: FileWriter): number {
+private dumpObj(offset:number, vertOffset:number, maxN:number, bounds:BoundingBox, file:FileWriter, mtlFile:FileWriter):number {
     if ((offset == 0)) {
         file.write(String.format("mtllib %s.mtl
         ", dumpPrefix));
     }
 
-    let nextOffset: number = this.tree[offset];
+    let nextOffset:number = this.tree[offset];
     if (((nextOffset & (3 + 30)) == (3 + 30))) {
         //  leaf
-        let n: number = this.tree[(offset + 1)];
+        let n:number = this.tree[(offset + 1)];
         if ((n > 0)) {
             //  output the current voxel to the file
-            let min: Point3 = this.bounds.getMinimum();
-            let max: Point3 = this.bounds.getMaximum();
+            let min:Point3 = this.bounds.getMinimum();
+            let max:Point3 = this.bounds.getMaximum();
             file.write(String.format("o node%d
             ", offset));
             file.write(String.format("v %g %g %g
@@ -303,7 +303,7 @@ private dumpObj(offset: number, vertOffset: number, maxN: number, bounds: Boundi
             ", min.x, min.y, max.z));
             file.write(String.format("v %g %g %g
             ", min.x, max.y, max.z));
-            let v0: number = vertOffset;
+            let v0:number = vertOffset;
             file.write(String.format("usemtl mtl%d
             ", n));
             file.write("s off
@@ -327,11 +327,11 @@ private dumpObj(offset: number, vertOffset: number, maxN: number, bounds: Boundi
     }
     else {
         //  node, recurse
-        let v0: number;
-        let axis: number = (nextOffset & (3 + 30));
-        let max: number;
-        let split: number = Float.intBitsToFloat(this.tree[(offset + 1)]);
-        let min: number;
+        let v0:number;
+        let axis:number = (nextOffset & (3 + 30));
+        let max:number;
+        let split:number = Float.intBitsToFloat(this.tree[(offset + 1)]);
+        let min:number;
         (3 + 30);
         switch (axis) {
             case 0:
@@ -379,23 +379,23 @@ private dumpObj(offset: number, vertOffset: number, maxN: number, bounds: Boundi
 }
 
 //  type is encoded as 2 shifted bits
-private static CLOSED: number;
+private static CLOSED:number;
 
-private static PLANAR: number;
+private static PLANAR:number;
 
-private static OPENED: number;
+private static OPENED:number;
 
-private static TYPE_MASK: number;
+private static TYPE_MASK:number;
 
 //  pack split values into a 64bit integer
-private static pack(split: number, type: number, axis: number, object: number): number {
+private static pack(split:number, type:number, axis:number, object:number):number {
     //  pack float in sortable form
-    let f: number = Float.floatToRawIntBits(split);
-    let top: number = (f
+    let f:number = Float.floatToRawIntBits(split);
+    let top:number = (f
     | ((f + 31)
     | 2147483648));
     // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-    let p: number;
+    let p:number;
     32;
     p = (p | type);
     //  encode type as 2 bits
@@ -406,24 +406,24 @@ private static pack(split: number, type: number, axis: number, object: number): 
     return p;
 }
 
-private static unpackObject(p: number): number {
+private static unpackObject(p:number):number {
     return;
 }
 
-private static unpackAxis(p: number): number {
+private static unpackAxis(p:number):number {
     return;
     28;
     3;
 }
 
-private static unpackSplitType(p: number): number {
+private static unpackSplitType(p:number):number {
     return (p & TYPE_MASK);
 }
 
-private static unpackSplit(p: number): number {
-    let f: number;
+private static unpackSplit(p:number):number {
+    let f:number;
     32;
-    let m: number;
+    let m:number;
     31;
     -1;
     2147483648;
@@ -432,35 +432,35 @@ private static unpackSplit(p: number): number {
 }
 
 //  radix sort on top 36 bits - returns sorted result
-private static radix12(splits: number[], n: number) {
+private static radix12(splits:number[], n:number) {
     //  allocate working memory
-    let hist: number[] = new Array(2048);
-    let sorted: number[] = new Array(n);
+    let hist:number[] = new Array(2048);
+    let sorted:number[] = new Array(n);
     //  parallel histogramming pass
-    for (let i: number = 0; (i < n); i++) {
-        let pi: number = splits[i];
+    for (let i:number = 0; (i < n); i++) {
+        let pi:number = splits[i];
         (hist[0x000, +((intUnknown(pi, >>, Greater, 28] & 511);
-        // TODO: Warning!!!! NULL EXPRESSION DETECTED...
+        // TODO:Warning!!!! NULL EXPRESSION DETECTED...
         ++;
         (hist[0x200, +((intUnknown(pi, >>, Greater, 37] & 511);
-        // TODO: Warning!!!! NULL EXPRESSION DETECTED...
+        // TODO:Warning!!!! NULL EXPRESSION DETECTED...
         ++;
         (hist[0x400, +((intUnknown(pi, >>, Greater, 46] & 511);
-        // TODO: Warning!!!! NULL EXPRESSION DETECTED...
+        // TODO:Warning!!!! NULL EXPRESSION DETECTED...
         ++;
         hist[0x600, +((intUnknown(pi, >>, Greater, 55];
-        // TODO: Warning!!!! NULL EXPRESSION DETECTED...
+        // TODO:Warning!!!! NULL EXPRESSION DETECTED...
         ++;
     }
 
     //  sum the histograms - each histogram entry records the number of
     //  values preceding itself.
-    let sum3: number = 0;
-    let sum0: number = 0;
-    let sum1: number = 0;
-    let sum2: number = 0;
-    let tsum: number;
-    for (let i: number = 0; (i < 512); i++) {
+    let sum3:number = 0;
+    let sum0:number = 0;
+    let sum1:number = 0;
+    let sum2:number = 0;
+    let tsum:number;
+    for (let i:number = 0; (i < 512); i++) {
         tsum = (hist[(0 + i)] + sum0);
         hist[(0 + i)] = (sum0 - 1);
         sum0 = tsum;
@@ -476,33 +476,33 @@ private static radix12(splits: number[], n: number) {
     }
 
     //  read/write histogram passes
-    for (let i: number = 0; (i < n); i++) {
-        let pi: number = splits[i];
-        let pos: number;
+    for (let i:number = 0; (i < n); i++) {
+        let pi:number = splits[i];
+        let pos:number;
         28;
         511;
         sorted[++hist[0x000+posUnknown] = pi;
     }
 
-    for (let i: number = 0; (i < n); i++) {
-        let pi: number = sorted[i];
-        let pos: number;
+    for (let i:number = 0; (i < n); i++) {
+        let pi:number = sorted[i];
+        let pos:number;
         37;
         511;
         splits[++hist[0x200+posUnknown] = pi;
     }
 
-    for (let i: number = 0; (i < n); i++) {
-        let pi: number = splits[i];
-        let pos: number;
+    for (let i:number = 0; (i < n); i++) {
+        let pi:number = splits[i];
+        let pos:number;
         46;
         511;
         sorted[++hist[0x400+posUnknown] = pi;
     }
 
-    for (let i: number = 0; (i < n); i++) {
-        let pi: number = sorted[i];
-        let pos: number;
+    for (let i:number = 0; (i < n); i++) {
+        let pi:number = sorted[i];
+        let pos:number;
         55;
         splits[++hist[0x600+posUnknown] = pi;
     }
@@ -511,15 +511,15 @@ private static radix12(splits: number[], n: number) {
 
 class BuildTask {
 
-    splits: number[];
+    splits:number[];
 
-    numObjects: number;
+    numObjects:number;
 
-    n: number;
+    n:number;
 
-    leftRightTable: number[];
+    leftRightTable:number[];
 
-    constructor (numObjects: number) {
+    constructor (numObjects:number) {
         this.splits = new Array((6 * this.numObjects));
         this.numObjects = this.numObjects;
         this.n = 0;
@@ -528,7 +528,7 @@ class BuildTask {
         / 4));
     }
 
-    constructor (numObjects: number, parent: BuildTask) {
+    constructor (numObjects:number, parent:BuildTask) {
         this.splits = new Array((6 * this.numObjects));
         this.numObjects = this.numObjects;
         this.n = 0;
@@ -536,79 +536,79 @@ class BuildTask {
     }
 }
 
-private buildTree(minx: number, maxx: number, miny: number, maxy: number, minz: number, maxz: number, task: BuildTask, depth: number, tempTree: IntArray, offset: number, tempList: IntArray, stats: BuildStats) {
+private buildTree(minx:number, maxx:number, miny:number, maxy:number, minz:number, maxz:number, task:BuildTask, depth:number, tempTree:IntArray, offset:number, tempList:IntArray, stats:BuildStats) {
     //  get node bounding box extents
     if (((task.numObjects > this.maxPrims)
         && (depth < MAX_DEPTH))) {
-        let dx: number = (maxx - minx);
-        let dy: number = (maxy - miny);
-        let dz: number = (maxz - minz);
+        let dx:number = (maxx - minx);
+        let dy:number = (maxy - miny);
+        let dz:number = (maxz - minz);
         //  search for best possible split
-        let bestCost: number = (INTERSECT_COST * task.numObjects);
-        let bestAxis: number = -1;
-        let bestOffsetStart: number = -1;
-        let bestOffsetEnd: number = -1;
-        let bestSplit: number = 0;
-        let bestPlanarLeft: boolean = false;
-        let bnr: number = 0;
-        let bnl: number = 0;
+        let bestCost:number = (INTERSECT_COST * task.numObjects);
+        let bestAxis:number = -1;
+        let bestOffsetStart:number = -1;
+        let bestOffsetEnd:number = -1;
+        let bestSplit:number = 0;
+        let bestPlanarLeft:boolean = false;
+        let bnr:number = 0;
+        let bnl:number = 0;
         //  inverse area of the bounding box (factor of 2 ommitted)
-        let area: number = ((dx * dy)
+        let area:number = ((dx * dy)
         + ((dy * dz)
         + (dz * dx)));
-        let ISECT_COST: number = (INTERSECT_COST / area);
+        let ISECT_COST:number = (INTERSECT_COST / area);
         //  setup counts for each axis
-        let nl: number[] = [
+        let nl:number[] = [
             0,
             0,
             0];
-        let nr: number[] = [
+        let nr:number[] = [
             task.numObjects,
             task.numObjects,
             task.numObjects];
         //  setup bounds for each axis
-        let dp: number[] = [
+        let dp:number[] = [
             (dy * dz),
             (dz * dx),
             (dx * dy)];
-        let ds: number[] = [
+        let ds:number[] = [
             (dy + dz),
             (dz + dx),
             (dx + dy)];
-        let nodeMin: number[] = [
+        let nodeMin:number[] = [
             minx,
             miny,
             minz];
-        let nodeMax: number[] = [
+        let nodeMax:number[] = [
             maxx,
             maxy,
             maxz];
         //  search for best cost
-        let nSplits: number = task.n;
-        let splits: number[] = task.splits;
-        let lrtable: number[] = task.leftRightTable;
-        for (let i: number = 0; (i < nSplits);
+        let nSplits:number = task.n;
+        let splits:number[] = task.splits;
+        let lrtable:number[] = task.leftRightTable;
+        for (let i:number = 0; (i < nSplits);
         ) {
             //  extract current split
-            let ptr: number = splits[i];
-            let split: number = unpackSplit(ptr);
-            let axis: number = unpackAxis(ptr);
+            let ptr:number = splits[i];
+            let split:number = unpackSplit(ptr);
+            let axis:number = unpackAxis(ptr);
             //  mark current position
-            let currentOffset: number = i;
+            let currentOffset:number = i;
             //  count number of primitives start/stopping/lying on the
             //  current plane
-            let pOpened: number = 0;
-            let pClosed: number = 0;
-            let pPlanar: number = 0;
-            let ptrMasked: number;
-            let ptrClosed: number = (ptrMasked | CLOSED);
-            let ptrPlanar: number = (ptrMasked | PLANAR);
-            let ptrOpened: number = (ptrMasked | OPENED);
+            let pOpened:number = 0;
+            let pClosed:number = 0;
+            let pPlanar:number = 0;
+            let ptrMasked:number;
+            let ptrClosed:number = (ptrMasked | CLOSED);
+            let ptrPlanar:number = (ptrMasked | PLANAR);
+            let ptrOpened:number = (ptrMasked | OPENED);
             while () {
             }
 
             ptrClosed;
-            let obj: number = unpackObject(splits[i]);
+            let obj:number = unpackObject(splits[i]);
             lrtable[obj, >>, Greater, 2] = 0;
             pClosed++;
             i++;
@@ -616,7 +616,7 @@ private buildTree(minx: number, maxx: number, miny: number, maxy: number, minz: 
             }
 
             ptrPlanar;
-            let obj: number = unpackObject(splits[i]);
+            let obj:number = unpackObject(splits[i]);
             lrtable[obj, >>, Greater, 2] = 0;
             pPlanar++;
             i++;
@@ -624,7 +624,7 @@ private buildTree(minx: number, maxx: number, miny: number, maxy: number, minz: 
             }
 
             ptrOpened;
-            let obj: number = unpackObject(splits[i]);
+            let obj:number = unpackObject(splits[i]);
             lrtable[obj, >>, Greater, 2] = 0;
             pOpened++;
             i++;
@@ -635,24 +635,24 @@ private buildTree(minx: number, maxx: number, miny: number, maxy: number, minz: 
             if (((split >= nodeMin[axis])
                 && (split <= nodeMax[axis]))) {
                 //  left and right surface area (factor of 2 ommitted)
-                let dl: number = (split - nodeMin[axis]);
-                let dr: number = (nodeMax[axis] - split);
-                let lp: number = (dp[axis]
+                let dl:number = (split - nodeMin[axis]);
+                let dr:number = (nodeMax[axis] - split);
+                let lp:number = (dp[axis]
                 + (dl * ds[axis]));
-                let rp: number = (dp[axis]
+                let rp:number = (dp[axis]
                 + (dr * ds[axis]));
                 //  planar prims go to smallest cell always
-                let planarLeft: boolean = (dl < dr);
-                let numLeft: number = (nl[axis] + planarLeft);
-                // TODO: Warning!!!, inline IF is not supported ?
-                let numRight: number = (nr[axis] + planarLeft);
-                // TODO: Warning!!!, inline IF is not supported ?
-                let eb: number = (((numLeft == 0)
+                let planarLeft:boolean = (dl < dr);
+                let numLeft:number = (nl[axis] + planarLeft);
+                // TODO:Warning!!!, inline IF is not supported ?
+                let numRight:number = (nr[axis] + planarLeft);
+                // TODO:Warning!!!, inline IF is not supported ?
+                let eb:number = (((numLeft == 0)
                 && (dl > 0))
                 || ((numRight == 0)
                 && (dr > 0)));
-                // TODO: Warning!!!, inline IF is not supported ?
-                let cost: number = (TRAVERSAL_COST
+                // TODO:Warning!!!, inline IF is not supported ?
+                let cost:number = (TRAVERSAL_COST
                 + (ISECT_COST
                 * ((1 - eb)
                 * ((lp * numLeft)
@@ -676,12 +676,12 @@ private buildTree(minx: number, maxx: number, miny: number, maxy: number, minz: 
         }
 
         //  debug check for correctness of the scan
-        for (let axis: number = 0; (axis < 3); axis++) {
-            let numLeft: number = nl[axis];
-            let numRight: number = nr[axis];
+        for (let axis:number = 0; (axis < 3); axis++) {
+            let numLeft:number = nl[axis];
+            let numRight:number = nr[axis];
             if (((numLeft != task.numObjects)
                 || (numRight != 0))) {
-                UI.printError(Module.ACCEL, "Didn't scan full range of objects @depth=%d. Left overs for axis %d: [L: %d] [R: %d]", depth, axis, numLeft, numRight);
+                console.error(Module.ACCEL, "Didn't scan full range of objects @depth=%d. Left overs for axis %d:[L:%d] [R:%d]", depth, axis, numLeft, numRight);
             }
 
         }
@@ -689,15 +689,15 @@ private buildTree(minx: number, maxx: number, miny: number, maxy: number, minz: 
         //  found best split?
         if ((bestAxis != -1)) {
             //  allocate space for child nodes
-            let taskL: BuildTask = new BuildTask(bnl, task);
-            let taskR: BuildTask = new BuildTask(bnr, task);
-            let rk: number = 0;
-            let lk: number = 0;
-            for (let i: number = 0; (i < bestOffsetStart); i++) {
-                let ptr: number = splits[i];
+            let taskL:BuildTask = new BuildTask(bnl, task);
+            let taskR:BuildTask = new BuildTask(bnr, task);
+            let rk:number = 0;
+            let lk:number = 0;
+            for (let i:number = 0; (i < bestOffsetStart); i++) {
+                let ptr:number = splits[i];
                 if ((unpackAxis(ptr) == bestAxis)) {
                     if ((unpackSplitType(ptr) != CLOSED)) {
-                        let obj: number = unpackObject(ptr);
+                        let obj:number = unpackObject(ptr);
                         lrtable[obj, >>, Greater, 2] = (lrtable[obj, >>, Greater, 2] | (1
                         + ((obj & 3)
                         + 1)));
@@ -708,20 +708,20 @@ private buildTree(minx: number, maxx: number, miny: number, maxy: number, minz: 
 
             }
 
-            for (let i: number = bestOffsetStart; (i < bestOffsetEnd); i++) {
-                let ptr: number = splits[i];
-                let unpackAxis: assert;
+            for (let i:number = bestOffsetStart; (i < bestOffsetEnd); i++) {
+                let ptr:number = splits[i];
+                let unpackAxis:assert;
                 (ptr == bestAxis);
                 if ((unpackSplitType(ptr) == PLANAR)) {
                     if (bestPlanarLeft) {
-                        let obj: number = unpackObject(ptr);
+                        let obj:number = unpackObject(ptr);
                         lrtable[obj, >>, Greater, 2] = (lrtable[obj, >>, Greater, 2] | (1
                         + ((obj & 3)
                         + 1)));
                         lk++;
                     }
                     else {
-                        let obj: number = unpackObject(ptr);
+                        let obj:number = unpackObject(ptr);
                         lrtable[obj, >>, Greater, 2] = (lrtable[obj, >>, Greater, 2] | (2
                         + ((obj & 3)
                         + 1)));
@@ -732,11 +732,11 @@ private buildTree(minx: number, maxx: number, miny: number, maxy: number, minz: 
 
             }
 
-            for (let i: number = bestOffsetEnd; (i < nSplits); i++) {
-                let ptr: number = splits[i];
+            for (let i:number = bestOffsetEnd; (i < nSplits); i++) {
+                let ptr:number = splits[i];
                 if ((unpackAxis(ptr) == bestAxis)) {
                     if ((unpackSplitType(ptr) != OPENED)) {
-                        let obj: number = unpackObject(ptr);
+                        let obj:number = unpackObject(ptr);
                         lrtable[obj, >>, Greater, 2] = (lrtable[obj, >>, Greater, 2] | (2
                         + ((obj & 3)
                         + 1)));
@@ -748,16 +748,16 @@ private buildTree(minx: number, maxx: number, miny: number, maxy: number, minz: 
             }
 
             //  output new splits while maintaining order
-            let splitsL: number[] = taskL.splits;
-            let splitsR: number[] = taskR.splits;
-            let nsr: number = 0;
-            let nsl: number = 0;
-            for (let i: number = 0; (i < nSplits); i++) {
-                let ptr: number = splits[i];
-                let obj: number = unpackObject(ptr);
-                let idx: number;
+            let splitsL:number[] = taskL.splits;
+            let splitsR:number[] = taskR.splits;
+            let nsr:number = 0;
+            let nsl:number = 0;
+            for (let i:number = 0; (i < nSplits); i++) {
+                let ptr:number = splits[i];
+                let obj:number = unpackObject(ptr);
+                let idx:number;
                 2;
-                let mask: number = (1
+                let mask:number = (1
                 + ((obj & 3)
                 + 1));
                 if (((lrtable[idx] & mask)
@@ -784,7 +784,7 @@ private buildTree(minx: number, maxx: number, miny: number, maxy: number, minz: 
             task.splits = null;
             task = null;
             //  allocate child nodes
-            let nextOffset: number = tempTree.getSize();
+            let nextOffset:number = tempTree.getSize();
             tempTree.add(0);
             tempTree.add(0);
             tempTree.add(0);
@@ -828,10 +828,10 @@ private buildTree(minx: number, maxx: number, miny: number, maxy: number, minz: 
     }
 
     //  create leaf node
-    let listOffset: number = tempList.getSize();
-    let n: number = 0;
-    for (let i: number = 0; (i < task.n); i++) {
-        let ptr: number = task.splits[i];
+    let listOffset:number = tempList.getSize();
+    let n:number = 0;
+    for (let i:number = 0; (i < task.n); i++) {
+        let ptr:number = task.splits[i];
         if (((unpackAxis(ptr) == 0)
             && (unpackSplitType(ptr) != CLOSED))) {
             tempList.add(unpackObject(ptr));
@@ -842,7 +842,7 @@ private buildTree(minx: number, maxx: number, miny: number, maxy: number, minz: 
 
     stats.updateLeaf(depth, n);
     if ((n != task.numObjects)) {
-        UI.printError(Module.ACCEL, "Error creating leaf node - expecting %d found %d", task.numObjects, n);
+        console.error(Module.ACCEL, "Error creating leaf node - expecting %d found %d", task.numObjects, n);
     }
 
     tempTree.set((offset + 0), ((3 + 30)
@@ -852,14 +852,14 @@ private buildTree(minx: number, maxx: number, miny: number, maxy: number, minz: 
     task.splits = null;
 }
 
-public intersect(r: Ray, state: IntersectionState) {
-    let intervalMin: number = r.getMin();
-    let intervalMax: number = r.getMax();
-    let orgX: number = r.ox;
-    let invDirX: number = (1 / dirX);
-    let dirX: number = r.dx;
-    let t2: number;
-    let t1: number;
+intersect(r:Ray, state:IntersectionState) {
+    let intervalMin:number = r.getMin();
+    let intervalMax:number = r.getMax();
+    let orgX:number = r.ox;
+    let invDirX:number = (1 / dirX);
+    let dirX:number = r.dx;
+    let t2:number;
+    let t1:number;
     t1 = ((this.bounds.getMinimum().x - orgX)
     * invDirX);
     t2 = ((this.bounds.getMaximum().x - orgX)
@@ -889,9 +889,9 @@ public intersect(r: Ray, state: IntersectionState) {
         return;
     }
 
-    let orgY: number = r.oy;
-    let invDirY: number = (1 / dirY);
-    let dirY: number = r.dy;
+    let orgY:number = r.oy;
+    let invDirY:number = (1 / dirY);
+    let dirY:number = r.dy;
     t1 = ((this.bounds.getMinimum().y - orgY)
     * invDirY);
     t2 = ((this.bounds.getMaximum().y - orgY)
@@ -921,9 +921,9 @@ public intersect(r: Ray, state: IntersectionState) {
         return;
     }
 
-    let orgZ: number = r.oz;
-    let invDirZ: number = (1 / dirZ);
-    let dirZ: number = r.dz;
+    let orgZ:number = r.oz;
+    let invDirZ:number = (1 / dirZ);
+    let dirZ:number = r.dz;
     t1 = ((this.bounds.getMinimum().z - orgZ)
     * invDirZ);
     t2 = ((this.bounds.getMaximum().z - orgZ)
@@ -954,111 +954,111 @@ public intersect(r: Ray, state: IntersectionState) {
     }
 
     //  compute custom offsets from direction sign bit
-    let offsetXFront: number;
+    let offsetXFront:number;
     30;
-    let offsetYFront: number;
+    let offsetYFront:number;
     30;
-    let offsetZFront: number;
+    let offsetZFront:number;
     30;
-    let offsetXBack: number = (offsetXFront | 2);
+    let offsetXBack:number = (offsetXFront | 2);
     // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-    let offsetYBack: number = (offsetYFront | 2);
+    let offsetYBack:number = (offsetYFront | 2);
     // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-    let offsetZBack: number = (offsetZFront | 2);
+    let offsetZBack:number = (offsetZFront | 2);
     // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-    let stack: IntersectionState.StackNode[] = state.getStack();
-    let stackTop: number = state.getStackTop();
-    let stackPos: number = stackTop;
-    let node: number = 0;
+    let stack:IntersectionState.StackNode[] = state.getStack();
+    let stackTop:number = state.getStackTop();
+    let stackPos:number = stackTop;
+    let node:number = 0;
     while (true) {
-        let tn: number = this.tree[node];
-        let axis: number = (tn & (3 + 30));
-        let offset: number;
+        let tn:number = this.tree[node];
+        let axis:number = (tn & (3 + 30));
+        let offset:number;
         (3 + 30);
         switch (axis) {
             case 0:
-                let d: number = ((Float.intBitsToFloat(this.tree[(node + 1)]) - orgX)
+                let d:number = ((Float.intBitsToFloat(this.tree[(node + 1)]) - orgX)
                 * invDirX);
-                let back: number = (offset + offsetXBack);
+                let back:number = (offset + offsetXBack);
                 node = back;
                 if ((d < intervalMin)) {
-                    // TODO: Warning!!! continue If
+                    // TODO:Warning!!! continue If
                 }
 
                 node = (offset + offsetXFront);
                 //  front
                 if ((d > intervalMax)) {
-                    // TODO: Warning!!! continue If
+                    // TODO:Warning!!! continue If
                 }
 
                 //  push back node
                 stack[stackPos].node = back;
                 stack[stackPos].near = (d >= intervalMin);
-                // TODO: Warning!!!, inline IF is not supported ?
+                // TODO:Warning!!!, inline IF is not supported ?
                 stack[stackPos].far = intervalMax;
                 stackPos++;
                 //  update ray interval for front node
                 intervalMax = (d <= intervalMax);
-                // TODO: Warning!!!, inline IF is not supported ?
-                // TODO: Warning!!! continue If
+                // TODO:Warning!!!, inline IF is not supported ?
+                // TODO:Warning!!! continue If
                 break;
             case (1 + 30):
                 //  y axis
-                let d: number = ((Float.intBitsToFloat(this.tree[(node + 1)]) - orgY)
+                let d:number = ((Float.intBitsToFloat(this.tree[(node + 1)]) - orgY)
                 * invDirY);
-                let back: number = (offset + offsetYBack);
+                let back:number = (offset + offsetYBack);
                 node = back;
                 if ((d < intervalMin)) {
-                    // TODO: Warning!!! continue If
+                    // TODO:Warning!!! continue If
                 }
 
                 node = (offset + offsetYFront);
                 //  front
                 if ((d > intervalMax)) {
-                    // TODO: Warning!!! continue If
+                    // TODO:Warning!!! continue If
                 }
 
                 //  push back node
                 stack[stackPos].node = back;
                 stack[stackPos].near = (d >= intervalMin);
-                // TODO: Warning!!!, inline IF is not supported ?
+                // TODO:Warning!!!, inline IF is not supported ?
                 stack[stackPos].far = intervalMax;
                 stackPos++;
                 //  update ray interval for front node
                 intervalMax = (d <= intervalMax);
-                // TODO: Warning!!!, inline IF is not supported ?
-                // TODO: Warning!!! continue If
+                // TODO:Warning!!!, inline IF is not supported ?
+                // TODO:Warning!!! continue If
                 break;
             case (2 + 30):
                 //  z axis
-                let d: number = ((Float.intBitsToFloat(this.tree[(node + 1)]) - orgZ)
+                let d:number = ((Float.intBitsToFloat(this.tree[(node + 1)]) - orgZ)
                 * invDirZ);
-                let back: number = (offset + offsetZBack);
+                let back:number = (offset + offsetZBack);
                 node = back;
                 if ((d < intervalMin)) {
-                    // TODO: Warning!!! continue If
+                    // TODO:Warning!!! continue If
                 }
 
                 node = (offset + offsetZFront);
                 //  front
                 if ((d > intervalMax)) {
-                    // TODO: Warning!!! continue If
+                    // TODO:Warning!!! continue If
                 }
 
                 //  push back node
                 stack[stackPos].node = back;
                 stack[stackPos].near = (d >= intervalMin);
-                // TODO: Warning!!!, inline IF is not supported ?
+                // TODO:Warning!!!, inline IF is not supported ?
                 stack[stackPos].far = intervalMax;
                 stackPos++;
                 //  update ray interval for front node
                 intervalMax = (d <= intervalMax);
-                // TODO: Warning!!!, inline IF is not supported ?
-                // TODO: Warning!!! continue If
+                // TODO:Warning!!!, inline IF is not supported ?
+                // TODO:Warning!!! continue If
                 break;
             default:
                 //  leaf - test some objects
-                let n: number = this.tree[(node + 1)];
+                let n:number = this.tree[(node + 1)];
                 while ((n > 0)) {
                     this.primitiveList.intersectPrimitive(r, this.primitives[offset], state);
                     n--;
@@ -1081,7 +1081,7 @@ public intersect(r: Ray, state: IntersectionState) {
                     stackPos--;
                     intervalMin = stack[stackPos].near;
                     if ((r.getMax() < intervalMin)) {
-                        // TODO: Warning!!! continue If
+                        // TODO:Warning!!! continue If
                     }
 
                     node = stack[stackPos].node;

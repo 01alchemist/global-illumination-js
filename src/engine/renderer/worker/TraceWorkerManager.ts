@@ -40,7 +40,7 @@ export class TraceWorkerManager {
             num_threads = navigator["hardwareConcurrency"] || 2;
         }
 
-        num_threads = num_threads > 2 ? 2 : num_threads;
+        num_threads = num_threads > 2 ? 2 :num_threads;
 
         num_threads = 4;//debug temp
 
@@ -59,19 +59,19 @@ export class TraceWorkerManager {
                     this.jobs.push(
                         new TraceJob(
                             {
-                                id: ++thread_id,
-                                pixelBuffer: this.pixelMemory.buffer,
-                                sceneBuffer: this.sceneMemory.buffer,
-                                camera: param.camera,
-                                cameraSamples: param.cameraSamples,
-                                hitSamples: param.hitSamples,
-                                bounces: param.bounces,
-                                full_width: width,
-                                full_height: height,
-                                width: _width,
-                                height: _height,
-                                xoffset: i * _width,
-                                yoffset: j * _height
+                                id:++thread_id,
+                                pixelBuffer:this.pixelMemory.buffer,
+                                sceneBuffer:this.sceneMemory.buffer,
+                                camera:param.camera,
+                                cameraSamples:param.cameraSamples,
+                                hitSamples:param.hitSamples,
+                                bounces:param.bounces,
+                                full_width:width,
+                                full_height:height,
+                                width:_width,
+                                height:_height,
+                                xoffset:i * _width,
+                                yoffset:j * _height
                             }
                         ));
                 }
@@ -80,19 +80,19 @@ export class TraceWorkerManager {
             this.jobs.push(
                 new TraceJob(
                     {
-                        pixelBuffer: this.pixelMemory.buffer,
-                        sceneBuffer: this.sceneMemory.buffer,
-                        camera: param.camera,
-                        cameraSamples: param.cameraSamples,
-                        hitSamples: param.hitSamples,
-                        bounces: param.bounces,
-                        full_width: width,
-                        full_height: height,
-                        width: width,
-                        height: height,
-                        xoffset: 0,
-                        yoffset: 0,
-                        id: 0
+                        pixelBuffer:this.pixelMemory.buffer,
+                        sceneBuffer:this.sceneMemory.buffer,
+                        camera:param.camera,
+                        cameraSamples:param.cameraSamples,
+                        hitSamples:param.hitSamples,
+                        bounces:param.bounces,
+                        full_width:width,
+                        full_height:height,
+                        width:width,
+                        height:height,
+                        xoffset:0,
+                        yoffset:0,
+                        id:0
                     }
                 ));
         }

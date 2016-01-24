@@ -20,10 +20,10 @@ export class Cube implements Shape {
     memorySize:number = (Vector3.SIZE * 2) + 2;// min, max, material index
     index:number;
 
-    constructor(public min:Vector3 = new Vector3(),
-                public max:Vector3 = new Vector3(),
-                public material:Material = null,
-                public box:Box=null) {
+    constructor(min:Vector3 = new Vector3(),
+                max:Vector3 = new Vector3(),
+                material:Material = null,
+                box:Box=null) {
 
     }
 

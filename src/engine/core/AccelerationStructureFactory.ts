@@ -1,19 +1,23 @@
+import {AccelerationStructure} from "./AccelerationStructure";
+import {UniformGrid} from "../turbo/UniformGrid";
+import {BoundingIntervalHierarchy} from "../turbo/BoundingIntervalHierarchy";
+import {KDTree} from "../turbo/KDTree";
+import {NullAccelerator} from "../turbo/NullAccelerator";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
 class AccelerationStructureFactory {
 
-    static create(name: String, n: number, primitives: boolean): AccelerationStructure {
-        if (((name == null)
-            || name.equals("auto"))) {
+    static create(name:string, n:int, primitives:boolean):AccelerationStructure {
+        if (name == null || name == "auto") {
             if (primitives) {
-                if ((n > 20000000)) {
+                if (n > 20000000) {
                     return new UniformGrid();
                 }
-                else if ((n > 2000000)) {
+                else if (n > 2000000) {
                     return new BoundingIntervalHierarchy();
                 }
-                else if ((n > 2)) {
+                else if (n > 2) {
                     return new KDTree();
                 }
                 else {
@@ -29,20 +33,20 @@ class AccelerationStructureFactory {
             }
 
         }
-        else if (name.equals("uniformgrid")) {
+        else if (name = "uniformgrid" ) {
             return new UniformGrid();
         }
-        else if (name.equals("null")) {
+        else if (name = "null" ) {
             return new NullAccelerator();
         }
-        else if (name.equals("kdtree")) {
+        else if (name = "kdtree" ) {
             return new KDTree();
         }
-        else if (name.equals("bih")) {
+        else if (name = "bih" ) {
             return new BoundingIntervalHierarchy();
         }
         else {
-            UI.printWarning(Module.ACCEL, "Unrecognized intersection accelerator \""%s\"" - using auto", name);
+            console.warn("ACCEL", "Unrecognized intersection accelerator "+name+" - using auto");
             return AccelerationStructureFactory.create(null, n, primitives);
         }
 

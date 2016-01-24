@@ -3,27 +3,27 @@
  */
 export /* abstract */ class CubeGrid implements PrimitiveList {
 
-    private nx: number;
+    private nx:number;
 
-    private ny: number;
+    private ny:number;
 
-    private nz: number;
+    private nz:number;
 
-    private voxelwx: number;
+    private voxelwx:number;
 
-    private voxelwy: number;
+    private voxelwy:number;
 
-    private voxelwz: number;
+    private voxelwz:number;
 
-    private invVoxelwx: number;
+    private invVoxelwx:number;
 
-    private invVoxelwy: number;
+    private invVoxelwy:number;
 
-    private invVoxelwz: number;
+    private invVoxelwz:number;
 
-    private bounds: BoundingBox;
+    private bounds:BoundingBox;
 
-    public constructor () {
+    constructor () {
         this.nz = 1;
         this.ny = 1;
         this.nx = 1;
@@ -32,7 +32,7 @@ export /* abstract */ class CubeGrid implements PrimitiveList {
         this.bounds = new BoundingBox(1);
     }
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         this.nx = pl.getInt("resolutionX", this.nx);
         this.ny = pl.getInt("resolutionY", this.ny);
         this.nz = pl.getInt("resolutionZ", this.nz);
@@ -45,17 +45,17 @@ export /* abstract */ class CubeGrid implements PrimitiveList {
         return true;
     }
 
-    protected abstract inside(x: number, y: number, z: number): boolean;
+    protected abstract inside(x:number, y:number, z:number):boolean;
 
-    public getBounds(): BoundingBox {
+    getBounds():BoundingBox {
         return this.bounds;
     }
 
-    public prepareShadingState(state: ShadingState) {
+    prepareShadingState(state:ShadingState) {
         state.init();
         state.getRay().getPoint(state.getPoint());
-        let parent: Instance = state.getInstance();
-        let normal: Vector3;
+        let parent:Instance = state.getInstance();
+        let normal:Vector3;
         switch (state.getPrimitiveID()) {
             case 0:
                 normal = new Vector3(-1, 0, 0);
@@ -87,26 +87,26 @@ export /* abstract */ class CubeGrid implements PrimitiveList {
         state.setModifier(parent.getModifier(0));
     }
 
-    public intersectPrimitive(r: Ray, primID: number, state: IntersectionState) {
-        let intervalMin: number = r.getMin();
-        let intervalMax: number = r.getMax();
-        let orgX: number = r.ox;
-        let orgY: number = r.oy;
-        let orgZ: number = r.oz;
-        let invDirX: number = (1 / dirX);
-        let dirX: number = r.dx;
-        let invDirY: number = (1 / dirY);
-        let dirY: number = r.dy;
-        let invDirZ: number = (1 / dirZ);
-        let dirZ: number = r.dz;
-        let t2: number;
-        let t1: number;
+    intersectPrimitive(r:Ray, primID:number, state:IntersectionState) {
+        let intervalMin:number = r.getMin();
+        let intervalMax:number = r.getMax();
+        let orgX:number = r.ox;
+        let orgY:number = r.oy;
+        let orgZ:number = r.oz;
+        let invDirX:number = (1 / dirX);
+        let dirX:number = r.dx;
+        let invDirY:number = (1 / dirY);
+        let dirY:number = r.dy;
+        let invDirZ:number = (1 / dirZ);
+        let dirZ:number = r.dz;
+        let t2:number;
+        let t1:number;
         t1 = (((1 - orgX)
         * -1)
         * invDirX);
         t2 = ((1 - orgX)
         * invDirX);
-        let curr: number = -1;
+        let curr:number = -1;
         if ((invDirX > 0)) {
             if ((t1 > intervalMin)) {
                 intervalMin = t1;
@@ -219,21 +219,21 @@ export /* abstract */ class CubeGrid implements PrimitiveList {
         + (intervalMin * dirZ));
         //  locate starting point inside the grid
         //  and set up 3D-DDA vars
-        let indxZ: number;
-        let indxX: number;
-        let indxY: number;
-        let stepZ: number;
-        let stepX: number;
-        let stepY: number;
-        let stopZ: number;
-        let stopX: number;
-        let stopY: number;
-        let deltaZ: number;
-        let deltaX: number;
-        let deltaY: number;
-        let tnextZ: number;
-        let tnextX: number;
-        let tnextY: number;
+        let indxZ:number;
+        let indxX:number;
+        let indxY:number;
+        let stepZ:number;
+        let stepX:number;
+        let stepY:number;
+        let stopZ:number;
+        let stopX:number;
+        let stopY:number;
+        let deltaZ:number;
+        let deltaX:number;
+        let deltaY:number;
+        let tnextZ:number;
+        let tnextX:number;
+        let tnextY:number;
         //  stepping factors along X
         indxX = (<number>(((orgX + 1)
         * this.invVoxelwx)));
@@ -340,7 +340,7 @@ export /* abstract */ class CubeGrid implements PrimitiveList {
         }
 
         //  are we starting inside the cube
-        let isInside: boolean = (this.inside(indxX, indxY, indxZ) && this.bounds.contains(r.ox, r.oy, r.oz));
+        let isInside:boolean = (this.inside(indxX, indxY, indxZ) && this.bounds.contains(r.ox, r.oy, r.oz));
         //  trace through the grid
         for (
             ; ;
@@ -350,7 +350,7 @@ export /* abstract */ class CubeGrid implements PrimitiveList {
                 r.setMax(intervalMin);
                 //  if we are inside, the last bit needs to be flipped
                 if (isInside) {
-                    let =: curr;
+                    let =:curr;
                 }
 
                 1;
@@ -361,7 +361,7 @@ export /* abstract */ class CubeGrid implements PrimitiveList {
             if (((tnextX < tnextY)
                 && (tnextX < tnextZ))) {
                 curr = (dirX > 0);
-                // TODO: Warning!!!, inline IF is not supported ?
+                // TODO:Warning!!!, inline IF is not supported ?
                 intervalMin = tnextX;
                 if ((intervalMin > intervalMax)) {
                     return;
@@ -376,7 +376,7 @@ export /* abstract */ class CubeGrid implements PrimitiveList {
             }
             else if ((tnextY < tnextZ)) {
                 curr = (dirY > 0);
-                // TODO: Warning!!!, inline IF is not supported ?
+                // TODO:Warning!!!, inline IF is not supported ?
                 intervalMin = tnextY;
                 if ((intervalMin > intervalMax)) {
                     return;
@@ -391,7 +391,7 @@ export /* abstract */ class CubeGrid implements PrimitiveList {
             }
             else {
                 curr = (dirZ > 0);
-                // TODO: Warning!!!, inline IF is not supported ?
+                // TODO:Warning!!!, inline IF is not supported ?
                 intervalMin = tnextZ;
                 if ((intervalMin > intervalMax)) {
                     return;
@@ -409,17 +409,17 @@ export /* abstract */ class CubeGrid implements PrimitiveList {
 
     }
 
-    public getNumPrimitives(): number {
+    getNumPrimitives():number {
         return 1;
     }
 
-    public getPrimitiveBound(primID: number, i: number): number {
+    getPrimitiveBound(primID:number, i:number):number {
         return ((i & 1)
         == 0);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    public getWorldBounds(o2w: Matrix4): BoundingBox {
+    getWorldBounds(o2w:Matrix4):BoundingBox {
         if ((o2w == null)) {
             return this.bounds;
         }

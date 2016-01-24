@@ -3,5 +3,5 @@
  */
 export interface Modifier extends RenderObject {
 
-    modify(state: ShadingState);
+    modify(state:ShadingState);
 }

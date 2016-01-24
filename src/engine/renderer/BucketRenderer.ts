@@ -78,7 +78,7 @@ export class BucketRenderer {
         this.workerManager = new TraceWorkerManager();
     }
 
-    public prepare(options:any, scene:SharedScene, w:number, h:number):boolean {
+    prepare(options:any, scene:SharedScene, w:number, h:number):boolean {
         this.scene = scene;
         this.imageWidth = w;
         this.imageHeight = h;
@@ -105,12 +105,12 @@ export class BucketRenderer {
         this.superSampling = MathUtils.clamp(this.superSampling, 1, 256);
         this.invSuperSampling = 1.0 / this.superSampling;
         // compute AA stepping sizes
-        this.subPixelSize = (this.maxAADepth > 0) ? (1 << this.maxAADepth) : 1;
-        this.minStepSize = this.maxAADepth >= 0 ? 1 : 1 << (-this.maxAADepth);
+        this.subPixelSize = (this.maxAADepth > 0) ? (1 << this.maxAADepth) :1;
+        this.minStepSize = this.maxAADepth >= 0 ? 1 :1 << (-this.maxAADepth);
         if (this.minAADepth == this.maxAADepth)
             this.maxStepSize = this.minStepSize;
         else
-            this.maxStepSize = this.minAADepth > 0 ? 1 << this.minAADepth : this.subPixelSize << (-this.minAADepth);
+            this.maxStepSize = this.minAADepth > 0 ? 1 << this.minAADepth :this.subPixelSize << (-this.minAADepth);
         this.useJitter = this.jitter && this.maxAADepth > 0;
         // compute anti-aliasing contrast thresholds
         this.contrastThreshold = MathUtils.clamp(this.contrastThreshold, 0, 1);
@@ -120,7 +120,7 @@ export class BucketRenderer {
         this.filter = FilterFactory.get(this.filterName);
         // adjust filter
         if (this.filter == null) {
-            console.log("Unrecognized filter type: " + this.filterName + " - defaulting to box");
+            console.log("Unrecognized filter type:" + this.filterName + " - defaulting to box");
             this.filter = new BoxFilter(1);
             this.filterName = "box";
         }
@@ -129,25 +129,25 @@ export class BucketRenderer {
 
         // prepare QMC sampling
         this.sigma = QMC.generateSigmaTable(this.subPixelSize << 7);
-        console.log("BCKT   info:  Bucket renderer settings:");
-        console.log("BCKT   info:    * Resolution:         " + this.imageWidth + "x" + this.imageHeight);
-        console.log("BCKT   info:    * Bucket size:        " + this.bucketSize);
-        console.log("BCKT   info:    * Number of buckets:  " + numBucketsX + "x" + numBucketsY);
+        console.log("BCKT   info: Bucket renderer settings:");
+        console.log("BCKT   info:   * Resolution:        " + this.imageWidth + "x" + this.imageHeight);
+        console.log("BCKT   info:   * Bucket size:       " + this.bucketSize);
+        console.log("BCKT   info:   * Number of buckets: " + numBucketsX + "x" + numBucketsY);
         if (this.minAADepth != this.maxAADepth)
-            console.log("BCKT   info:    * Anti-aliasing:      " + this.aaDepthToString(this.minAADepth) + " -> " + this.aaDepthToString(this.maxAADepth) + " (adaptive)");
+            console.log("BCKT   info:   * Anti-aliasing:     " + this.aaDepthToString(this.minAADepth) + " -> " + this.aaDepthToString(this.maxAADepth) + " (adaptive)");
         else
-            console.log("BCKT   info:    * Anti-aliasing:      " + this.aaDepthToString(this.minAADepth) + " (fixed)");
-        console.log("BCKT   info:    * Rays per sample:    " + this.superSampling);
-        console.log("BCKT   info:    * Subpixel jitter:    " + this.useJitter ? "on" : (this.jitter ? "auto-off" : "off"));
-        console.log("BCKT   info:    * Contrast threshold: " + this.contrastThreshold.toFixed(2));
-        console.log("BCKT   info:    * Filter type:        " + this.filterName);
-        console.log("BCKT   info:    * Filter size:        " + this.filter.getSize() + " pixels");
+            console.log("BCKT   info:   * Anti-aliasing:     " + this.aaDepthToString(this.minAADepth) + " (fixed)");
+        console.log("BCKT   info:   * Rays per sample:   " + this.superSampling);
+        console.log("BCKT   info:   * Subpixel jitter:   " + this.useJitter ? "on" :(this.jitter ? "auto-off" :"off"));
+        console.log("BCKT   info:   * Contrast threshold:" + this.contrastThreshold.toFixed(2));
+        console.log("BCKT   info:   * Filter type:       " + this.filterName);
+        console.log("BCKT   info:   * Filter size:       " + this.filter.getSize() + " pixels");
         return true;
     }
 
     private aaDepthToString(depth:number):string {
-        var pixelAA:number = (depth) < 0 ? -(1 << (-depth)) : (1 << depth);
-        return (depth < 0 ? "1/" : "") + (pixelAA * pixelAA) + " sample" + (depth == 0 ? "" : "s");
+        var pixelAA:number = (depth) < 0 ? -(1 << (-depth)) :(1 << depth);
+        return (depth < 0 ? "1/" :"") + (pixelAA * pixelAA) + " sample" + (depth == 0 ? "" :"s");
     }
 
     render(display:IDisplay):void {
@@ -213,8 +213,8 @@ export class BucketRenderer {
                 var j:number = sx & (this.sigma.length - 1);
                 var k:number = sy & (this.sigma.length - 1);
                 var i:number = j * this.sigma.length + this.sigma[k];
-                var dx:number = this.useJitter ? this.sigma[k] / this.sigma.length : 0.5;
-                var dy:number = this.useJitter ? this.sigma[j] / this.sigma.length : 0.5;
+                var dx:number = this.useJitter ? this.sigma[k] / this.sigma.length :0.5;
+                var dy:number = this.useJitter ? this.sigma[j] / this.sigma.length :0.5;
                 var rx:number = (sx + dx) * this.invSubPixelSize;
                 var ry:number = (sy + dy) * this.invSubPixelSize;
                 ry = this.imageHeight - ry - 1;
@@ -247,7 +247,7 @@ export class BucketRenderer {
                             var sx:number = x * this.subPixelSize + fs + i;
                             var sy:number = y * this.subPixelSize + fs + j;
                             var s:number = sx + sy * sbw;
-                            sampled += samples[s].sampled() ? 1 : 0;
+                            sampled += samples[s].sampled() ? 1 :0;
                         }
                     }
                     bucketRGB[index] = new Color(sampled * invArea);

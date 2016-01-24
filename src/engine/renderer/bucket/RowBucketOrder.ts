@@ -3,13 +3,13 @@
  */
 export class RowBucketOrder implements BucketOrder {
 
-    public getBucketSequence(nbw: number, nbh: number): number[] {
-        let coords: number[] = new Array((2
+    getBucketSequence(nbw:number, nbh:number):number[] {
+        let coords:number[] = new Array((2
         * (nbw * nbh)));
-        for (let i: number = 0; (i
+        for (let i:number = 0; (i
         < (nbw * nbh)); i++) {
-            let by: number = (i / nbw);
-            let bx: number = (i % nbw);
+            let by:number = (i / nbw);
+            let bx:number = (i % nbw);
             if (((by & 1)
                 == 1)) {
                 bx = (nbw - (1 - bx));

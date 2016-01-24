@@ -3,11 +3,11 @@
  */
 export class UVShader implements Shader {
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         return true;
     }
 
-    public getRadiance(state: ShadingState): Color {
+    getRadiance(state:ShadingState):Color {
         if ((state.getUV() == null)) {
             return Color.BLACK;
         }
@@ -15,7 +15,7 @@ export class UVShader implements Shader {
         return new Color(state.getUV().x, state.getUV().y, 0);
     }
 
-    public scatterPhoton(state: ShadingState, power: Color) {
+    scatterPhoton(state:ShadingState, power:Color) {
 
     }
 }

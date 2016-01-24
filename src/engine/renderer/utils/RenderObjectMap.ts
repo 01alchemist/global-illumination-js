@@ -3,11 +3,11 @@
  */
 export class RenderObjectMap {
 
-    private renderObjects: FastHashMap<String, RenderObjectHandle>;
+    private renderObjects:FastHashMap<string, RenderObjectHandle>;
 
-    private rebuildInstanceList: boolean;
+    private rebuildInstanceList:boolean;
 
-    private rebuildLightList: boolean;
+    private rebuildLightList:boolean;
 
     enum RenderObjectType {
 
@@ -29,19 +29,19 @@ export class RenderObjectMap {
 }
 
 constructor () {
-    this.renderObjects = new FastHashMap<String, RenderObjectHandle>();
+    this.renderObjects = new FastHashMap<string, RenderObjectHandle>();
     this.rebuildLightList = false;
     this.rebuildInstanceList = false;
 }
 
-has(name: String): boolean {
+has(name:string):boolean {
     return this.renderObjects.containsKey(name);
 }
 
-remove(name: String) {
-    let obj: RenderObjectHandle = this.renderObjects.get(name);
+remove(name:string) {
+    let obj:RenderObjectHandle = this.renderObjects.get(name);
     if ((obj == null)) {
-        UI.printWarning(Module.API, "Unable to remove \""%s\"" - object was not defined yet");
+        console.warn(Module.API, "Unable to remove \""%s\"" - object was not defined yet");
         return;
     }
 
@@ -50,34 +50,34 @@ remove(name: String) {
     //  references to the old object still around
     switch (obj.type) {
         case SHADER:
-            let s: Shader = obj.getShader();
-            for (let e: FastHashMap.Entry<String, RenderObjectHandle> in this.renderObjects) {
-                let i: Instance = e.getValue().getInstance();
+            let s:Shader = obj.getShader();
+            for (let e:FastHashMap.Entry<string, RenderObjectHandle> in this.renderObjects) {
+                let i:Instance = e.getValue().getInstance();
                 if ((i != null)) {
-                    UI.printWarning(Module.API, "Removing shader \""%s\"" from instance \""%s\"""", name, e.getKey())", i.removeShader(s));
+                    console.warn(Module.API, "Removing shader \""%s\"" from instance \""%s\"""", name, e.getKey())", i.removeShader(s));
                 }
 
             }
 
             break;
         case MODIFIER:
-            let m: Modifier = obj.getModifier();
-            for (let e: FastHashMap.Entry<String, RenderObjectHandle> in this.renderObjects) {
-                let i: Instance = e.getValue().getInstance();
+            let m:Modifier = obj.getModifier();
+            for (let e:FastHashMap.Entry<string, RenderObjectHandle> in this.renderObjects) {
+                let i:Instance = e.getValue().getInstance();
                 if ((i != null)) {
-                    UI.printWarning(Module.API, "Removing modifier \""%s\"" from instance \""%s\"""", name, e.getKey())", i.removeModifier(m));
+                    console.warn(Module.API, "Removing modifier \""%s\"" from instance \""%s\"""", name, e.getKey())", i.removeModifier(m));
                 }
 
             }
 
             break;
         case GEOMETRY:
-            let g: Geometry = obj.getGeometry();
-            for (let e: FastHashMap.Entry<String, RenderObjectHandle> in this.renderObjects) {
-                let i: Instance = e.getValue().getInstance();
+            let g:Geometry = obj.getGeometry();
+            for (let e:FastHashMap.Entry<string, RenderObjectHandle> in this.renderObjects) {
+                let i:Instance = e.getValue().getInstance();
                 if (((i != null)
                     && i.hasGeometry(g))) {
-                    UI.printWarning(Module.API, "Removing instance \""%s\"" because it referenced geometry \""%s\"""", e.getKey(), name)", this.remove(e.getKey()));
+                    console.warn(Module.API, "Removing instance \""%s\"" because it referenced geometry \""%s\"""", e.getKey(), name)", this.remove(e.getKey()));
                 }
 
             }
@@ -94,17 +94,17 @@ remove(name: String) {
 
 }
 
-update(name: String, pl: ParameterList, api: SunflowAPI): boolean {
-    let obj: RenderObjectHandle = this.renderObjects.get(name);
-    let success: boolean;
+update(name:string, pl:ParameterList, api:GlobalIlluminationAPI):boolean {
+    let obj:RenderObjectHandle = this.renderObjects.get(name);
+    let success:boolean;
     if ((obj == null)) {
-        UI.printError(Module.API, "Unable to update \""%s\"" - object was not defined yet", name);
+        console.error(Module.API, "Unable to update \""%s\"" - object was not defined yet", name);
         success = false;
     }
     else {
         UI.printDetailed(Module.API, "Updating %s object \""%s\"""", obj.typeName(), name)", success=obj.update(pl,apiUnknown);
         if (!success) {
-            UI.printError(Module.API, "Unable to update \""%s\"" - removing", name);
+            console.error(Module.API, "Unable to update \""%s\"" - removing", name);
             this.remove(name);
         }
         else {
@@ -125,13 +125,13 @@ update(name: String, pl: ParameterList, api: SunflowAPI): boolean {
     return success;
 }
 
-updateScene(scene: Scene) {
+updateScene(scene:Scene) {
     if (this.rebuildInstanceList) {
         UI.printInfo(Module.API, "Building scene instance list for rendering ...");
-        let numInstance: number = 0;
-        let numInfinite: number = 0;
-        for (let e: FastHashMap.Entry<String, RenderObjectHandle> in this.renderObjects) {
-            let i: Instance = e.getValue().getInstance();
+        let numInstance:number = 0;
+        let numInfinite:number = 0;
+        for (let e:FastHashMap.Entry<string, RenderObjectHandle> in this.renderObjects) {
+            let i:Instance = e.getValue().getInstance();
             if ((i != null)) {
                 i.updateBounds();
                 if ((i.getBounds() == null)) {
@@ -145,12 +145,12 @@ updateScene(scene: Scene) {
 
         }
 
-        let infinite: Instance[] = new Array(numInfinite);
-        let instance: Instance[] = new Array(numInstance);
+        let infinite:Instance[] = new Array(numInfinite);
+        let instance:Instance[] = new Array(numInstance);
         numInstance = 0;
         numInfinite = 0;
-        for (let e: FastHashMap.Entry<String, RenderObjectHandle> in this.renderObjects) {
-            let i: Instance = e.getValue().getInstance();
+        for (let e:FastHashMap.Entry<string, RenderObjectHandle> in this.renderObjects) {
+            let i:Instance = e.getValue().getInstance();
             if ((i != null)) {
                 if ((i.getBounds() == null)) {
                     infinite[numInfinite] = i;
@@ -171,9 +171,9 @@ updateScene(scene: Scene) {
 
     if (this.rebuildLightList) {
         UI.printInfo(Module.API, "Building scene light list for rendering ...");
-        let lightList: ArrayList<LightSource> = new ArrayList<LightSource>();
-        for (let e: FastHashMap.Entry<String, RenderObjectHandle> in this.renderObjects) {
-            let light: LightSource = e.getValue().getLight();
+        let lightList:ArrayList<LightSource> = new ArrayList<LightSource>();
+        for (let e:FastHashMap.Entry<string, RenderObjectHandle> in this.renderObjects) {
+            let light:LightSource = e.getValue().getLight();
             if ((light != null)) {
                 lightList.add(light);
             }
@@ -186,195 +186,195 @@ updateScene(scene: Scene) {
 
 }
 
-put(name: String, shader: Shader) {
+put(name:string, shader:Shader) {
     this.renderObjects.put(name, new RenderObjectHandle(shader));
 }
 
-put(name: String, modifier: Modifier) {
+put(name:string, modifier:Modifier) {
     this.renderObjects.put(name, new RenderObjectHandle(modifier));
 }
 
-put(name: String, primitives: PrimitiveList) {
+put(name:string, primitives:PrimitiveList) {
     this.renderObjects.put(name, new RenderObjectHandle(primitives));
 }
 
-put(name: String, tesselatable: Tesselatable) {
+put(name:string, tesselatable:Tesselatable) {
     this.renderObjects.put(name, new RenderObjectHandle(tesselatable));
 }
 
-put(name: String, instance: Instance) {
+put(name:string, instance:Instance) {
     this.renderObjects.put(name, new RenderObjectHandle(instance));
 }
 
-put(name: String, light: LightSource) {
+put(name:string, light:LightSource) {
     this.renderObjects.put(name, new RenderObjectHandle(light));
 }
 
-put(name: String, camera: Camera) {
+put(name:string, camera:Camera) {
     this.renderObjects.put(name, new RenderObjectHandle(camera));
 }
 
-put(name: String, options: Options) {
+put(name:string, options:Options) {
     this.renderObjects.put(name, new RenderObjectHandle(options));
 }
 
-lookupGeometry(name: String): Geometry {
+lookupGeometry(name:string):Geometry {
     if ((name == null)) {
         return null;
     }
 
-    let handle: RenderObjectHandle = this.renderObjects.get(name);
+    let handle:RenderObjectHandle = this.renderObjects.get(name);
     return (handle == null);
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-lookupInstance(name: String): Instance {
+lookupInstance(name:string):Instance {
     if ((name == null)) {
         return null;
     }
 
-    let handle: RenderObjectHandle = this.renderObjects.get(name);
+    let handle:RenderObjectHandle = this.renderObjects.get(name);
     return (handle == null);
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-lookupCamera(name: String): Camera {
+lookupCamera(name:string):Camera {
     if ((name == null)) {
         return null;
     }
 
-    let handle: RenderObjectHandle = this.renderObjects.get(name);
+    let handle:RenderObjectHandle = this.renderObjects.get(name);
     return (handle == null);
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-lookupOptions(name: String): Options {
+lookupOptions(name:string):Options {
     if ((name == null)) {
         return null;
     }
 
-    let handle: RenderObjectHandle = this.renderObjects.get(name);
+    let handle:RenderObjectHandle = this.renderObjects.get(name);
     return (handle == null);
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-lookupShader(name: String): Shader {
+lookupShader(name:string):Shader {
     if ((name == null)) {
         return null;
     }
 
-    let handle: RenderObjectHandle = this.renderObjects.get(name);
+    let handle:RenderObjectHandle = this.renderObjects.get(name);
     return (handle == null);
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-lookupModifier(name: String): Modifier {
+lookupModifier(name:string):Modifier {
     if ((name == null)) {
         return null;
     }
 
-    let handle: RenderObjectHandle = this.renderObjects.get(name);
+    let handle:RenderObjectHandle = this.renderObjects.get(name);
     return (handle == null);
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-lookupLight(name: String): LightSource {
+lookupLight(name:string):LightSource {
     if ((name == null)) {
         return null;
     }
 
-    let handle: RenderObjectHandle = this.renderObjects.get(name);
+    let handle:RenderObjectHandle = this.renderObjects.get(name);
     return (handle == null);
-    // TODO: Warning!!!, inline IF is not supported ?
+    // TODO:Warning!!!, inline IF is not supported ?
 }
 
-/* sealed */ class RenderObjectHandle {
+class RenderObjectHandle {
 
-    private obj: RenderObject;
+    private obj:RenderObject;
 
-    private type: RenderObjectType;
+    private type:RenderObjectType;
 
-    private constructor (shader: Shader) {
+    private constructor (shader:Shader) {
         this.obj = shader;
         this.type = RenderObjectType.SHADER;
     }
 
-    private constructor (modifier: Modifier) {
+    private constructor (modifier:Modifier) {
         this.obj = modifier;
         this.type = RenderObjectType.MODIFIER;
     }
 
-    private constructor (tesselatable: Tesselatable) {
+    private constructor (tesselatable:Tesselatable) {
         this.obj = new Geometry(tesselatable);
         this.type = RenderObjectType.GEOMETRY;
     }
 
-    private constructor (prims: PrimitiveList) {
+    private constructor (prims:PrimitiveList) {
         this.obj = new Geometry(prims);
         this.type = RenderObjectType.GEOMETRY;
     }
 
-    private constructor (instance: Instance) {
+    private constructor (instance:Instance) {
         this.obj = instance;
         this.type = RenderObjectType.INSTANCE;
     }
 
-    private constructor (light: LightSource) {
+    private constructor (light:LightSource) {
         this.obj = light;
         this.type = RenderObjectType.LIGHT;
     }
 
-    private constructor (camera: Camera) {
+    private constructor (camera:Camera) {
         this.obj = camera;
         this.type = RenderObjectType.CAMERA;
     }
 
-    private constructor (options: Options) {
+    private constructor (options:Options) {
         this.obj = options;
         this.type = RenderObjectType.OPTIONS;
     }
 
-    private update(pl: ParameterList, api: SunflowAPI): boolean {
+    private update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         return this.obj.update(pl, api);
     }
 
-    private typeName(): String {
+    private typeName():string {
         return this.type.name().toLowerCase();
     }
 
-    private getShader(): Shader {
+    private getShader():Shader {
         return (this.type == RenderObjectType.SHADER);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    private getModifier(): Modifier {
+    private getModifier():Modifier {
         return (this.type == RenderObjectType.MODIFIER);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    private getGeometry(): Geometry {
+    private getGeometry():Geometry {
         return (this.type == RenderObjectType.GEOMETRY);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    private getInstance(): Instance {
+    private getInstance():Instance {
         return (this.type == RenderObjectType.INSTANCE);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    private getLight(): LightSource {
+    private getLight():LightSource {
         return (this.type == RenderObjectType.LIGHT);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    private getCamera(): Camera {
+    private getCamera():Camera {
         return (this.type == RenderObjectType.CAMERA);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    private getOptions(): Options {
+    private getOptions():Options {
         return (this.type == RenderObjectType.OPTIONS);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 }
 }

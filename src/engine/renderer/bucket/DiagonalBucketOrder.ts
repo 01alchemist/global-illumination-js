@@ -3,14 +3,14 @@
  */
 export class DiagonalBucketOrder implements BucketOrder {
 
-    public getBucketSequence(nbw: number, nbh: number): number[] {
-        let coords: number[] = new Array((2
+    getBucketSequence(nbw:number, nbh:number):number[] {
+        let coords:number[] = new Array((2
         * (nbw * nbh)));
-        let ny: number = 0;
-        let x: number = 0;
-        let y: number = 0;
-        let nx: number = 1;
-        for (let i: number = 0; (i
+        let ny:number = 0;
+        let x:number = 0;
+        let y:number = 0;
+        let nx:number = 1;
+        for (let i:number = 0; (i
         < (nbw * nbh)); i++) {
             coords[((2 * i)
             + 0)] = x;

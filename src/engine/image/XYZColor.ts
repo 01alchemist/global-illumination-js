@@ -3,55 +3,55 @@
  */
 export class XYZColor {
 
-    private X: number;
+    private X:number;
 
-    private Y: number;
+    private Y:number;
 
-    private Z: number;
+    private Z:number;
 
-    public constructor () {
+    constructor () {
 
     }
 
-    public constructor (X: number, Y: number, Z: number) {
+    constructor (X:number, Y:number, Z:number) {
         this.X = this.X;
         this.Y = this.Y;
         this.Z = this.Z;
     }
 
-    public getX(): number {
+    getX():number {
         return this.X;
     }
 
-    public getY(): number {
+    getY():number {
         return this.Y;
     }
 
-    public getZ(): number {
+    getZ():number {
         return this.Z;
     }
 
-    public mul(s: number): XYZColor {
+    mul(s:number):XYZColor {
         this.X = (this.X * s);
         this.Y = (this.Y * s);
         this.Z = (this.Z * s);
         return this;
     }
 
-    public normalize() {
-        let XYZ: number = (this.X
+    normalize() {
+        let XYZ:number = (this.X
         + (this.Y + this.Z));
         if ((XYZ < 1E-06)) {
             return;
         }
 
-        let s: number = (1 / XYZ);
+        let s:number = (1 / XYZ);
         this.X = (this.X * s);
         this.Y = (this.Y * s);
         this.Z = (this.Z * s);
     }
 
-    public toString(): String {
+    toString():string {
         return String.format("(%.3f, %.3f, %.3f)", this.X, this.Y, this.Z);
     }
 }

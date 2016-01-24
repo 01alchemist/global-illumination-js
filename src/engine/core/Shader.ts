@@ -3,7 +3,7 @@
  */
 export interface Shader extends RenderObject {
 
-    getRadiance(state: ShadingState): Color;
+    getRadiance(state:ShadingState):Color;
 
-    scatterPhoton(state: ShadingState, power: Color);
+    scatterPhoton(state:ShadingState, power:Color);
 }

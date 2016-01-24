@@ -3,17 +3,17 @@
  */
 export class RegularSpectralCurve extends SpectralCurve {
 
-    private spectrum: number[];
+    private spectrum:number[];
 
-    private lambdaMin: number;
+    private lambdaMin:number;
 
-    private lambdaMax: number;
+    private lambdaMax:number;
 
-    private delta: number;
+    private delta:number;
 
-    private invDelta: number;
+    private invDelta:number;
 
-    public constructor (spectrum: number[], lambdaMin: number, lambdaMax: number) {
+    constructor (spectrum:number[], lambdaMin:number, lambdaMax:number) {
         this.lambdaMin = this.lambdaMin;
         this.lambdaMax = this.lambdaMax;
         this.spectrum = this.spectrum;
@@ -22,7 +22,7 @@ export class RegularSpectralCurve extends SpectralCurve {
         this.invDelta = (1 / this.delta);
     }
 
-    public sample(lambda: number): number {
+    sample(lambda:number):number {
         //  reject wavelengths outside the valid range
         if (((lambda < this.lambdaMin)
             || (lambda > this.lambdaMax))) {
@@ -30,11 +30,11 @@ export class RegularSpectralCurve extends SpectralCurve {
         }
 
         //  interpolate the two closest samples linearly
-        let x: number = ((lambda - this.lambdaMin)
+        let x:number = ((lambda - this.lambdaMin)
         * this.invDelta);
-        let b0: number = (<number>(x));
-        let b1: number = Math.min((b0 + 1), (this.spectrum.length - 1));
-        let dx: number = (x - b0);
+        let b0:number = (<number>(x));
+        let b1:number = Math.min((b0 + 1), (this.spectrum.length - 1));
+        let dx:number = (x - b0);
         return (((1 - dx)
         * this.spectrum[b0])
         + (dx * this.spectrum[b1]));

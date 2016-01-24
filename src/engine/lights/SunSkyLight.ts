@@ -52,13 +52,13 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
     0.125e-1f, 0.100e+1f, 0.870f, 0.610e-1f, 0.100e-2f, 0.100e-4f,
     0.100e-4f, 0.600e-3f, 0.175e-1f, 0.360e-1f };
 
-    private static k_oCurve: IrregularSpectralCurve = new IrregularSpectralCurve(k_oWavelengths, k_oAmplitudes);
+    private static k_oCurve:IrregularSpectralCurve = new IrregularSpectralCurve(k_oWavelengths, k_oAmplitudes);
 
-    private static k_gCurve: IrregularSpectralCurve = new IrregularSpectralCurve(k_gWavelengths, k_gAmplitudes);
+    private static k_gCurve:IrregularSpectralCurve = new IrregularSpectralCurve(k_gWavelengths, k_gAmplitudes);
 
-    private static k_waCurve: IrregularSpectralCurve = new IrregularSpectralCurve(k_waWavelengths, k_waAmplitudes);
+    private static k_waCurve:IrregularSpectralCurve = new IrregularSpectralCurve(k_waWavelengths, k_waAmplitudes);
 
-    public constructor () {
+    constructor () {
         this.numSkySamples = 64;
         this.sunDirWorld = new Vector3(1, 1, 1);
         this.turbidity = 6;
@@ -66,41 +66,41 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
         this.initSunSky();
     }
 
-    private computeAttenuatedSunlight(theta: number, turbidity: number): SpectralCurve {
-        let data: number[] = new Array(91);
+    private computeAttenuatedSunlight(theta:number, turbidity:number):SpectralCurve {
+        let data:number[] = new Array(91);
         //  holds the sunsky curve data
-        let alpha: number = 1.3;
-        let lozone: number = 0.35;
-        let w: number = 2;
-        let beta: number = ((0.0460836582205 * this.turbidity)
+        let alpha:number = 1.3;
+        let lozone:number = 0.35;
+        let w:number = 2;
+        let beta:number = ((0.0460836582205 * this.turbidity)
         - 0.04586025928522);
         //  Relative optical mass
-        let m: number = (1
+        let m:number = (1
         / (Math.cos(theta) + (0.00094 * Math.pow((1.6386 - theta), -1.253))));
-        for (let lambda: number = 350; (lambda <= 800); i++) {
+        for (let lambda:number = 350; (lambda <= 800); i++) {
         }
 
-        let i: number = 0;
+        let i:number = 0;
         lambda += 5;
         //  Rayleigh scattering
-        let tauR: number = Math.exp(((m * (0.008735 * Math.pow(((<number>(lambda)) / 1000), -4.08)))
+        let tauR:number = Math.exp(((m * (0.008735 * Math.pow(((<number>(lambda)) / 1000), -4.08)))
         * -1));
         //  Aerosol (water + dust) attenuation
-        let tauA: number = Math.exp(((m
+        let tauA:number = Math.exp(((m
         * (beta * Math.pow(((<number>(lambda)) / 1000), (alpha * -1))))
         * -1));
         //  Attenuation due to ozone absorption
-        let tauO: number = Math.exp(((m
+        let tauO:number = Math.exp(((m
         * (k_oCurve.sample(lambda) * lozone))
         * -1));
         //  Attenuation due to mixed gases absorption
-        let tauG: number = Math.exp(((1.41
+        let tauG:number = Math.exp(((1.41
         * (k_gCurve.sample(lambda)
         * (m / Math.pow((1 + (118.93
         * (k_gCurve.sample(lambda) * m))), 0.45))))
         * -1));
         //  Attenuation due to water vapor absorption
-        let tauWA: number = Math.exp(((0.2385
+        let tauWA:number = Math.exp(((0.2385
         * (k_waCurve.sample(lambda)
         * (w
         * (m / Math.pow((1 + (20.07
@@ -108,7 +108,7 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
         * (w * m)))), 0.45)))))
         * -1));
         //  100.0 comes from solAmplitudes begin in wrong units.
-        let amp: number = (solCurve.sample(lambda)
+        let amp:number = (solCurve.sample(lambda)
         * (tauR
         * (tauA
         * (tauO
@@ -117,13 +117,13 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
         return new RegularSpectralCurve(data, 350, 800);
     }
 
-    private perezFunction(lam: number[], theta: number, gamma: number, lvz: number): number {
-        let den: number = ((1
+    private perezFunction(lam:number[], theta:number, gamma:number, lvz:number):number {
+        let den:number = ((1
         + (lam[0] * Math.exp(lam[1]))) * (1
         + ((lam[2] * Math.exp((lam[3] * this.sunTheta)))
         + (lam[4]
         * (Math.cos(this.sunTheta) * Math.cos(this.sunTheta))))));
-        let num: number = ((1
+        let num:number = ((1
         + (lam[0] * Math.exp((lam[1] / Math.cos(theta))))) * (1
         + ((lam[2] * Math.exp((lam[3] * gamma)))
         + (lam[4]
@@ -148,11 +148,11 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
         }
 
         //  sunSolidAngle = (float) (0.25 * Math.PI * 1.39 * 1.39 / (150 * 150));
-        let theta2: number = (this.sunTheta * this.sunTheta);
-        let theta3: number = (this.sunTheta * theta2);
-        let T: number = this.turbidity;
-        let T2: number = (this.turbidity * this.turbidity);
-        let chi: number = (((4 / 9)
+        let theta2:number = (this.sunTheta * this.sunTheta);
+        let theta3:number = (this.sunTheta * theta2);
+        let T:number = this.turbidity;
+        let T2:number = (this.turbidity * this.turbidity);
+        let chi:number = (((4 / 9)
         - (T / 120))
         * (Math.PI - (2 * this.sunTheta)));
         this.zenithY = (((((4.0453 * T)
@@ -227,20 +227,20 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
         this.perezy[4] = (((0.01092 * T)
         * -1)
         + 0.05291);
-        let h: number = 32;
-        let w: number = 32;
+        let h:number = 32;
+        let w:number = 32;
         this.imageHistogram = new Array(w);
         h;
         this.colHistogram = new Array(w);
-        let du: number = (1 / w);
-        let dv: number = (1 / h);
-        for (let x: number = 0; (x < w); x++) {
-            for (let y: number = 0; (y < h); y++) {
-                let u: number = ((x + 0.5)
+        let du:number = (1 / w);
+        let dv:number = (1 / h);
+        for (let x:number = 0; (x < w); x++) {
+            for (let y:number = 0; (y < h); y++) {
+                let u:number = ((x + 0.5)
                 * du);
-                let v: number = ((y + 0.5)
+                let v:number = ((y + 0.5)
                 * dv);
-                let c: Color = this.getSkyRGB(this.getDirection(u, v));
+                let c:Color = this.getSkyRGB(this.getDirection(u, v));
                 this.imageHistogram[x][y] = (c.getLuminance() * (<number>(Math.sin((Math.PI * v)))));
                 if ((y > 0)) {
                     this.imageHistogram[x][y] = (this.imageHistogram[x][y] + this.imageHistogram[x][(y - 1)]);
@@ -253,13 +253,13 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
                 this.colHistogram[x] = (this.colHistogram[x] + this.colHistogram[(x - 1)]);
             }
 
-            for (let y: number = 0; (y < h); y++) {
+            for (let y:number = 0; (y < h); y++) {
             }
 
             this.imageHistogram[x][(h - 1)];
         }
 
-        for (let x: number = 0; (x < w); x++) {
+        for (let x:number = 0; (x < w); x++) {
         }
 
         this.colHistogram[(w - 1)];
@@ -268,9 +268,9 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
         / (w * h));
     }
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
-        let up: Vector3 = pl.getVector("up", null);
-        let east: Vector3 = pl.getVector("east", null);
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
+        let up:Vector3 = pl.getVector("up", null);
+        let east:Vector3 = pl.getVector("east", null);
         if (((up != null)
             && (east != null))) {
             this.basis = OrthoNormalBasis.makeFromWV(up, east);
@@ -287,7 +287,7 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
         return true;
     }
 
-    public init(name: String, api: SunflowAPI) {
+    init(name:string, api:GlobalIlluminationAPI) {
         //  register this object with the api properly
         api.geometry(name, this);
         api.shader((name + ".shader"), this);
@@ -296,7 +296,7 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
         api.light((name + ".light"), this);
     }
 
-    private getSkyRGB(dir: Vector3): Color {
+    private getSkyRGB(dir:Vector3):Color {
         if ((dir.z < 0)) {
             return Color.BLACK;
         }
@@ -306,36 +306,36 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
         }
 
         dir.normalize();
-        let theta: number = Math.acos(MathUtils.clamp(dir.z, -1, 1));
-        let gamma: number = Math.acos(MathUtils.clamp(Vector3.dot(dir, this.sunDir), -1, 1));
-        let x: number = this.perezFunction(this.perezx, theta, gamma, this.zenithx);
-        let y: number = this.perezFunction(this.perezy, theta, gamma, this.zenithy);
-        let Y: number = (this.perezFunction(this.perezY, theta, gamma, this.zenithY) * 0.0001);
-        let c: XYZColor = ChromaticitySpectrum.get((<number>(x)), (<number>(y)));
+        let theta:number = Math.acos(MathUtils.clamp(dir.z, -1, 1));
+        let gamma:number = Math.acos(MathUtils.clamp(Vector3.dot(dir, this.sunDir), -1, 1));
+        let x:number = this.perezFunction(this.perezx, theta, gamma, this.zenithx);
+        let y:number = this.perezFunction(this.perezy, theta, gamma, this.zenithy);
+        let Y:number = (this.perezFunction(this.perezY, theta, gamma, this.zenithY) * 0.0001);
+        let c:XYZColor = ChromaticitySpectrum.get((<number>(x)), (<number>(y)));
         //  XYZColor c = new ChromaticitySpectrum((float) x, (float) y).toXYZ();
-        let X: number = (<number>((c.getX()
+        let X:number = (<number>((c.getX()
         * (Y / c.getY()))));
-        let Z: number = (<number>((c.getZ()
+        let Z:number = (<number>((c.getZ()
         * (Y / c.getY()))));
         return RGBSpace.SRGB.convertXYZtoRGB(X, (<number>(Y)), Z);
     }
 
-    public getNumSamples(): number {
+    getNumSamples():number {
         return (1 + this.numSkySamples);
     }
 
-    public getPhoton(randX1: number, randY1: number, randX2: number, randY2: number, p: Point3, dir: Vector3, power: Color) {
-        //  FIXME: not implemented
+    getPhoton(randX1:number, randY1:number, randX2:number, randY2:number, p:Point3, dir:Vector3, power:Color) {
+        //  FIXME:not implemented
     }
 
-    public getPower(): number {
+    getPower():number {
         return 0;
     }
 
-    public getSamples(state: ShadingState) {
+    getSamples(state:ShadingState) {
         if (((Vector3.dot(this.sunDirWorld, state.getGeoNormal()) > 0)
             && (Vector3.dot(this.sunDirWorld, state.getNormal()) > 0))) {
-            let dest: LightSample = new LightSample();
+            let dest:LightSample = new LightSample();
             dest.setShadowRay(new Ray(state.getPoint(), this.sunDirWorld));
             dest.getShadowRay().setMax(Float.MAX_VALUE);
             dest.setRadiance(this.sunColor, this.sunColor);
@@ -343,22 +343,22 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
             state.addSample(dest);
         }
 
-        let n: number = (state.getDiffuseDepth() > 0);
-        // TODO: Warning!!!, inline IF is not supported ?
-        for (let i: number = 0; (i < n); i++) {
+        let n:number = (state.getDiffuseDepth() > 0);
+        // TODO:Warning!!!, inline IF is not supported ?
+        for (let i:number = 0; (i < n); i++) {
             //  random offset on unit square, we use the infinite version of
             //  getRandom because the light sampling is adaptive
-            let randX: number = state.getRandom(i, 0, n);
-            let randY: number = state.getRandom(i, 1, n);
-            let x: number = 0;
+            let randX:number = state.getRandom(i, 0, n);
+            let randY:number = state.getRandom(i, 1, n);
+            let x:number = 0;
             while (((randX >= this.colHistogram[x])
             && (x
             < (this.colHistogram.length - 1)))) {
                 x++;
             }
 
-            let rowHistogram: number[] = this.imageHistogram[x];
-            let y: number = 0;
+            let rowHistogram:number[] = this.imageHistogram[x];
+            let y:number = 0;
             while (((randY >= rowHistogram[y])
             && (y
             < (rowHistogram.length - 1)))) {
@@ -366,30 +366,30 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
             }
 
             //  sample from (x, y)
-            let u: number = (<number>((x == 0)));
-            // TODO: Warning!!!, inline IF is not supported ?
-            let v: number = (<number>((y == 0)));
-            // TODO: Warning!!!, inline IF is not supported ?
-            let px: number = (x == 0);
-            // TODO: Warning!!!, inline IF is not supported ?
-            let py: number = (y == 0);
-            // TODO: Warning!!!, inline IF is not supported ?
-            let su: number = ((x + u)
+            let u:number = (<number>((x == 0)));
+            // TODO:Warning!!!, inline IF is not supported ?
+            let v:number = (<number>((y == 0)));
+            // TODO:Warning!!!, inline IF is not supported ?
+            let px:number = (x == 0);
+            // TODO:Warning!!!, inline IF is not supported ?
+            let py:number = (y == 0);
+            // TODO:Warning!!!, inline IF is not supported ?
+            let su:number = ((x + u)
             / this.colHistogram.length);
-            let sv: number = ((y + v)
+            let sv:number = ((y + v)
             / rowHistogram.length);
-            let invP: number = ((<number>(Math.sin((sv * Math.PI))))
+            let invP:number = ((<number>(Math.sin((sv * Math.PI))))
             * (this.jacobian
             / (n
             * (px * py))));
-            let localDir: Vector3 = this.getDirection(su, sv);
-            let dir: Vector3 = this.basis.transform(localDir, new Vector3());
+            let localDir:Vector3 = this.getDirection(su, sv);
+            let dir:Vector3 = this.basis.transform(localDir, new Vector3());
             if (((Vector3.dot(dir, state.getGeoNormal()) > 0)
                 && (Vector3.dot(dir, state.getNormal()) > 0))) {
-                let dest: LightSample = new LightSample();
+                let dest:LightSample = new LightSample();
                 dest.setShadowRay(new Ray(state.getPoint(), dir));
                 dest.getShadowRay().setMax(Float.MAX_VALUE);
-                let radiance: Color = this.getSkyRGB(localDir);
+                let radiance:Color = this.getSkyRGB(localDir);
                 dest.setRadiance(radiance, radiance);
                 dest.getDiffuseRadiance().mul(invP);
                 dest.getSpecularRadiance().mul(invP);
@@ -401,51 +401,51 @@ export class SunSkyLight implements LightSource, PrimitiveList, Shader {
 
     }
 
-    public getBakingPrimitives(): PrimitiveList {
+    getBakingPrimitives():PrimitiveList {
         return null;
     }
 
-    public getNumPrimitives(): number {
+    getNumPrimitives():number {
         return 1;
     }
 
-    public getPrimitiveBound(primID: number, i: number): number {
+    getPrimitiveBound(primID:number, i:number):number {
         return 0;
     }
 
-    public getWorldBounds(o2w: Matrix4): BoundingBox {
+    getWorldBounds(o2w:Matrix4):BoundingBox {
         return null;
     }
 
-    public intersectPrimitive(r: Ray, primID: number, state: IntersectionState) {
+    intersectPrimitive(r:Ray, primID:number, state:IntersectionState) {
         if ((r.getMax() == Float.POSITIVE_INFINITY)) {
             state.setIntersection(0, 0, 0);
         }
 
     }
 
-    public prepareShadingState(state: ShadingState) {
+    prepareShadingState(state:ShadingState) {
         if (state.includeLights()) {
             state.setShader(this);
         }
 
     }
 
-    public getRadiance(state: ShadingState): Color {
+    getRadiance(state:ShadingState):Color {
         return this.getSkyRGB(this.basis.untransform(state.getRay().getDirection())).constrainRGB();
     }
 
-    public scatterPhoton(state: ShadingState, power: Color) {
+    scatterPhoton(state:ShadingState, power:Color) {
         //  let photon escape
     }
 
-    private getDirection(u: number, v: number): Vector3 {
-        let dest: Vector3 = new Vector3();
-        let theta: number = 0;
-        let phi: number = 0;
+    private getDirection(u:number, v:number):Vector3 {
+        let dest:Vector3 = new Vector3();
+        let theta:number = 0;
+        let phi:number = 0;
         theta = (u * (2 * Math.PI));
         phi = (v * Math.PI);
-        let sin_phi: number = Math.sin(phi);
+        let sin_phi:number = Math.sin(phi);
         dest.x = (<number>(((sin_phi * Math.cos(theta))
         * -1)));
         dest.y = (<number>(Math.cos(phi)));

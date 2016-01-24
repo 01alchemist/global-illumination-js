@@ -3,15 +3,15 @@
  */
 export class Texture {
 
-    private filename: String;
+    private filename:string;
 
-    private isLinear: boolean;
+    private isLinear:boolean;
 
-    private bitmap: Bitmap;
+    private bitmap:Bitmap;
 
-    private loaded: number;
+    private loaded:number;
 
-    constructor (filename: String, isLinear: boolean) {
+    constructor (filename:string, isLinear:boolean) {
         this.filename = this.filename;
         this.isLinear = this.isLinear;
         this.loaded = 0;
@@ -23,7 +23,7 @@ export class Texture {
         }
 
         try {
-            UI.printInfo(Module.TEX, "Reading texture bitmap from: \""%s\"" ...", this.filename);
+            UI.printInfo(Module.TEX, "Reading texture bitmap from:\""%s\"" ...", this.filename);
             this.bitmap = new Bitmap(this.filename, this.isLinear);
             if (((this.bitmap.getWidth() == 0)
                 || (this.bitmap.getHeight() == 0))) {
@@ -32,13 +32,13 @@ export class Texture {
 
         }
         catch (e /*:IOException*/) {
-            UI.printError(Module.TEX, "%s", e.getMessage());
+            console.error(Module.TEX, "%s", e.getMessage());
         }
 
         this.loaded = 1;
     }
 
-    public getBitmap(): Bitmap {
+    getBitmap():Bitmap {
         if ((this.loaded == 0)) {
             this.load();
         }
@@ -46,8 +46,8 @@ export class Texture {
         return this.bitmap;
     }
 
-    public getPixel(x: number, y: number): Color {
-        let bitmap: Bitmap = this.getBitmap();
+    getPixel(x:number, y:number):Color {
+        let bitmap:Bitmap = this.getBitmap();
         if ((this.bitmap == null)) {
             return Color.BLACK;
         }
@@ -62,59 +62,59 @@ export class Texture {
             y++;
         }
 
-        let dx: number = ((<number>(x))
+        let dx:number = ((<number>(x))
         * (this.bitmap.getWidth() - 1));
-        let dy: number = ((<number>(y))
+        let dy:number = ((<number>(y))
         * (this.bitmap.getHeight() - 1));
-        let ix0: number = (<number>(dx));
-        let iy0: number = (<number>(dy));
-        let ix1: number = ((ix0 + 1)
+        let ix0:number = (<number>(dx));
+        let iy0:number = (<number>(dy));
+        let ix1:number = ((ix0 + 1)
         % this.bitmap.getWidth());
-        let iy1: number = ((iy0 + 1)
+        let iy1:number = ((iy0 + 1)
         % this.bitmap.getHeight());
-        let u: number = (dx - ix0);
-        let v: number = (dy - iy0);
+        let u:number = (dx - ix0);
+        let v:number = (dy - iy0);
         u = (u
         * (u * (3 - (2 * u))));
         v = (v
         * (v * (3 - (2 * v))));
-        let k00: number = ((1 - u) * (1 - v));
-        let c00: Color = this.bitmap.getPixel(ix0, iy0);
-        let k01: number = ((1 - u)
+        let k00:number = ((1 - u) * (1 - v));
+        let c00:Color = this.bitmap.getPixel(ix0, iy0);
+        let k01:number = ((1 - u)
         * v);
-        let c01: Color = this.bitmap.getPixel(ix0, iy1);
-        let k10: number = (u * (1 - v));
-        let c10: Color = this.bitmap.getPixel(ix1, iy0);
-        let k11: number = (u * v);
-        let c11: Color = this.bitmap.getPixel(ix1, iy1);
-        let c: Color = Color.mul(k00, c00);
+        let c01:Color = this.bitmap.getPixel(ix0, iy1);
+        let k10:number = (u * (1 - v));
+        let c10:Color = this.bitmap.getPixel(ix1, iy0);
+        let k11:number = (u * v);
+        let c11:Color = this.bitmap.getPixel(ix1, iy1);
+        let c:Color = Color.mul(k00, c00);
         c.madd(k01, c01);
         c.madd(k10, c10);
         c.madd(k11, c11);
         return c;
     }
 
-    public getNormal(x: number, y: number, basis: OrthoNormalBasis): Vector3 {
-        let rgb: number[] = this.getPixel(x, y).getRGB();
+    getNormal(x:number, y:number, basis:OrthoNormalBasis):Vector3 {
+        let rgb:number[] = this.getPixel(x, y).getRGB();
         return basis.transform(new Vector3(((2 * rgb[0])
         - 1), ((2 * rgb[1])
         - 1), ((2 * rgb[2])
         - 1))).normalize();
     }
 
-    public getBump(x: number, y: number, basis: OrthoNormalBasis, scale: number): Vector3 {
-        let bitmap: Bitmap = this.getBitmap();
+    getBump(x:number, y:number, basis:OrthoNormalBasis, scale:number):Vector3 {
+        let bitmap:Bitmap = this.getBitmap();
         if ((this.bitmap == null)) {
             return basis.transform(new Vector3(0, 0, 1));
         }
 
-        let dx: number = (1
+        let dx:number = (1
         / (this.bitmap.getWidth() - 1));
-        let dy: number = (1
+        let dy:number = (1
         / (this.bitmap.getHeight() - 1));
-        let b0: number = this.getPixel(x, y).getLuminance();
-        let bx: number = this.getPixel((x + dx), y).getLuminance();
-        let by: number = this.getPixel(x, (y + dy)).getLuminance();
+        let b0:number = this.getPixel(x, y).getLuminance();
+        let bx:number = this.getPixel((x + dx), y).getLuminance();
+        let by:number = this.getPixel(x, (y + dy)).getLuminance();
         return basis.transform(new Vector3((scale
         * ((bx - b0)
         / dx)), (scale

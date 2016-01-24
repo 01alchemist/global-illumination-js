@@ -2,7 +2,7 @@ import {Mesh} from "../scene/shapes/Mesh";
 import {Material} from "../scene/materials/Material";
 import {Vector3} from "../math/Vector3";
 import {Triangle} from "../scene/shapes/Triangle";
-import {append} from "../utils/MapUtils";
+import {append} from "../utils/ArrayUtils";
 import {Color} from "../math/Color";
 import {Texture} from "../scene/materials/Texture";
 /**
@@ -69,8 +69,8 @@ export class OBJLoader {
             return null;
         } else {
             return {
-                keyword: _str[0],
-                value: _str[1].split(/ {1,}/)
+                keyword:_str[0],
+                value:_str[1].split(/ {1,}/)
             };
         }
     }
@@ -189,7 +189,7 @@ export class OBJLoader {
             return;
         }
         this.materialsLoading = true;
-        url = this.basePath == "" ? url : this.basePath + "/" + url;
+        url = this.basePath == "" ? url :this.basePath + "/" + url;
         console.log("Loading MTL:" + url);
         var self = this;
         var xhr:XMLHttpRequest = new XMLHttpRequest();
@@ -208,7 +208,7 @@ export class OBJLoader {
                     switch (item.keyword) {
                         case "newmtl":
                             material = self.materials[item.value[0]];
-                            material = material ? material : self.parentMaterial.clone();
+                            material = material ? material :self.parentMaterial.clone();
                             self.materials[item.value[0]] = material;
                             break;
                         case "Kd":

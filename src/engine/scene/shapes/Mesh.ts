@@ -6,7 +6,7 @@ import {Ray} from "../../math/Ray";
 import {Shape} from "./Shape";
 import {Color} from "../../math/Color";
 import {Material} from "../materials/Material";
-import {append} from "../../utils/MapUtils";
+import {append} from "../../utils/ArrayUtils";
 import {Tree} from "../tree/Tree";
 import {Box} from "./Box";
 import {ShapeType} from "./Shape";
@@ -29,9 +29,9 @@ export class Mesh implements Shape {
         }
     }
 
-    constructor(public box:Box = null,
-                public triangles:Triangle[] = [],
-                public tree:Tree|SharedTree = null) {
+    constructor(box:Box = null,
+                triangles:Triangle[] = [],
+                tree:Tree|SharedTree = null) {
 
     }
 
@@ -177,9 +177,9 @@ export class Mesh implements Shape {
         //var lookup = make(map[Vector3]Vector3)
         var lookup:Map<any,Vector3> = new Map<any,Vector3>();
         m.triangles.forEach(function (t:any) {
-            lookup[t.v1] = lookup[t.v1] ? lookup[t.v1].add(t.n1) : t.n1;
-            lookup[t.v2] = lookup[t.v2] ? lookup[t.v2].add(t.n2) : t.v2;
-            lookup[t.v3] = lookup[t.v3] ? lookup[t.v3].add(t.n3) : t.v3;
+            lookup[t.v1] = lookup[t.v1] ? lookup[t.v1].add(t.n1) :t.n1;
+            lookup[t.v2] = lookup[t.v2] ? lookup[t.v2].add(t.n2) :t.v2;
+            lookup[t.v3] = lookup[t.v3] ? lookup[t.v3].add(t.n3) :t.v3;
         });
         lookup.forEach(function (v:Vector3, k) {
             lookup[k] = v.normalize();

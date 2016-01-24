@@ -3,61 +3,61 @@
  */
 export class OpenExrDisplay implements Display {
 
-    private static HALF: number = 1;
+    private static HALF:number = 1;
 
-    private static FLOAT: number = 2;
+    private static FLOAT:number = 2;
 
-    private static HALF_SIZE: number = 2;
+    private static HALF_SIZE:number = 2;
 
-    private static FLOAT_SIZE: number = 4;
+    private static FLOAT_SIZE:number = 4;
 
-    private static OE_MAGIC: number = 20000630;
+    private static OE_MAGIC:number = 20000630;
 
-    private static OE_EXR_VERSION: number = 2;
+    private static OE_EXR_VERSION:number = 2;
 
-    private static OE_TILED_FLAG: number = 512;
+    private static OE_TILED_FLAG:number = 512;
 
-    private static NO_COMPRESSION: number = 0;
+    private static NO_COMPRESSION:number = 0;
 
-    private static RLE_COMPRESSION: number = 1;
+    private static RLE_COMPRESSION:number = 1;
 
     //  private static final int ZIPS_COMPRESSION = 2;
-    private static ZIP_COMPRESSION: number = 3;
+    private static ZIP_COMPRESSION:number = 3;
 
     //  private static final int PIZ_COMPRESSION = 4;
     //  private static final int PXR24_COMPRESSION = 5;
-    private static RLE_MIN_RUN: number = 3;
+    private static RLE_MIN_RUN:number = 3;
 
-    private static RLE_MAX_RUN: number = 127;
+    private static RLE_MAX_RUN:number = 127;
 
-    private filename: String;
+    private filename:string;
 
-    private file: RandomAccessFile;
+    private file:RandomAccessFile;
 
-    private tileOffsets: number[,];
+    private tileOffsets:number[,];
 
-    private tileOffsetsPosition: number;
+    private tileOffsetsPosition:number;
 
-    private tilesX: number;
+    private tilesX:number;
 
-    private tilesY: number;
+    private tilesY:number;
 
-    private tileSize: number;
+    private tileSize:number;
 
-    private compression: number;
+    private compression:number;
 
-    private channelType: number;
+    private channelType:number;
 
-    private channelSize: number;
+    private channelSize:number;
 
-    private tmpbuf: number[];
+    private tmpbuf:number[];
 
-    private comprbuf: number[];
+    private comprbuf:number[];
 
-    public constructor (filename: String, compression: String, channelType: String) {
+    constructor (filename:string, compression:string, channelType:string) {
         this.filename = (this.filename == null);
-        // TODO: Warning!!!, inline IF is not supported ?
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
         if (((this.compression == null)
             || this.compression.equals("none"))) {
             this.compression = NO_COMPRESSION;
@@ -69,7 +69,7 @@ export class OpenExrDisplay implements Display {
             this.compression = ZIP_COMPRESSION;
         }
         else {
-            UI.printWarning(Module.DISP, "EXR - Compression type was not recognized - defaulting to zip");
+            console.warn(Module.DISP, "EXR - Compression type was not recognized - defaulting to zip");
             this.compression = ZIP_COMPRESSION;
         }
 
@@ -84,18 +84,18 @@ export class OpenExrDisplay implements Display {
             this.channelSize = HALF_SIZE;
         }
         else {
-            UI.printWarning(Module.DISP, "EXR - Channel type was not recognized - defaulting to float");
+            console.warn(Module.DISP, "EXR - Channel type was not recognized - defaulting to float");
             this.channelType = FLOAT;
             this.channelSize = FLOAT_SIZE;
         }
 
     }
 
-    public setGamma(gamma: number) {
-        UI.printWarning(Module.DISP, "EXR - Gamma correction unsupported - ignoring");
+    setGamma(gamma:number) {
+        console.warn(Module.DISP, "EXR - Gamma correction unsupported - ignoring");
     }
 
-    public imageBegin(w: number, h: number, bucketSize: number) {
+    imageBegin(w:number, h:number, bucketSize:number) {
         try {
             this.file = new RandomAccessFile(this.filename, "rw");
             this.file.setLength(0);
@@ -106,48 +106,48 @@ export class OpenExrDisplay implements Display {
             this.writeRGBHeader(w, h, bucketSize);
         }
         catch (e /*:Exception*/) {
-            UI.printError(Module.DISP, "EXR - %s", e.getMessage());
+            console.error(Module.DISP, "EXR - %s", e.getMessage());
             e.printStackTrace();
         }
 
     }
 
-    public imagePrepare(x: number, y: number, w: number, h: number, id: number) {
+    imagePrepare(x:number, y:number, w:number, h:number, id:number) {
 
     }
 
-    public imageUpdate(x: number, y: number, w: number, h: number, data: Color[]) {
+    imageUpdate(x:number, y:number, w:number, h:number, data:Color[]) {
         try {
             //  figure out which openexr tile corresponds to this bucket
-            let tx: number = (x / this.tileSize);
-            let ty: number = (y / this.tileSize);
+            let tx:number = (x / this.tileSize);
+            let ty:number = (y / this.tileSize);
             this.writeTile(tx, ty, w, h, data);
         }
         catch (e /*:IOException*/) {
-            UI.printError(Module.DISP, "EXR - %s", e.getMessage());
+            console.error(Module.DISP, "EXR - %s", e.getMessage());
             e.printStackTrace();
         }
 
     }
 
-    public imageFill(x: number, y: number, w: number, h: number, c: Color) {
+    imageFill(x:number, y:number, w:number, h:number, c:Color) {
 
     }
 
-    public imageEnd() {
+    imageEnd() {
         try {
             this.writeTileOffsets();
             this.file.close();
         }
         catch (e /*:IOException*/) {
-            UI.printError(Module.DISP, "EXR - %s", e.getMessage());
+            console.error(Module.DISP, "EXR - %s", e.getMessage());
             e.printStackTrace();
         }
 
     }
 
-    public writeRGBHeader(w: number, h: number, tileSize: number) {
-        let chanOut: number[] = [
+    writeRGBHeader(w:number, h:number, tileSize:number) {
+        let chanOut:number[] = [
             0,
             this.channelType,
             0,
@@ -265,10 +265,10 @@ export class OpenExrDisplay implements Display {
         this.writeTileOffsets();
     }
 
-    public writeTileOffsets() {
+    writeTileOffsets() {
         this.file.seek(this.tileOffsetsPosition);
-        for (let ty: number = 0; (ty < this.tilesY); ty++) {
-            for (let tx: number = 0; (tx < this.tilesX); tx++) {
+        for (let ty:number = 0; (ty < this.tilesY); ty++) {
+            for (let tx:number = 0; (tx < this.tilesX); tx++) {
                 this.file.write(ByteUtil.get8Bytes(this.tileOffsets[tx][ty]));
             }
 
@@ -276,18 +276,18 @@ export class OpenExrDisplay implements Display {
 
     }
 
-    private writeTile(tileX: number, tileY: number, w: number, h: number, tile: Color[]) {
-        let rgb: number[] = new Array(4);
+    private writeTile(tileX:number, tileY:number, w:number, h:number, tile:Color[]) {
+        let rgb:number[] = new Array(4);
         //  setting comprSize to max integer so without compression things
         //  don't go awry
-        let comprSize: number = Integer.MAX_VALUE;
-        let pixptr: number = 0;
-        let writeSize: number = 0;
-        let tileRangeX: number = (this.tileSize < w);
-        // TODO: Warning!!!, inline IF is not supported ?
-        let tileRangeY: number = (this.tileSize < h);
-        // TODO: Warning!!!, inline IF is not supported ?
-        let channelBase: number = (tileRangeX * this.channelSize);
+        let comprSize:number = Integer.MAX_VALUE;
+        let pixptr:number = 0;
+        let writeSize:number = 0;
+        let tileRangeX:number = (this.tileSize < w);
+        // TODO:Warning!!!, inline IF is not supported ?
+        let tileRangeY:number = (this.tileSize < h);
+        // TODO:Warning!!!, inline IF is not supported ?
+        let channelBase:number = (tileRangeX * this.channelSize);
         //  lets see if the alignment matches, you can comment this out if
         //  need be
         if (((this.tileSize != tileRangeX)
@@ -301,7 +301,7 @@ export class OpenExrDisplay implements Display {
         }
 
         this.tileOffsets[tileX][tileY] = this.file.getFilePointer();
-        //  the tile header: tile's x&y coordinate, levels x&y coordinate and
+        //  the tile header:tile's x&y coordinate, levels x&y coordinate and
         //  tilesize
         this.file.write(ByteUtil.get4Bytes(tileX));
         this.file.write(ByteUtil.get4Bytes(tileY));
@@ -309,11 +309,11 @@ export class OpenExrDisplay implements Display {
         this.file.write(ByteUtil.get4Bytes(0));
         //  just in case
         Arrays.fill(this.tmpbuf, (<number>(0)));
-        for (let ty: number = 0; (ty < tileRangeY); ty++) {
-            for (let tx: number = 0; (tx < tileRangeX); tx++) {
-                let rgbf: number[] = tile[(tx
+        for (let ty:number = 0; (ty < tileRangeY); ty++) {
+            for (let tx:number = 0; (tx < tileRangeX); tx++) {
+                let rgbf:number[] = tile[(tx
                 + (ty * tileRangeX))].getRGB();
-                for (let component: number = 0; (component < 3); component++) {
+                for (let component:number = 0; (component < 3); component++) {
                     if ((this.channelType == FLOAT)) {
                         rgb = ByteUtil.get4Bytes(Float.floatToRawIntBits(rgbf[(2 - component)]));
                         this.tmpbuf[((channelBase * component)
@@ -363,17 +363,17 @@ export class OpenExrDisplay implements Display {
 
     }
 
-    private static compress(tp: number, in: number[], inSize: number, out: number[]): number {
+    private static compress(tp:number, in:number[], inSize:number, out:number[]):number {
     if ((inSize == 0)) {
     return 0;
 }
 
-let t2: number = ((inSize + 1)
+let t2:number = ((inSize + 1)
 / 2);
-let t1: number = 0;
-let ret: number;
-let inPtr: number = 0;
-let tmp: number[] = new Array(inSize);
+let t1:number = 0;
+let ret:number;
+let inPtr:number = 0;
+let tmp:number[] = new Array(inSize);
 //  zip and rle treat the data first, in the same way so I'm not
 //  repeating the code
 if (((tp == ZIP_COMPRESSION)
@@ -398,9 +398,9 @@ if (((tp == ZIP_COMPRESSION)
 
     //  Predictor ~ straight from ImfZipCompressor.cpp :)
     t1 = 1;
-    let p: number = tmp[(t1 - 1)];
+    let p:number = tmp[(t1 - 1)];
     while ((t1 < inSize)) {
-        let d: number = (((<number>(tmp[t1])) - p) + (128 + 256));
+        let d:number = (((<number>(tmp[t1])) - p) + (128 + 256));
         p = (<number>(tmp[t1]));
         tmp[t1] = (<number>(d));
         t1++;
@@ -412,7 +412,7 @@ if (((tp == ZIP_COMPRESSION)
 //  need be
 switch (tp) {
     case ZIP_COMPRESSION:
-        let def: Deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, false);
+        let def:Deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, false);
         def.setInput(tmp, 0, inSize);
         def.finish();
         ret = def.deflate(/* out */Unknown);
@@ -428,10 +428,10 @@ switch (tp) {
 
 }
 
-private static rleCompress(in: number[], inLen: number, out: number[]): number {
-    let outWrite: number = 0;
-    let runStart: number = 0;
-    let runEnd: number = 1;
+private static rleCompress(in:number[], inLen:number, out:number[]):number {
+    let outWrite:number = 0;
+    let runStart:number = 0;
+    let runEnd:number = 1;
     while ((runStart < inLen)) {
         while (((runEnd < inLen)
         && ((in[runStart] == in[runEnd])

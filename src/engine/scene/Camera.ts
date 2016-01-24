@@ -5,10 +5,10 @@ import {Ray} from "../math/Ray";
  */
 export class Camera {
 
-    constructor(public p?:Vector3, public u?:Vector3, public v?:Vector3, public w?:Vector3,
-                public m?:number,
-                public focalDistance?:number,
-                public apertureRadius?:number) {
+    constructor(p?:Vector3, u?:Vector3, v?:Vector3, w?:Vector3,
+                m?:number,
+                focalDistance?:number,
+                apertureRadius?:number) {
 
     }
 

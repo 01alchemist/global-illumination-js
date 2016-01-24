@@ -3,19 +3,19 @@
  */
 export class GlassShader implements Shader {
 
-    private eta: number;
+    private eta:number;
 
     //  refraction index ratio
-    private f0: number;
+    private f0:number;
 
     //  fresnel normal incidence
-    private color: Color;
+    private color:Color;
 
-    private absorbtionDistance: number;
+    private absorbtionDistance:number;
 
-    private absorbtionColor: Color;
+    private absorbtionColor:Color;
 
-    public constructor () {
+    constructor () {
         this.eta = 1.3;
         this.color = Color.WHITE;
         this.absorbtionDistance = 0;
@@ -24,7 +24,7 @@ export class GlassShader implements Shader {
         //  50% absorbtion
     }
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         this.color = pl.getColor("color", this.color);
         this.eta = pl.getFloat("eta", this.eta);
         this.f0 = ((1 - this.eta) / (1 + this.eta));
@@ -34,19 +34,19 @@ export class GlassShader implements Shader {
         return true;
     }
 
-    public getRadiance(state: ShadingState): Color {
+    getRadiance(state:ShadingState):Color {
         if (!state.includeSpecular()) {
             return Color.BLACK;
         }
 
-        let reflDir: Vector3 = new Vector3();
-        let refrDir: Vector3 = new Vector3();
+        let reflDir:Vector3 = new Vector3();
+        let refrDir:Vector3 = new Vector3();
         state.faceforward();
-        let cos: number = state.getCosND();
-        let inside: boolean = state.isBehind();
-        let neta: number = inside;
-        // TODO: Warning!!!, inline IF is not supported ?
-        let dn: number = (2 * cos);
+        let cos:number = state.getCosND();
+        let inside:boolean = state.isBehind();
+        let neta:number = inside;
+        // TODO:Warning!!!, inline IF is not supported ?
+        let dn:number = (2 * cos);
         reflDir.x = ((dn * state.getNormal().x)
         + state.getRay().getDirection().x);
         reflDir.y = ((dn * state.getNormal().y)
@@ -54,16 +54,16 @@ export class GlassShader implements Shader {
         reflDir.z = ((dn * state.getNormal().z)
         + state.getRay().getDirection().z);
         //  refracted ray
-        let arg: number = (1
+        let arg:number = (1
         - (neta
         * (neta * (1
         - (cos * cos)))));
-        let tir: boolean = (arg < 0);
+        let tir:boolean = (arg < 0);
         if (tir) {
             refrDir.z = 0;
         }
         else {
-            let nK: number = ((neta * cos)
+            let nK:number = ((neta * cos)
             - (<number>(Math.sqrt(arg))));
             refrDir.y = 0;
             refrDir.x = 0;
@@ -76,21 +76,21 @@ export class GlassShader implements Shader {
         }
 
         //  compute Fresnel terms
-        let cosTheta1: number = Vector3.dot(state.getNormal(), reflDir);
-        let cosTheta2: number = (Vector3.dot(state.getNormal(), refrDir) * -1);
-        let pPara: number = ((cosTheta1
+        let cosTheta1:number = Vector3.dot(state.getNormal(), reflDir);
+        let cosTheta2:number = (Vector3.dot(state.getNormal(), refrDir) * -1);
+        let pPara:number = ((cosTheta1
         - (this.eta * cosTheta2))
         / (cosTheta1
         + (this.eta * cosTheta2)));
-        let pPerp: number = (((this.eta * cosTheta1)
+        let pPerp:number = (((this.eta * cosTheta1)
         - cosTheta2)
         / ((this.eta * cosTheta1)
         + cosTheta2));
-        let kr: number = (0.5
+        let kr:number = (0.5
         * ((pPara * pPara)
         + (pPerp * pPerp)));
-        let kt: number = (1 - kr);
-        let absorbtion: Color = null;
+        let kt:number = (1 - kr);
+        let absorbtion:Color = null;
         if ((inside
             && (this.absorbtionDistance > 0))) {
             //  this ray is inside the object and leaving it
@@ -105,7 +105,7 @@ export class GlassShader implements Shader {
         }
 
         //  refracted ray
-        let ret: Color = Color.black();
+        let ret:Color = Color.black();
         if (!tir) {
             ret.madd(kt, state.traceRefraction(new Ray(state.getPoint(), refrDir), 0)).mul(this.color);
         }
@@ -116,15 +116,15 @@ export class GlassShader implements Shader {
         }
 
         return (absorbtion != null);
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    public scatterPhoton(state: ShadingState, power: Color) {
-        let refr: Color = Color.mul((1 - this.f0), this.color);
-        let refl: Color = Color.mul(this.f0, this.color);
-        let avgR: number = refl.getAverage();
-        let avgT: number = refr.getAverage();
-        let rnd: number = state.getRandom(0, 0, 1);
+    scatterPhoton(state:ShadingState, power:Color) {
+        let refr:Color = Color.mul((1 - this.f0), this.color);
+        let refl:Color = Color.mul(this.f0, this.color);
+        let avgR:number = refl.getAverage();
+        let avgT:number = refr.getAverage();
+        let rnd:number = state.getRandom(0, 0, 1);
         if ((rnd < avgR)) {
             state.faceforward();
             //  don't reflect internally
@@ -133,10 +133,10 @@ export class GlassShader implements Shader {
             }
 
             //  photon is reflected
-            let cos: number = state.getCosND();
+            let cos:number = state.getCosND();
             power.mul(refl).mul((1 / avgR));
-            let dn: number = (2 * cos);
-            let dir: Vector3 = new Vector3();
+            let dn:number = (2 * cos);
+            let dir:Vector3 = new Vector3();
             dir.x = ((dn * state.getNormal().x)
             + state.getRay().getDirection().x);
             dir.y = ((dn * state.getNormal().y)
@@ -149,16 +149,16 @@ export class GlassShader implements Shader {
             < (avgR + avgT))) {
             state.faceforward();
             //  photon is refracted
-            let cos: number = state.getCosND();
-            let neta: number = state.isBehind();
-            // TODO: Warning!!!, inline IF is not supported ?
+            let cos:number = state.getCosND();
+            let neta:number = state.isBehind();
+            // TODO:Warning!!!, inline IF is not supported ?
             power.mul(refr).mul((1 / avgT));
-            let wK: number = (neta * -1);
-            let arg: number = (1
+            let wK:number = (neta * -1);
+            let arg:number = (1
             - (neta
             * (neta * (1
             - (cos * cos)))));
-            let dir: Vector3 = new Vector3();
+            let dir:Vector3 = new Vector3();
             if ((state.isBehind()
                 && (this.absorbtionDistance > 0))) {
                 //  this ray is inside the object and leaving it
@@ -169,7 +169,7 @@ export class GlassShader implements Shader {
 
             if ((arg < 0)) {
                 //  TIR
-                let dn: number = (2 * cos);
+                let dn:number = (2 * cos);
                 dir.x = ((dn * state.getNormal().x)
                 + state.getRay().getDirection().x);
                 dir.y = ((dn * state.getNormal().y)
@@ -179,7 +179,7 @@ export class GlassShader implements Shader {
                 state.traceReflectionPhoton(new Ray(state.getPoint(), dir), power);
             }
             else {
-                let nK: number = ((neta * cos)
+                let nK:number = ((neta * cos)
                 - (<number>(Math.sqrt(arg))));
                 dir.x = (((wK * state.getRay().dx)
                 * -1)

@@ -3,98 +3,98 @@
  */
 export class GridPhotonMap implements GlobalPhotonMapInterface {
 
-    private numGather: number;
+    private numGather:number;
 
-    private gatherRadius: number;
+    private gatherRadius:number;
 
-    private numStoredPhotons: number;
+    private numStoredPhotons:number;
 
-    private nx: number;
+    private nx:number;
 
-    private ny: number;
+    private ny:number;
 
-    private nz: number;
+    private nz:number;
 
-    private bounds: BoundingBox;
+    private bounds:BoundingBox;
 
-    private cellHash: PhotonGroup[];
+    private cellHash:PhotonGroup[];
 
-    private hashSize: number;
+    private hashSize:number;
 
-    private hashPrime: number;
+    private hashPrime:number;
 
-    private rwl: ReentrantReadWriteLock;
+    private rwl:ReentrantReadWriteLock;
 
-    private numEmit: number;
+    private numEmit:number;
 
-    private static NORMAL_THRESHOLD: number = (<number>(Math.cos((10
+    private static NORMAL_THRESHOLD:number = (<number>(Math.cos((10
     * (Math.PI / 180)))));
 
-    private static PRIMES: number[];
+    private static PRIMES:number[];
 
-    private static 19: number[];
+    private static 19:number[];
 
-    private static 37: number[];
+    private static 37:number[];
 
-    private static 109: number[];
+    private static 109:number[];
 
-    private static 163: number[];
+    private static 163:number[];
 
-    private static 251: number[];
+    private static 251:number[];
 
-    private static 367: number[];
+    private static 367:number[];
 
-    private static 557: number[];
+    private static 557:number[];
 
-    private static 823: number[];
+    private static 823:number[];
 
-    private static 1237: number[];
+    private static 1237:number[];
 
-    private static 1861: number[];
+    private static 1861:number[];
 
-    private static 2777: number[];
+    private static 2777:number[];
 
-    private static 4177: number[];
+    private static 4177:number[];
 
-    private static 6247: number[];
+    private static 6247:number[];
 
-    private static 9371: number[];
+    private static 9371:number[];
 
-    private static 21089: number[];
+    private static 21089:number[];
 
-    private static 31627: number[];
+    private static 31627:number[];
 
-    private static 47431: number[];
+    private static 47431:number[];
 
-    private static 71143: number[];
+    private static 71143:number[];
 
-    private static 106721: number[];
+    private static 106721:number[];
 
-    private static 160073: number[];
+    private static 160073:number[];
 
-    private static 240101: number[];
+    private static 240101:number[];
 
-    private static 360163: number[];
+    private static 360163:number[];
 
-    private static 540217: number[];
+    private static 540217:number[];
 
-    private static 810343: number[];
+    private static 810343:number[];
 
-    private static 1215497: number[];
+    private static 1215497:number[];
 
-    private static 1823231: number[];
+    private static 1823231:number[];
 
-    private static 2734867: number[];
+    private static 2734867:number[];
 
-    private static 4102283: number[];
+    private static 4102283:number[];
 
-    private static 6153409: number[];
+    private static 6153409:number[];
 
-    private static 9230113: number[];
+    private static 9230113:number[];
 
-    private static 13845163: number[];
+    private static 13845163:number[];
 
-    public constructor (numEmit: number, numGather: number, gatherRadius: number) {
+    constructor (numEmit:number, numGather:number, gatherRadius:number) {
         this.numEmit = this.numEmit;
         this.numGather = this.numGather;
         this.gatherRadius = this.gatherRadius;
@@ -105,21 +105,21 @@ export class GridPhotonMap implements GlobalPhotonMapInterface {
         this.numEmit = 100000;
     }
 
-    public prepare(sceneBounds: BoundingBox) {
+    prepare(sceneBounds:BoundingBox) {
         this.bounds = new BoundingBox(sceneBounds);
         this.bounds.enlargeUlps();
-        let w: Vector3 = this.bounds.getExtents();
+        let w:Vector3 = this.bounds.getExtents();
         this.nx = (<number>(Math.max(((w.x / this.gatherRadius)
         + 0.5), 1)));
         this.ny = (<number>(Math.max(((w.y / this.gatherRadius)
         + 0.5), 1)));
         this.nz = (<number>(Math.max(((w.z / this.gatherRadius)
         + 0.5), 1)));
-        let numCells: number = (this.nx
+        let numCells:number = (this.nx
         * (this.ny * this.nz));
         UI.printInfo(Module.LIGHT, "Initializing grid photon map:");
-        UI.printInfo(Module.LIGHT, "  * Resolution:  %dx%dx%d", this.nx, this.ny, this.nz);
-        UI.printInfo(Module.LIGHT, "  * Total cells: %d", numCells);
+        UI.printInfo(Module.LIGHT, "  * Resolution: %dx%dx%d", this.nx, this.ny, this.nz);
+        UI.printInfo(Module.LIGHT, "  * Total cells:%d", numCells);
         for (this.hashPrime = 0; (this.hashPrime < PRIMES.length); this.hashPrime++) {
             if ((PRIMES[this.hashPrime]
                 > (numCells / 5))) {
@@ -129,47 +129,47 @@ export class GridPhotonMap implements GlobalPhotonMapInterface {
         }
 
         this.cellHash = new Array(PRIMES[this.hashPrime]);
-        UI.printInfo(Module.LIGHT, "  * Initial hash size: %d", this.cellHash.length);
+        UI.printInfo(Module.LIGHT, "  * Initial hash size:%d", this.cellHash.length);
     }
 
-    public size(): number {
+    size():number {
         return this.numStoredPhotons;
     }
 
-    public store(state: ShadingState, dir: Vector3, power: Color, diffuse: Color) {
+    store(state:ShadingState, dir:Vector3, power:Color, diffuse:Color) {
         //  don't store on the wrong side of a surface
         if ((Vector3.dot(state.getNormal(), dir) > 0)) {
             return;
         }
 
-        let pt: Point3 = state.getPoint();
+        let pt:Point3 = state.getPoint();
         //  outside grid bounds ?
         if (!this.bounds.contains(pt)) {
             return;
         }
 
-        let ext: Vector3 = this.bounds.getExtents();
-        let ix: number = (<number>((((pt.x - this.bounds.getMinimum().x)
+        let ext:Vector3 = this.bounds.getExtents();
+        let ix:number = (<number>((((pt.x - this.bounds.getMinimum().x)
         * this.nx)
         / ext.x)));
-        let iy: number = (<number>((((pt.y - this.bounds.getMinimum().y)
+        let iy:number = (<number>((((pt.y - this.bounds.getMinimum().y)
         * this.ny)
         / ext.y)));
-        let iz: number = (<number>((((pt.z - this.bounds.getMinimum().z)
+        let iz:number = (<number>((((pt.z - this.bounds.getMinimum().z)
         * this.nz)
         / ext.z)));
         ix = MathUtils.clamp(ix, 0, (this.nx - 1));
         iy = MathUtils.clamp(iy, 0, (this.ny - 1));
         iz = MathUtils.clamp(iz, 0, (this.nz - 1));
-        let id: number = (ix
+        let id:number = (ix
         + ((iy * this.nx)
         + (iz
         * (this.nx * this.ny))));
         this;
-        let hid: number = (id % this.cellHash.length);
-        let g: PhotonGroup = this.cellHash[hid];
-        let last: PhotonGroup = null;
-        let hasID: boolean = false;
+        let hid:number = (id % this.cellHash.length);
+        let g:PhotonGroup = this.cellHash[hid];
+        let last:PhotonGroup = null;
+        let hasID:boolean = false;
         while ((g != null)) {
             if ((g.id == id)) {
                 hasID = true;
@@ -210,23 +210,23 @@ export class GridPhotonMap implements GlobalPhotonMapInterface {
         this.numStoredPhotons++;
     }
 
-    public init() {
+    init() {
         UI.printInfo(Module.LIGHT, "Initializing photon grid ...");
-        UI.printInfo(Module.LIGHT, "  * Photon hits:      %d", this.numStoredPhotons);
-        UI.printInfo(Module.LIGHT, "  * Final hash size:  %d", this.cellHash.length);
-        let cells: number = 0;
-        for (let i: number = 0; (i < this.cellHash.length); i++) {
-            for (let g: PhotonGroup = this.cellHash[i]; (g != null); g = g.next) {
+        UI.printInfo(Module.LIGHT, "  * Photon hits:     %d", this.numStoredPhotons);
+        UI.printInfo(Module.LIGHT, "  * Final hash size: %d", this.cellHash.length);
+        let cells:number = 0;
+        for (let i:number = 0; (i < this.cellHash.length); i++) {
+            for (let g:PhotonGroup = this.cellHash[i]; (g != null); g = g.next) {
                 g.diffuse.mul((1 / g.count));
                 cells++;
             }
 
         }
 
-        UI.printInfo(Module.LIGHT, "  * Num photon cells: %d", cells);
+        UI.printInfo(Module.LIGHT, "  * Num photon cells:%d", cells);
     }
 
-    public precomputeRadiance(includeDirect: boolean, includeCaustics: boolean) {
+    precomputeRadiance(includeDirect:boolean, includeCaustics:boolean) {
 
     }
 
@@ -237,14 +237,14 @@ export class GridPhotonMap implements GlobalPhotonMapInterface {
             return;
         }
 
-        let temp: PhotonGroup[] = new Array(PRIMES[++hashPrime]);
-        for (let i: number = 0; (i < this.cellHash.length); i++) {
-            let g: PhotonGroup = this.cellHash[i];
+        let temp:PhotonGroup[] = new Array(PRIMES[++hashPrime]);
+        for (let i:number = 0; (i < this.cellHash.length); i++) {
+            let g:PhotonGroup = this.cellHash[i];
             while ((g != null)) {
                 //  re-hash into the new table
-                let hid: number = (g.id % temp.length);
-                let last: PhotonGroup = null;
-                for (let gn: PhotonGroup = temp[hid]; (gn != null); gn = gn.next) {
+                let hid:number = (g.id % temp.length);
+                let last:PhotonGroup = null;
+                for (let gn:PhotonGroup = temp[hid]; (gn != null); gn = gn.next) {
                     last = gn;
                 }
 
@@ -255,7 +255,7 @@ export class GridPhotonMap implements GlobalPhotonMapInterface {
                     last.next = g;
                 }
 
-                let next: PhotonGroup = g.next;
+                let next:PhotonGroup = g.next;
                 g.next = null;
                 g = next;
             }
@@ -265,31 +265,31 @@ export class GridPhotonMap implements GlobalPhotonMapInterface {
         this.cellHash = temp;
     }
 
-    public getRadiance(p: Point3, n: Vector3): Color {
+    getRadiance(p:Point3, n:Vector3):Color {
         if (!this.bounds.contains(p)) {
             return Color.BLACK;
         }
 
-        let ext: Vector3 = this.bounds.getExtents();
-        let ix: number = (<number>((((p.x - this.bounds.getMinimum().x)
+        let ext:Vector3 = this.bounds.getExtents();
+        let ix:number = (<number>((((p.x - this.bounds.getMinimum().x)
         * this.nx)
         / ext.x)));
-        let iy: number = (<number>((((p.y - this.bounds.getMinimum().y)
+        let iy:number = (<number>((((p.y - this.bounds.getMinimum().y)
         * this.ny)
         / ext.y)));
-        let iz: number = (<number>((((p.z - this.bounds.getMinimum().z)
+        let iz:number = (<number>((((p.z - this.bounds.getMinimum().z)
         * this.nz)
         / ext.z)));
         ix = MathUtils.clamp(ix, 0, (this.nx - 1));
         iy = MathUtils.clamp(iy, 0, (this.ny - 1));
         iz = MathUtils.clamp(iz, 0, (this.nz - 1));
-        let id: number = (ix
+        let id:number = (ix
         + ((iy * this.nx)
         + (iz
         * (this.nx * this.ny))));
         this.rwl.readLock().lock();
-        let center: PhotonGroup = null;
-        for (let g: PhotonGroup = this.get(ix, iy, iz); (g != null); g = g.next) {
+        let center:PhotonGroup = null;
+        for (let g:PhotonGroup = this.get(ix, iy, iz); (g != null); g = g.next) {
             if (((g.id == id)
                 && (Vector3.dot(n, g.normal) > NORMAL_THRESHOLD))) {
                 if ((g.radiance == null)) {
@@ -297,37 +297,37 @@ export class GridPhotonMap implements GlobalPhotonMapInterface {
                     break;
                 }
 
-                let r: Color = g.radiance.copy();
+                let r:Color = g.radiance.copy();
                 this.rwl.readLock().unlock();
                 return r;
             }
 
         }
 
-        let vol: number = 1;
+        let vol:number = 1;
         while (true) {
-            let numPhotons: number = 0;
-            let ndiff: number = 0;
-            let irr: Color = Color.black();
-            let diff: Color = (center == null);
-            // TODO: Warning!!!, inline IF is not supported ?
-            for (let z: number = (iz
+            let numPhotons:number = 0;
+            let ndiff:number = 0;
+            let irr:Color = Color.black();
+            let diff:Color = (center == null);
+            // TODO:Warning!!!, inline IF is not supported ?
+            for (let z:number = (iz
             - (vol - 1)); (z
             <= (iz
             + (vol - 1))); z++) {
-                for (let y: number = (iy
+                for (let y:number = (iy
                 - (vol - 1)); (y
                 <= (iy
                 + (vol - 1))); y++) {
-                    for (let x: number = (ix
+                    for (let x:number = (ix
                     - (vol - 1)); (x
                     <= (ix
                     + (vol - 1))); x++) {
-                        let vid: number = (x
+                        let vid:number = (x
                         + ((y * this.nx)
                         + (z
                         * (this.nx * this.ny))));
-                        for (let g: PhotonGroup = this.get(x, y, z); (g != null); g = g.next) {
+                        for (let g:PhotonGroup = this.get(x, y, z); (g != null); g = g.next) {
                             if (((g.id == vid)
                                 && (Vector3.dot(n, g.normal) > NORMAL_THRESHOLD))) {
                                 numPhotons = (numPhotons + g.count);
@@ -354,7 +354,7 @@ export class GridPhotonMap implements GlobalPhotonMapInterface {
                 || (vol >= 3))) {
                 //  we have found enough photons
                 //  cache irradiance and return
-                let area: number = (((2 * vol)
+                let area:number = (((2 * vol)
                 - 1) / (3
                 * ((ext.x / this.nx)
                 + ((ext.y / this.ny)
@@ -388,7 +388,7 @@ export class GridPhotonMap implements GlobalPhotonMapInterface {
 
     }
 
-    private get(x: number, y: number, z: number): PhotonGroup {
+    private get(x:number, y:number, z:number):PhotonGroup {
         //  returns the list associated with the specified location
         if (((x < 0)
             || (x >= this.nx))) {
@@ -414,21 +414,21 @@ export class GridPhotonMap implements GlobalPhotonMapInterface {
 
     class PhotonGroup {
 
-    id: number;
+    id:number;
 
-    count: number;
+    count:number;
 
-    normal: Vector3;
+    normal:Vector3;
 
-    flux: Color;
+    flux:Color;
 
-    radiance: Color;
+    radiance:Color;
 
-    diffuse: Color;
+    diffuse:Color;
 
-    next: PhotonGroup;
+    next:PhotonGroup;
 
-    constructor (id: number, n: Vector3) {
+    constructor (id:number, n:Vector3) {
         this.normal = new Vector3(n);
         this.flux = Color.black();
         this.diffuse = Color.black();
@@ -439,19 +439,19 @@ export class GridPhotonMap implements GlobalPhotonMapInterface {
     }
 }
 
-public allowDiffuseBounced(): boolean {
+allowDiffuseBounced():boolean {
     return true;
 }
 
-public allowReflectionBounced(): boolean {
+allowReflectionBounced():boolean {
     return true;
 }
 
-public allowRefractionBounced(): boolean {
+allowRefractionBounced():boolean {
     return true;
 }
 
-public numEmit(): number {
+numEmit():number {
     return this.numEmit;
 }
 }

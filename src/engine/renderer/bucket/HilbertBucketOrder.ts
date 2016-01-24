@@ -3,10 +3,10 @@
  */
 export class HilbertBucketOrder implements BucketOrder {
 
-    public getBucketSequence(nbw: number, nbh: number): number[] {
-        let hi: number = 0;
+    getBucketSequence(nbw:number, nbh:number):number[] {
+        let hi:number = 0;
         //  hilbert curve index
-        let hn: number = 0;
+        let hn:number = 0;
         //  hilbert curve order
         while (((((1 + hn)
         < nbw)
@@ -17,15 +17,15 @@ export class HilbertBucketOrder implements BucketOrder {
         }
 
         //  fit to number of buckets
-        let hN: number = (1 + (2 * hn));
+        let hN:number = (1 + (2 * hn));
         //  number of hilbert buckets - 2**2n
-        let n: number = (nbw * nbh);
+        let n:number = (nbw * nbh);
         //  total number of buckets
-        let coords: number[] = new Array((2 * n));
+        let coords:number[] = new Array((2 * n));
         //  storage for bucket coordinates
-        for (let i: number = 0; (i < n); i++) {
-            let hy: number;
-            let hx: number;
+        for (let i:number = 0; (i < n); i++) {
+            let hy:number;
+            let hx:number;
             for (
                 ; (((hx >= nbw)
             || ((hy >= nbh)
@@ -34,15 +34,15 @@ export class HilbertBucketOrder implements BucketOrder {
             && (hi < hN));
             ) {
                 //  s is the hilbert index, shifted to start in the middle
-                let s: number = hi;
+                let s:number = hi;
                 //  (hi + (hN >> 1)) & (hN - 1);
                 //  int n = hn;
                 //  adapted from Hacker's Delight
-                let sr: number;
-                let comp: number;
-                let swap: number;
-                let cs: number;
-                let t: number;
+                let sr:number;
+                let comp:number;
+                let swap:number;
+                let cs:number;
+                let t:number;
                 s = (s | (1431655765 + (2 * hn)));
                 //  Pad s on left with 01
                 1;
@@ -61,13 +61,13 @@ export class HilbertBucketOrder implements BucketOrder {
                 //  no step "cs ^= cs >> 1", so in effect it computes
                 //  two independent parallel prefix operations on two
                 //  interleaved sets of sixteen bits).
-                let (: cs;
+                let (:cs;
                 2;
-                let (: cs;
+                let (:cs;
                 4;
-                let (: cs;
+                let (:cs;
                 8;
-                let (: cs;
+                let (:cs;
                 16;
                 swap = (cs & 1431655765);
                 //  Separate the swap and

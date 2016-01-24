@@ -3,19 +3,19 @@
  */
 export class Box implements PrimitiveList {
 
-    private minX: number;
+    private minX:number;
 
-    private minY: number;
+    private minY:number;
 
-    private minZ: number;
+    private minZ:number;
 
-    private maxX: number;
+    private maxX:number;
 
-    private maxY: number;
+    private maxY:number;
 
-    private maxZ: number;
+    private maxZ:number;
 
-    public constructor () {
+    constructor () {
         this.minZ = -1;
         this.minY = -1;
         this.minX = -1;
@@ -26,11 +26,11 @@ export class Box implements PrimitiveList {
         this.maxX = 1;
     }
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
-        let pts: FloatParameter = pl.getPointArray("points");
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
+        let pts:FloatParameter = pl.getPointArray("points");
         if ((pts != null)) {
-            let bounds: BoundingBox = new BoundingBox();
-            for (let i: number = 0; (i < pts.data.length); i += 3) {
+            let bounds:BoundingBox = new BoundingBox();
+            for (let i:number = 0; (i < pts.data.length); i += 3) {
                 bounds.include(pts.data[i], pts.data[(i + 1)], pts.data[(i + 2)]);
             }
 
@@ -46,10 +46,10 @@ export class Box implements PrimitiveList {
         return true;
     }
 
-    public prepareShadingState(state: ShadingState) {
+    prepareShadingState(state:ShadingState) {
         state.init();
         state.getRay().getPoint(state.getPoint());
-        let n: number = state.getPrimitiveID();
+        let n:number = state.getPrimitiveID();
         switch (n) {
             case 0:
                 state.getNormal().set(new Vector3(1, 0, 0));
@@ -80,19 +80,19 @@ export class Box implements PrimitiveList {
         state.setModifier(state.getInstance().getModifier(0));
     }
 
-    public intersectPrimitive(r: Ray, primID: number, state: IntersectionState) {
-        let intervalMin: number = Float.NEGATIVE_INFINITY;
-        let intervalMax: number = Float.POSITIVE_INFINITY;
-        let orgX: number = r.ox;
-        let invDirX: number = (1 / r.dx);
-        let t2: number;
-        let t1: number;
+    intersectPrimitive(r:Ray, primID:number, state:IntersectionState) {
+        let intervalMin:number = Float.NEGATIVE_INFINITY;
+        let intervalMax:number = Float.POSITIVE_INFINITY;
+        let orgX:number = r.ox;
+        let invDirX:number = (1 / r.dx);
+        let t2:number;
+        let t1:number;
         t1 = ((this.minX - orgX)
         * invDirX);
         t2 = ((this.maxX - orgX)
         * invDirX);
-        let sideOut: number = -1;
-        let sideIn: number = -1;
+        let sideOut:number = -1;
+        let sideIn:number = -1;
         if ((invDirX > 0)) {
             if ((t1 > intervalMin)) {
                 intervalMin = t1;
@@ -122,8 +122,8 @@ export class Box implements PrimitiveList {
             return;
         }
 
-        let orgY: number = r.oy;
-        let invDirY: number = (1 / r.dy);
+        let orgY:number = r.oy;
+        let invDirY:number = (1 / r.dy);
         t1 = ((this.minY - orgY)
         * invDirY);
         t2 = ((this.maxY - orgY)
@@ -157,8 +157,8 @@ export class Box implements PrimitiveList {
             return;
         }
 
-        let orgZ: number = r.oz;
-        let invDirZ: number = (1 / r.dz);
+        let orgZ:number = r.oz;
+        let invDirZ:number = (1 / r.dz);
         t1 = ((this.minZ - orgZ)
         * invDirZ);
         //  no front wall
@@ -204,11 +204,11 @@ export class Box implements PrimitiveList {
 
     }
 
-    public getNumPrimitives(): number {
+    getNumPrimitives():number {
         return 1;
     }
 
-    public getPrimitiveBound(primID: number, i: number): number {
+    getPrimitiveBound(primID:number, i:number):number {
         switch (i) {
             case 0:
                 return this.minX;
@@ -235,8 +235,8 @@ export class Box implements PrimitiveList {
 
     }
 
-    public getWorldBounds(o2w: Matrix4): BoundingBox {
-        let bounds: BoundingBox = new BoundingBox(this.minX, this.minY, this.minZ);
+    getWorldBounds(o2w:Matrix4):BoundingBox {
+        let bounds:BoundingBox = new BoundingBox(this.minX, this.minY, this.minZ);
         bounds.include(this.maxX, this.maxY, this.maxZ);
         if ((o2w == null)) {
             return bounds;
@@ -245,7 +245,7 @@ export class Box implements PrimitiveList {
         return o2w.transform(bounds);
     }
 
-    public getBakingPrimitives(): PrimitiveList {
+    getBakingPrimitives():PrimitiveList {
         return null;
     }
 }

@@ -3,29 +3,29 @@
  */
 export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
 
-    private texture: Texture;
+    private texture:Texture;
 
-    private basis: OrthoNormalBasis;
+    private basis:OrthoNormalBasis;
 
-    private numSamples: number;
+    private numSamples:number;
 
-    private jacobian: number;
+    private jacobian:number;
 
-    private colHistogram: number[];
+    private colHistogram:number[];
 
-    private imageHistogram: number[,];
+    private imageHistogram:number[,];
 
-    private samples: Vector3[];
+    private samples:Vector3[];
 
-    private colors: Color[];
+    private colors:Color[];
 
-    public constructor () {
+    constructor () {
         this.texture = null;
         this.updateBasis(new Vector3(0, 0, -1), new Vector3(0, 1, 0));
         this.numSamples = 64;
     }
 
-    private updateBasis(center: Vector3, up: Vector3) {
+    private updateBasis(center:Vector3, up:Vector3) {
         if (((center != null)
             && (up != null))) {
             this.basis = OrthoNormalBasis.makeFromWV(center, up);
@@ -35,10 +35,10 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
 
     }
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         this.updateBasis(pl.getVector("center", null), pl.getVector("up", null));
         this.numSamples = pl.getInt("samples", this.numSamples);
-        let filename: String = pl.getString("texture", null);
+        let filename:string = pl.getString("texture", null);
         if ((filename != null)) {
             this.texture = TextureCache.getTexture(api.resolveTextureFilename(filename), true);
         }
@@ -48,7 +48,7 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
             return false;
         }
 
-        let b: Bitmap = this.texture.getBitmap();
+        let b:Bitmap = this.texture.getBitmap();
         if ((b == null)) {
             return false;
         }
@@ -58,15 +58,15 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
             this.imageHistogram = new Array(b.getWidth());
             b.getHeight();
             this.colHistogram = new Array(b.getWidth());
-            let du: number = (1 / b.getWidth());
-            let dv: number = (1 / b.getHeight());
-            for (let x: number = 0; (x < b.getWidth()); x++) {
-                for (let y: number = 0; (y < b.getHeight()); y++) {
-                    let u: number = ((x + 0.5)
+            let du:number = (1 / b.getWidth());
+            let dv:number = (1 / b.getHeight());
+            for (let x:number = 0; (x < b.getWidth()); x++) {
+                for (let y:number = 0; (y < b.getHeight()); y++) {
+                    let u:number = ((x + 0.5)
                     * du);
-                    let v: number = ((y + 0.5)
+                    let v:number = ((y + 0.5)
                     * dv);
-                    let c: Color = this.texture.getPixel(u, v);
+                    let c:Color = this.texture.getPixel(u, v);
                     //  box filter the image
                     //  c.add(texture.getPixel(u + du, v));
                     //  c.add(texture.getPixel(u + du, v+ dv));
@@ -84,13 +84,13 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
                     this.colHistogram[x] = (this.colHistogram[x] + this.colHistogram[(x - 1)]);
                 }
 
-                for (let y: number = 0; (y < b.getHeight()); y++) {
+                for (let y:number = 0; (y < b.getHeight()); y++) {
                 }
 
                 this.imageHistogram[x][(b.getHeight() - 1)];
             }
 
-            for (let x: number = 0; (x < b.getWidth()); x++) {
+            for (let x:number = 0; (x < b.getWidth()); x++) {
             }
 
             this.colHistogram[(b.getWidth() - 1)];
@@ -104,18 +104,18 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
             //  Bitmap loc = new Bitmap(filename);
             this.samples = new Array(this.numSamples);
             this.colors = new Array(this.numSamples);
-            for (let i: number = 0; (i < this.numSamples); i++) {
-                let randX: number = ((<number>(i)) / (<number>(this.numSamples)));
-                let randY: number = QMC.halton(0, i);
-                let x: number = 0;
+            for (let i:number = 0; (i < this.numSamples); i++) {
+                let randX:number = ((<number>(i)) / (<number>(this.numSamples)));
+                let randY:number = QMC.halton(0, i);
+                let x:number = 0;
                 while (((randX >= this.colHistogram[x])
                 && (x
                 < (this.colHistogram.length - 1)))) {
                     x++;
                 }
 
-                let rowHistogram: number[] = this.imageHistogram[x];
-                let y: number = 0;
+                let rowHistogram:number[] = this.imageHistogram[x];
+                let y:number = 0;
                 while (((randY >= rowHistogram[y])
                 && (y
                 < (rowHistogram.length - 1)))) {
@@ -123,19 +123,19 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
                 }
 
                 //  sample from (x, y)
-                let u: number = (<number>((x == 0)));
-                // TODO: Warning!!!, inline IF is not supported ?
-                let v: number = (<number>((y == 0)));
-                // TODO: Warning!!!, inline IF is not supported ?
-                let px: number = (x == 0);
-                // TODO: Warning!!!, inline IF is not supported ?
-                let py: number = (y == 0);
-                // TODO: Warning!!!, inline IF is not supported ?
-                let su: number = ((x + u)
+                let u:number = (<number>((x == 0)));
+                // TODO:Warning!!!, inline IF is not supported ?
+                let v:number = (<number>((y == 0)));
+                // TODO:Warning!!!, inline IF is not supported ?
+                let px:number = (x == 0);
+                // TODO:Warning!!!, inline IF is not supported ?
+                let py:number = (y == 0);
+                // TODO:Warning!!!, inline IF is not supported ?
+                let su:number = ((x + u)
                 / this.colHistogram.length);
-                let sv: number = ((y + v)
+                let sv:number = ((y + v)
                 / rowHistogram.length);
-                let invP: number = ((<number>(Math.sin((sv * Math.PI))))
+                let invP:number = ((<number>(Math.sin((sv * Math.PI))))
                 * (this.jacobian
                 / (this.numSamples
                 * (px * py))));
@@ -156,7 +156,7 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
         return true;
     }
 
-    public init(name: String, api: SunflowAPI) {
+    init(name:string, api:GlobalIlluminationAPI) {
         //  register this object with the api properly
         api.geometry(name, this);
         if ((api.lookupGeometry(name) == null)) {
@@ -171,58 +171,58 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
         api.light((name + ".light"), this);
     }
 
-    public prepareShadingState(state: ShadingState) {
+    prepareShadingState(state:ShadingState) {
         if (state.includeLights()) {
             state.setShader(this);
         }
 
     }
 
-    public intersectPrimitive(r: Ray, primID: number, state: IntersectionState) {
+    intersectPrimitive(r:Ray, primID:number, state:IntersectionState) {
         if ((r.getMax() == Float.POSITIVE_INFINITY)) {
             state.setIntersection(0, 0, 0);
         }
 
     }
 
-    public getNumPrimitives(): number {
+    getNumPrimitives():number {
         return 1;
     }
 
-    public getPrimitiveBound(primID: number, i: number): number {
+    getPrimitiveBound(primID:number, i:number):number {
         return 0;
     }
 
-    public getWorldBounds(o2w: Matrix4): BoundingBox {
+    getWorldBounds(o2w:Matrix4):BoundingBox {
         return null;
     }
 
-    public getBakingPrimitives(): PrimitiveList {
+    getBakingPrimitives():PrimitiveList {
         return null;
     }
 
-    public getNumSamples(): number {
+    getNumSamples():number {
         return this.numSamples;
     }
 
-    public getSamples(state: ShadingState) {
+    getSamples(state:ShadingState) {
         if ((this.samples == null)) {
-            let n: number = (state.getDiffuseDepth() > 0);
-            // TODO: Warning!!!, inline IF is not supported ?
-            for (let i: number = 0; (i < n); i++) {
+            let n:number = (state.getDiffuseDepth() > 0);
+            // TODO:Warning!!!, inline IF is not supported ?
+            for (let i:number = 0; (i < n); i++) {
                 //  random offset on unit square, we use the infinite version of
                 //  getRandom because the light sampling is adaptive
-                let randX: number = state.getRandom(i, 0, n);
-                let randY: number = state.getRandom(i, 1, n);
-                let x: number = 0;
+                let randX:number = state.getRandom(i, 0, n);
+                let randY:number = state.getRandom(i, 1, n);
+                let x:number = 0;
                 while (((randX >= this.colHistogram[x])
                 && (x
                 < (this.colHistogram.length - 1)))) {
                     x++;
                 }
 
-                let rowHistogram: number[] = this.imageHistogram[x];
-                let y: number = 0;
+                let rowHistogram:number[] = this.imageHistogram[x];
+                let y:number = 0;
                 while (((randY >= rowHistogram[y])
                 && (y
                 < (rowHistogram.length - 1)))) {
@@ -230,29 +230,29 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
                 }
 
                 //  sample from (x, y)
-                let u: number = (<number>((x == 0)));
-                // TODO: Warning!!!, inline IF is not supported ?
-                let v: number = (<number>((y == 0)));
-                // TODO: Warning!!!, inline IF is not supported ?
-                let px: number = (x == 0);
-                // TODO: Warning!!!, inline IF is not supported ?
-                let py: number = (y == 0);
-                // TODO: Warning!!!, inline IF is not supported ?
-                let su: number = ((x + u)
+                let u:number = (<number>((x == 0)));
+                // TODO:Warning!!!, inline IF is not supported ?
+                let v:number = (<number>((y == 0)));
+                // TODO:Warning!!!, inline IF is not supported ?
+                let px:number = (x == 0);
+                // TODO:Warning!!!, inline IF is not supported ?
+                let py:number = (y == 0);
+                // TODO:Warning!!!, inline IF is not supported ?
+                let su:number = ((x + u)
                 / this.colHistogram.length);
-                let sv: number = ((y + v)
+                let sv:number = ((y + v)
                 / rowHistogram.length);
-                let invP: number = ((<number>(Math.sin((sv * Math.PI))))
+                let invP:number = ((<number>(Math.sin((sv * Math.PI))))
                 * (this.jacobian
                 / (n
                 * (px * py))));
-                let dir: Vector3 = this.getDirection(su, sv);
+                let dir:Vector3 = this.getDirection(su, sv);
                 this.basis.transform(dir);
                 if ((Vector3.dot(dir, state.getGeoNormal()) > 0)) {
-                    let dest: LightSample = new LightSample();
+                    let dest:LightSample = new LightSample();
                     dest.setShadowRay(new Ray(state.getPoint(), dir));
                     dest.getShadowRay().setMax(Float.MAX_VALUE);
-                    let radiance: Color = this.texture.getPixel(su, sv);
+                    let radiance:Color = this.texture.getPixel(su, sv);
                     dest.setRadiance(radiance, radiance);
                     dest.getDiffuseRadiance().mul(invP);
                     dest.getSpecularRadiance().mul(invP);
@@ -264,10 +264,10 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
 
         }
         else {
-            for (let i: number = 0; (i < this.numSamples); i++) {
+            for (let i:number = 0; (i < this.numSamples); i++) {
                 if (((Vector3.dot(this.samples[i], state.getGeoNormal()) > 0)
                     && (Vector3.dot(this.samples[i], state.getNormal()) > 0))) {
-                    let dest: LightSample = new LightSample();
+                    let dest:LightSample = new LightSample();
                     dest.setShadowRay(new Ray(state.getPoint(), this.samples[i]));
                     dest.getShadowRay().setMax(Float.MAX_VALUE);
                     dest.setRadiance(this.colors[i], this.colors[i]);
@@ -281,22 +281,22 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
 
     }
 
-    public getPhoton(randX1: number, randY1: number, randX2: number, randY2: number, p: Point3, dir: Vector3, power: Color) {
+    getPhoton(randX1:number, randY1:number, randX2:number, randY2:number, p:Point3, dir:Vector3, power:Color) {
 
     }
 
-    public getRadiance(state: ShadingState): Color {
+    getRadiance(state:ShadingState):Color {
         //  lookup texture based on ray direction
         return state.includeLights();
-        // TODO: Warning!!!, inline IF is not supported ?
+        // TODO:Warning!!!, inline IF is not supported ?
     }
 
-    private getColor(dir: Vector3): Color {
-        let v: number;
-        let u: number;
+    private getColor(dir:Vector3):Color {
+        let v:number;
+        let u:number;
         //  assume lon/lat format
-        let theta: number = 0;
-        let phi: number = 0;
+        let theta:number = 0;
+        let phi:number = 0;
         phi = Math.acos(dir.y);
         theta = Math.atan2(dir.z, dir.x);
         u = (<number>((0.5 - (0.5
@@ -305,13 +305,13 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
         return this.texture.getPixel(u, v);
     }
 
-    private getDirection(u: number, v: number): Vector3 {
-        let dest: Vector3 = new Vector3();
-        let theta: number = 0;
-        let phi: number = 0;
+    private getDirection(u:number, v:number):Vector3 {
+        let dest:Vector3 = new Vector3();
+        let theta:number = 0;
+        let phi:number = 0;
         theta = (u * (2 * Math.PI));
         phi = (v * Math.PI);
-        let sin_phi: number = Math.sin(phi);
+        let sin_phi:number = Math.sin(phi);
         dest.x = (<number>(((sin_phi * Math.cos(theta))
         * -1)));
         dest.y = (<number>(Math.cos(phi)));
@@ -319,11 +319,11 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
         return dest;
     }
 
-    public scatterPhoton(state: ShadingState, power: Color) {
+    scatterPhoton(state:ShadingState, power:Color) {
 
     }
 
-    public getPower(): number {
+    getPower():number {
         return 0;
     }
 }

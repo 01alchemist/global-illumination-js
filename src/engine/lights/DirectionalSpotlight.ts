@@ -3,19 +3,19 @@
  */
 export class DirectionalSpotlight implements LightSource {
 
-    private src: Point3;
+    private src:Point3;
 
-    private dir: Vector3;
+    private dir:Vector3;
 
-    private basis: OrthoNormalBasis;
+    private basis:OrthoNormalBasis;
 
-    private r: number;
+    private r:number;
 
-    private r2: number;
+    private r2:number;
 
-    private radiance: Color;
+    private radiance:Color;
 
-    public constructor () {
+    constructor () {
         this.src = new Point3(0, 0, 0);
         this.dir = new Vector3(0, 0, -1);
         this.dir.normalize();
@@ -25,7 +25,7 @@ export class DirectionalSpotlight implements LightSource {
         this.radiance = Color.WHITE;
     }
 
-    public update(pl: ParameterList, api: SunflowAPI): boolean {
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         this.src = pl.getPoint("source", this.src);
         this.dir = pl.getVector("dir", this.dir);
         this.dir.normalize();
@@ -36,22 +36,22 @@ export class DirectionalSpotlight implements LightSource {
         return true;
     }
 
-    public getNumSamples(): number {
+    getNumSamples():number {
         return 1;
     }
 
-    public getLowSamples(): number {
+    getLowSamples():number {
         return 1;
     }
 
-    public getSamples(state: ShadingState) {
+    getSamples(state:ShadingState) {
         if (((Vector3.dot(this.dir, state.getGeoNormal()) < 0)
             && (Vector3.dot(this.dir, state.getNormal()) < 0))) {
             //  project point onto source plane
-            let x: number = (state.getPoint().x - this.src.x);
-            let y: number = (state.getPoint().y - this.src.y);
-            let z: number = (state.getPoint().z - this.src.z);
-            let t: number = ((x * this.dir.x)
+            let x:number = (state.getPoint().x - this.src.x);
+            let y:number = (state.getPoint().y - this.src.y);
+            let z:number = (state.getPoint().z - this.src.z);
+            let t:number = ((x * this.dir.x)
             + ((y * this.dir.y)
             + (z * this.dir.z)));
             if ((t >= 0)) {
@@ -65,11 +65,11 @@ export class DirectionalSpotlight implements LightSource {
                     + ((y * y)
                     + (z * z)))
                     <= this.r2)) {
-                    let p: Point3 = new Point3();
+                    let p:Point3 = new Point3();
                     p.x = (this.src.x + x);
                     p.y = (this.src.y + y);
                     p.z = (this.src.z + z);
-                    let dest: LightSample = new LightSample();
+                    let dest:LightSample = new LightSample();
                     dest.setShadowRay(new Ray(state.getPoint(), p));
                     dest.setRadiance(this.radiance, this.radiance);
                     dest.traceShadow(state);
@@ -82,10 +82,10 @@ export class DirectionalSpotlight implements LightSource {
 
     }
 
-    public getPhoton(randX1: number, randY1: number, randX2: number, randY2: number, p: Point3, dir: Vector3, power: Color) {
-        let phi: number = (<number>((2
+    getPhoton(randX1:number, randY1:number, randX2:number, randY2:number, p:Point3, dir:Vector3, power:Color) {
+        let phi:number = (<number>((2
         * (Math.PI * randX1))));
-        let s: number = (<number>(Math.sqrt((1 - randY1))));
+        let s:number = (<number>(Math.sqrt((1 - randY1))));
         this.dir.x = (this.r
         * ((<number>(Math.cos(phi))) * s));
         this.dir.y = (this.r
@@ -97,7 +97,7 @@ export class DirectionalSpotlight implements LightSource {
         power.set(this.radiance).mul(((<number>(Math.PI)) * this.r2));
     }
 
-    public getPower(): number {
+    getPower():number {
         return this.radiance.copy().mul(((<number>(Math.PI)) * this.r2)).getLuminance();
     }
 }
