@@ -3,55 +3,40 @@
  */
 export class XYZColor {
 
-    private X:number;
-
-    private Y:number;
-
-    private Z:number;
-
-    constructor () {
-
+    constructor(private X:float = 0, private Y:float = 0, private Z:float = 0) {
     }
 
-    constructor (X:number, Y:number, Z:number) {
-        this.X = this.X;
-        this.Y = this.Y;
-        this.Z = this.Z;
-    }
-
-    getX():number {
+    getX():float {
         return this.X;
     }
 
-    getY():number {
+    getY():float {
         return this.Y;
     }
 
-    getZ():number {
+    getZ():float {
         return this.Z;
     }
 
-    mul(s:number):XYZColor {
-        this.X = (this.X * s);
-        this.Y = (this.Y * s);
-        this.Z = (this.Z * s);
+    mul(s:float):XYZColor {
+        this.X *= s;
+        this.Y *= s;
+        this.Z *= s;
         return this;
     }
 
     normalize() {
-        let XYZ:number = (this.X
-        + (this.Y + this.Z));
-        if ((XYZ < 1E-06)) {
+        let XYZ:float = this.X + this.Y + this.Z;
+        if (XYZ < 1E-06) {
             return;
         }
-
-        let s:number = (1 / XYZ);
-        this.X = (this.X * s);
-        this.Y = (this.Y * s);
-        this.Z = (this.Z * s);
+        let s:float = 1 / XYZ;
+        this.X *= s;
+        this.Y *= s;
+        this.Z *= s;
     }
 
     toString():string {
-        return String.format("(%.3f, %.3f, %.3f)", this.X, this.Y, this.Z);
+        return "(" + this.X + ", " + this.Y + ", " + this.Z + ")";
     }
 }

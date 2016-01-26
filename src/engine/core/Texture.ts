@@ -1,3 +1,4 @@
+import {Bitmap} from "../image/Bitmap";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
