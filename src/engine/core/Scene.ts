@@ -1,3 +1,15 @@
+import {InstanceList} from "./InstanceList";
+import {Camera} from "../scene/Camera";
+import {Instance} from "./Instance";
+import {LightSource} from "./LightSource";
+import {Shader} from "./Shader";
+import {IntersectionState} from "./IntersectionState";
+import {ShadingState} from "./ShadingState";
+import {AccelerationStructure} from "./AccelerationStructure";
+import {PrimitiveList} from "./PrimitiveList";
+import {PhotonStore} from "./PhotonStore";
+import {BrowserPlatform} from "../../utils/BrowserPlatform";
+import {Thread} from "../renderer/worker/Thread";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -5,36 +17,25 @@ export class Scene {
 
     //  scene storage
     private lightServer:LightServer;
-
     private instanceList:InstanceList;
-
     private infiniteInstanceList:InstanceList;
-
     private camera:Camera;
-
     private intAccel:AccelerationStructure;
-
     private acceltype:string;
 
     //  baking
     private bakingViewDependent:boolean;
-
     private bakingInstance:Instance;
-
     private bakingPrimitives:PrimitiveList;
-
     private bakingAccel:AccelerationStructure;
-
     private rebuildAccel:boolean;
 
     //  image size
     private imageWidth:number;
-
     private imageHeight:number;
 
     //  global options
     private threads:number;
-
     private lowPriority:boolean;
 
     constructor () {
@@ -49,23 +50,29 @@ export class Scene {
         this.camera = null;
         this.imageWidth = 640;
         this.imageHeight = 480;
-        this.threads = 0;
         this.lowPriority = true;
         this.rebuildAccel = true;
+        var result = BrowserPlatform.getAvailableProcessors();
+        if(isNaN(result)){
+            self = this;
+            result.then(function(threads){
+                self.threads = threads;
+            });
+        }else{
+            this.threads = result;
+        }
     }
 
     getThreads():number {
-        return (this.threads <= 0);
-        // TODO:Warning!!!, inline IF is not supported ?
+        return this.threads;
     }
 
     getThreadPriority():number {
-        return this.lowPriority;
-        // TODO:Warning!!!, inline IF is not supported ?
+        return this.lowPriority ? Thread.MIN_PRIORITY : Thread.NORM_PRIORITY;
     }
 
     setCamera(camera:Camera) {
-        this.camera = this.camera;
+        this.camera = camera;
     }
 
     getCamera():Camera {

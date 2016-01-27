@@ -17,6 +17,7 @@ import {IDisplay} from "../core/IDisplay";
 import {BucketThread} from "./worker/BucketThread";
 import {Thread} from "./worker/Thread";
 import {ImageSample} from "../imaging/ImageSample";
+import {IntersectionState} from "../core/IntersectionState";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
@@ -134,9 +135,9 @@ export class BucketRenderer {
         console.log("BCKT   info:   * Bucket size:       " + this.bucketSize);
         console.log("BCKT   info:   * Number of buckets: " + numBucketsX + "x" + numBucketsY);
         if (this.minAADepth != this.maxAADepth)
-            console.log("BCKT   info:   * Anti-aliasing:     " + this.aaDepthToString(this.minAADepth) + " -> " + this.aaDepthToString(this.maxAADepth) + " (adaptive)");
+            console.log("BCKT   info:   * Anti-aliasing:     " + BucketRenderer.aaDepthToString(this.minAADepth) + " -> " + BucketRenderer.aaDepthToString(this.maxAADepth) + " (adaptive)");
         else
-            console.log("BCKT   info:   * Anti-aliasing:     " + this.aaDepthToString(this.minAADepth) + " (fixed)");
+            console.log("BCKT   info:   * Anti-aliasing:     " + BucketRenderer.aaDepthToString(this.minAADepth) + " (fixed)");
         console.log("BCKT   info:   * Rays per sample:   " + this.superSampling);
         console.log("BCKT   info:   * Subpixel jitter:   " + this.useJitter ? "on" :(this.jitter ? "auto-off" :"off"));
         console.log("BCKT   info:   * Contrast threshold:" + this.contrastThreshold.toFixed(2));
@@ -145,7 +146,7 @@ export class BucketRenderer {
         return true;
     }
 
-    private aaDepthToString(depth:number):string {
+    static aaDepthToString(depth:number):string {
         var pixelAA:number = (depth) < 0 ? -(1 << (-depth)) :(1 << depth);
         return (depth < 0 ? "1/" :"") + (pixelAA * pixelAA) + " sample" + (depth == 0 ? "" :"s");
     }
@@ -161,7 +162,7 @@ export class BucketRenderer {
         var renderThreads:Thread[] = new Thread[scene.getThreads()];
         for (var i = 0; i < renderThreads.length; i++) {
             renderThreads[i] = new BucketThread(i);
-            renderThreads[i].setPriority(scene.getThreadPriority());
+            //renderThreads[i].setPriority(scene.getThreadPriority());
             renderThreads[i].start();
         }
         for (var i = 0; i < renderThreads.length; i++) {

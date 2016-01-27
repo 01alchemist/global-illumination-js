@@ -1,4 +1,5 @@
 import {Thread} from "./Thread";
+import {IntersectionState} from "../../core/IntersectionState";
 /**
  * Created by Nidin Vinayakan on 20/1/2016.
  */

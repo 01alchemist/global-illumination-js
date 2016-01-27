@@ -12,6 +12,10 @@ export class Thread {
     initialized:boolean;
     isTracing:boolean;
 
+    static MIN_PRIORITY:string = "low";
+    static NORM_PRIORITY:string = "normal";
+    static HIGH_PRIORITY:string = "high";
+
     constructor(name:string) {
 
         //console.log("Thread:"+name);
