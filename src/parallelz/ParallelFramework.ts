@@ -26,7 +26,7 @@ export class ParallelFramework{
             throw "ParallelFramework is singleton";
         }
         ParallelFramework._instance = this;
-        heapSize = heapSize || defaultSize;
+        heapSize = heapSize || this.defaultSize;
         this.heapBuffer = new SharedArrayBuffer(heapSize);
         this.HEAP = new Uint8Array(this.heapBuffer);
         this.heapRegister = new HeapRegister(heapSize);
