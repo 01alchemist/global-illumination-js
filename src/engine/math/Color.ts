@@ -202,7 +202,7 @@ export class Color {
     toRGBE():int {
         // encode the color into 32bits while preserving HDR using Ward's RGBE
         // technique
-        var v:float = MathUtils.max(this.r, this.g, this.b);
+        var v:float = Math.max(this.r, this.g, this.b);
         if (v < 1e-32) {
             return 0;
         }
@@ -226,6 +226,44 @@ export class Color {
         c |= (this.r * v) << 24;
         c |= (this.g * v) << 16;
         c |= (this.b * v) << 8;
+        return c;
+    }
+
+    static toRGBE(r,g?,b?):int {
+
+        if(arguments.length == 1){
+            var hex = r;
+            r = ((hex >> 16) & 255 ) / 255;
+            g = ((hex >> 8) & 255) / 255;
+            b = (hex & 255) / 255;
+        }
+
+        // encode the color into 32bits while preserving HDR using Ward's RGBE
+        // technique
+        var v:float = Math.max(r, g, b);
+        if (v < 1e-32) {
+            return 0;
+        }
+
+        // get mantissa and exponent
+        var m:float = v;
+        var e:int = 0;
+        if (v > 1.0) {
+            while (m > 1.0) {
+                m *= 0.5;
+                e++;
+            }
+        } else if (v <= 0.5) {
+            while (m <= 0.5) {
+                m *= 2.0;
+                e--;
+            }
+        }
+        v = (m * 255.0) / v;
+        var c:int = e + 128;
+        c |= (r * v) << 24;
+        c |= (g * v) << 16;
+        c |= (b * v) << 8;
         return c;
     }
 

@@ -1,4 +1,32 @@
-interface String{
+interface Headers {
+    append(key:string, value:string);
+    delete(key:string);
+    entries():Iterator;
+    get(key:string):string;
+    getAll():any[];
+    has(value:string):boolean;
+    keys():Iterator;
+    keys():string[];
+}
+interface Response {
+    type:string;
+    url:string;
+    useFinalURL:string;
+    status:string;
+    statusText:string;
+    headers:Headers;
+    ok:boolean;
+    clone():Response;
+    error();
+    redirect();
+    arrayBuffer():ArrayBuffer;
+    blob():Blob;
+    formData();
+    json():Object;
+    text():string;
+}
+declare function fetch(url:string, options:any):Promise;
+interface String {
     startsWith(value:string):boolean;
 }
 declare function postMessage(arg:any);
@@ -14,7 +42,7 @@ interface SharedArrayBuffer {
      */
     slice(begin:number, end?:number): ArrayBuffer;
 }
-interface SharedArrayBufferConstructor extends ArrayBufferConstructor{
+interface SharedArrayBufferConstructor extends ArrayBufferConstructor {
 
 }
 declare var SharedArrayBuffer:SharedArrayBufferConstructor;
@@ -40,21 +68,21 @@ interface SymbolConstructor {
      * Returns a new unique Symbol value.
      * @param  description Description of the new Symbol object.
      */
-    (description?: string|number): symbol;
+    (description?:string|number): symbol;
 
     /**
      * Returns a Symbol object from the global symbol registry matching the given key if found.
      * Otherwise, returns a new symbol with this key.
      * @param key key to search for.
      */
-    for(key: string): symbol;
+    for(key:string): symbol;
 
     /**
      * Returns a key from the global symbol registry matching the given Symbol if found.
      * Otherwise, returns a undefined.
      * @param sym Symbol to find the key for.
      */
-    keyFor(sym: symbol): string;
+    keyFor(sym:symbol): string;
 
     // Well-known Symbols
 
@@ -124,16 +152,16 @@ interface SymbolConstructor {
      */
     unscopables: symbol;
 }
-declare var Symbol: SymbolConstructor;
+declare var Symbol:SymbolConstructor;
 interface IteratorResult<T> {
     done: boolean;
     value?: T;
 }
 
 interface Iterator<T> {
-    next(value?: any): IteratorResult<T>;
-    return?(value?: any): IteratorResult<T>;
-    throw?(e?: any): IteratorResult<T>;
+    next(value?:any): IteratorResult<T>;
+    return?(value?:any): IteratorResult<T>;
+    throw?(e?:any): IteratorResult<T>;
 }
 
 interface Iterable<T> {
@@ -145,13 +173,13 @@ interface IterableIterator<T> extends Iterator<T> {
 }
 interface Map<K, V> {
     clear(): void;
-    delete(key: K): boolean;
+    delete(key:K): boolean;
     entries(): IterableIterator<[K, V]>;
-    forEach(callbackfn: (value: V, index: K, map: Map<K, V>) => void, thisArg?: any): void;
-    get(key: K): V;
-    has(key: K): boolean;
+    forEach(callbackfn:(value:V, index:K, map:Map<K, V>) => void, thisArg?:any): void;
+    get(key:K): V;
+    has(key:K): boolean;
     keys(): IterableIterator<K>;
-    set(key: K, value?: V): Map<K, V>;
+    set(key:K, value?:V): Map<K, V>;
     size: number;
     values(): IterableIterator<V>;
     [Symbol.iterator]():IterableIterator<[K,V]>;
@@ -161,7 +189,7 @@ interface Map<K, V> {
 interface MapConstructor {
     new (): Map<any, any>;
     new <K, V>(): Map<K, V>;
-    new <K, V>(iterable: Iterable<[K, V]>): Map<K, V>;
+    new <K, V>(iterable:Iterable<[K, V]>): Map<K, V>;
     prototype: Map<any, any>;
 }
-declare var Map: MapConstructor;
+declare var Map:MapConstructor;

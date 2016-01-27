@@ -433,6 +433,30 @@ export class ByteArrayBase {
         return str;
     }
 
+    public readLine():string {
+        return this.readStringTill("\n");
+    }
+
+    public readStringTill(endChar:string):string {
+
+        if(endChar.length > 1){
+            throw "readStringTill:: only support single char as argument";
+        }
+        var str:string = "";
+        var num:number = 0;
+        var endByte = endChar.charAt(0);
+        while (this.bytesAvailable > 0) {
+            var _byte:number = this.data.getUint8(this.position++);
+            num++;
+            if (_byte != endByte) {
+                str += String.fromCharCode(_byte);
+            } else {
+                break;
+            }
+        }
+        return str;
+    }
+
     /**
      * Writes a Boolean value. A single byte is written according to the value parameter,
      * either 1 if true or 0 if false.
@@ -812,7 +836,7 @@ export class ByteArrayBase {
         if (!createNewBuffer) {
 
             if ((this.bufferOffset + this.position) % 4 == 0) {
-                var result:Float32Array = new Int32Array(this.buffer, this.bufferOffset + this.position, length);
+                var result:Int32Array = new Int32Array(this.buffer, this.bufferOffset + this.position, length);
                 this.position += size;
             } else {
                 var tmp:Uint8Array = new Uint8Array(new ArrayBuffer(size));

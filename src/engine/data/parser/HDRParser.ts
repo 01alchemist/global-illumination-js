@@ -1,19 +1,41 @@
+import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 /**
  * Created by Nidin Vinayakan on 26/1/2016.
  */
+export function HDRPipe(isLinear:boolean=false){
+
+    return function (response:Response){
+        var _isLinear = isLinear;
+        return new HDRParser.parse(response.arrayBuffer());
+    };
+}
 export class HDRParser {
-
-    constructor() {
-
-    }
-    parse(){
+    
+    static parse(buffer:ArrayBuffer, offset:int=0, length:int=0){
+        var data:ByteArrayBase = new ByteArrayBase(buffer,  offset, length==0?buffer.byteLength:length);
+        var pixels:Int32Array;
         // parse header
         var parseWidth:boolean = false;
         var parseHeight:boolean = false;
-        this.width = this.height = 0;
+        var width = 0;
+        var height = 0;
         var last:int = 0;
-        while (this.width == 0 || this.height == 0 || last != '\n') {
-            var n:int = f.read();
+
+        data.readLine();
+        data.readLine();
+        data.readLine();
+        data.readLine();
+        data.readLine();
+        var dimension:string[] = data.readLine().split(" ");
+        if(dimension[0] === "-Y"){
+            height = parseInt(dimension[1]);
+            width = parseInt(dimension[3]);
+        }else if(dimension[0] === "+X"){
+            width = parseInt(dimension[1]);
+            height = parseInt(dimension[3]);
+        }
+        /*while (width == 0 || height == 0 || last != '\n') {
+            var n:string = String.fromCharCode(data.readByte());
             switch (n) {
                 case 'Y':
                     parseHeight = last == '-';
@@ -24,8 +46,8 @@ export class HDRParser {
                     parseWidth = last == '+';
                     break;
                 case ' ':
-                    parseWidth &= this.width == 0;
-                    parseHeight &= this.height == 0;
+                    parseWidth &= width == 0;
+                    parseHeight &= height == 0;
                     break;
                 case '0':
                 case '1':
@@ -38,57 +60,78 @@ export class HDRParser {
                 case '8':
                 case '9':
                     if (parseHeight)
-                        this.height = 10 * this.height + (n - '0');
+                        height = 10 * height + (n - '0');
                     else if (parseWidth)
-                        this.width = 10 * this.width + (n - '0');
+                        width = 10 * width + (n - '0');
                     break;
                 default:
                     parseWidth = parseHeight = false;
                     break;
             }
             last = n;
-        }
+        }*/
         // allocate image
-        this.pixels = new Int32Array[this.width * this.height];
-        if (this.width < 8 || this.width > 0x7fff) {
+        pixels = new Int32Array[width * height];
+        if (width < 8 || width > 0x7fff) {
             // run length encoding is not allowed so read flat
-            this.readFlatRGBE(f, 0, this.width * this.height);
+            let numPixels:int = width * height;
+            let rasterPos:int = 0;
+            while (numPixels-- > 0) {
+                var r:int = data.readByte();
+                var g:int = data.readByte();
+                var b:int = data.readByte();
+                var e:int = data.readByte();
+                pixels[rasterPos] = (r << 24) | (g << 16) | (b << 8) | e;
+                rasterPos++;
+            }
+
             return;
         }
-        int rasterPos = 0;
-        int numScanlines = height;
-        int[] scanlineBuffer = new int[4 * width];
+        let rasterPos:int = 0;
+        var numScanlines:int = height;
+        var scanlineBuffer:Int32Array = new Int32Array(4 * width);
         while (numScanlines > 0) {
-            int r = f.read();
-            int g = f.read();
-            int b = f.read();
-            int e = f.read();
+            var r:int = data.readByte();
+            var g:int = data.readByte();
+            var b:int = data.readByte();
+            var e:int = data.readByte();
             if ((r != 2) || (g != 2) || ((b & 0x80) != 0)) {
                 // this file is not run length encoded
                 pixels[rasterPos] = (r << 24) | (g << 16) | (b << 8) | e;
-                readFlatRGBE(f, rasterPos + 1, width * numScanlines - 1);
+
+                let numPixels:int = width * numScanlines - 1;
+                let _rasterPos:int = rasterPos + 1;
+                while (numPixels-- > 0) {
+                    var r:int = data.readByte();
+                    var g:int = data.readByte();
+                    var b:int = data.readByte();
+                    var e:int = data.readByte();
+                    pixels[_rasterPos] = (r << 24) | (g << 16) | (b << 8) | e;
+                    _rasterPos++;
+                }
+
                 return;
             }
 
             if (((b << 8) | e) != width) {
-                System.out.println("Invalid scanline width");
+                console.log("Invalid scanline width");
                 return;
             }
-            int p = 0;
+            var p:int = 0;
             // read each of the four channels for the scanline into
             // the buffer
-            for (int i = 0; i < 4; i++) {
+            for (let i:int = 0; i < 4; i++) {
                 if (p % width != 0)
-                    System.out.println("Unaligned access to scanline data");
-                int end = (i + 1) * width;
+                    console.log("Unaligned access to scanline data");
+                var end:int = (i + 1) * width;
                 while (p < end) {
-                    int b0 = f.read();
-                    int b1 = f.read();
+                    var b0:int = data.readByte();
+                    var b1:int = data.readByte();
                     if (b0 > 128) {
                         // a run of the same value
-                        int count = b0 - 128;
+                        let count:int = b0 - 128;
                         if ((count == 0) || (count > (end - p))) {
-                            System.out.println("Bad scanline data - invalid RLE run");
+                            console.log("Bad scanline data - invalid RLE run");
                             return;
                         }
                         while (count-- > 0) {
@@ -97,23 +140,24 @@ export class HDRParser {
                         }
                     } else {
                         // a non-run
-                        int count = b0;
+                        let count:int = b0;
                         if ((count == 0) || (count > (end - p))) {
-                            System.out.println("Bad scanline data - invalid count");
+                            console.log("Bad scanline data - invalid count");
                             return;
                         }
                         scanlineBuffer[p] = b1;
                         p++;
                         if (--count > 0) {
-                            for (int x = 0; x < count; x++)
-                            scanlineBuffer[p + x] = f.read();
+                            for (var x:int = 0; x < count; x++) {
+                                scanlineBuffer[p + x] = data.readByte();
+                            }
                             p += count;
                         }
                     }
                 }
             }
             // now convert data from buffer into floats
-            for (int i = 0; i < width; i++) {
+            for (let i:int = 0; i < width; i++) {
                 r = scanlineBuffer[i];
                 g = scanlineBuffer[i + width];
                 b = scanlineBuffer[i + 2 * width];
@@ -124,9 +168,9 @@ export class HDRParser {
             numScanlines--;
         }
         // flip image
-        for (int y = 0, i = 0, ir = (height - 1) * width; y < height / 2; y++, ir -= width) {
-            for (int x = 0, i2 = ir; x < width; x++, i++, i2++) {
-                int t = pixels[i];
+        for (let y:int = 0, i = 0, ir = (height - 1) * width; y < height / 2; y++, ir -= width) {
+            for (let x:int = 0, i2 = ir; x < width; x++, i++, i2++) {
+                let t:int = pixels[i];
                 pixels[i] = pixels[i2];
                 pixels[i2] = t;
             }
