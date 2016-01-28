@@ -1,68 +1,52 @@
+import {Ray} from "./Ray";
+import {Instance} from "./Instance";
+import {OrthoNormalBasis} from "../math/OrthoNormalBasis";
+import {Vector3} from "../math/Vector3";
+import {Point2} from "../math/Point2";
+import {Point3} from "../math/Point3";
+import {Color} from "../math/Color";
+import {LightServer} from "./LightServer";
+import {IntersectionState} from "./IntersectionState";
+import {LightSample} from "./LightSample";
+import {Shader} from "./Shader";
+import {Modifier} from "./Modifier";
+import {PhotonStore} from "./PhotonStore";
+import {TriangleMesh} from "../primitive/TriangleMesh";
+import {PrimitiveList} from "./PrimitiveList";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
 export class ShadingState implements Iterable<LightSample> {
 
     private istate:IntersectionState;
-
     private server:LightServer;
-
     private rx:number;
-
     private ry:number;
-
     private result:Color;
-
     private p:Point3;
-
     private n:Vector3;
-
     private tex:Point2;
-
     private ng:Vector3;
-
     private basis:OrthoNormalBasis;
-
     private cosND:number;
-
     private behind:boolean;
-
     private hitU:number;
-
     private hitV:number;
-
     private instance:Instance;
-
     private primitiveID:number;
-
     private r:Ray;
-
-    private d:number;
-
-    //  quasi monte carlo instance variables
-    private i:number;
-
-    //  quasi monte carlo instance variables
+    private d:number;// quasi monte carlo instance variables
+    private i:number;// quasi monte carlo instance variables
     private qmcD0I:number;
-
     private qmcD1I:number;
-
     private shader:Shader;
-
     private modifier:Modifier;
-
     private diffuseDepth:number;
-
     private reflectionDepth:number;
-
     private refractionDepth:number;
-
     private includeLights:boolean;
-
     private includeSpecular:boolean;
-
     private lightSample:LightSample;
-
     private map:PhotonStore;
 
     static createPhotonState(r:Ray, istate:IntersectionState, i:number, map:PhotonStore, server:LightServer):ShadingState {
@@ -366,11 +350,11 @@ export class ShadingState implements Iterable<LightSample> {
 
     getTrianglePoints(p:Point3[]):boolean {
         let prims:PrimitiveList = this.instance.getGeometry().getPrimitiveList();
-        if ((prims instanceof  TriangleMesh)) {
-            let m:TriangleMesh = (<TriangleMesh>(prims));
-            m.getPoint(this.primitiveID, 0, p[0Unknown=newPoint3(Unknown);
-            m.getPoint(this.primitiveID, 1, p[1Unknown=newPoint3(Unknown);
-            m.getPoint(this.primitiveID, 2, p[2Unknown=newPoint3(Unknown);
+        if (prims instanceof  TriangleMesh) {
+            let m:TriangleMesh = <TriangleMesh>prims;
+            m.getPoint(this.primitiveID, 0, p[0]=new Point3());
+            m.getPoint(this.primitiveID, 1, p[1]=new Point3());
+            m.getPoint(this.primitiveID, 2, p[2]=new Point3());
             return true;
         }
 

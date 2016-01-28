@@ -4,6 +4,7 @@ import {BufferedImage} from "./BufferedImage";
 import {Color} from "../math/Color";
 import {ByteArrayBase} from "../../pointer/ByteArrayBase";
 import {BrowserPlatform} from "../../utils/BrowserPlatform";
+import {IBitmap} from "./IBitmap";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -23,10 +24,19 @@ export class Bitmap {
         }
     }
 
-    load(filename:string, isLinear:boolean) {
+    load(filename:string, isLinear:boolean):Promise {
 
-        ImageLoader.load(filename, isLinear).then(function () {
-
+        var self = this;
+        return new Promise(function(resolve, reject){
+            ImageLoader.load(filename, isLinear).then(function (image:IBitmap) {
+                self.pixels = image.pixels;
+                self.width = image.width;
+                self.height = image.height;
+                self.isHDR = image.isHDR;
+                resolve(self);
+            }).catch(function(error){
+                reject(error);
+            })
         });
     }
 

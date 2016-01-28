@@ -35,6 +35,12 @@ export class CoreEstimator {
     }
     static instance:CoreEstimator;
 
+
+
+    private dom_implemented:boolean;
+    private previously_run:boolean;
+    private workload:string;
+
     constructor() {
 
         if(CoreEstimator.instance){
@@ -44,7 +50,7 @@ export class CoreEstimator {
         CoreEstimator.instance = this;
 
         // Set up performance testing function
-        var performance = view.performance || Date;
+        var performance = window.performance || Date;
         if (!performance.now) {
             if (performance.webkitNow) {
                 performance.now = performance.webkitNow;
@@ -55,17 +61,21 @@ export class CoreEstimator {
             }
         }
 
+        if(navigator.hardwareConcurrency){
+            this.dom_implemented = true;
+        }
+
         // Path to workload.js is derived from the path of the running script.
-        var workload = "workload.js";
+        this.workload = "workload.js";
 
         var previously_run = false;
 
         // Set navigator.hardwareConcurrency to a sane value before getHardwareConcurrency is ever run
-        if (!dom_implemented) {
+        if (!this.dom_implemented) {
             /** @expose */ navigator.hardwareConcurrency = 1;
             if (typeof Worker === "undefined") {
                 // Web workers not supported, effectively single-core
-                dom_implemented = true;
+                this.dom_implemented = true;
             }
         }
 
@@ -80,19 +90,19 @@ export class CoreEstimator {
      *
      * @expose
      **/
-    getHardwareConcurrency(callback, options) {
+    getHardwareConcurrency(callback, options?) {
         options = options || {};
         if (!('use_cache' in options)) {
             options.use_cache = true;
         }
 
         // If we already have an answer, return early.
-        if (dom_implemented || (options.use_cache && previously_run)) {
+        if (this.dom_implemented || (options.use_cache && this.previously_run)) {
             callback(navigator.hardwareConcurrency);
             return;
         }
 
-        doc.documentElement.style.cursor = "progress";
+        document.documentElement.style.cursor = "progress";
 
         var workers = []; // An array of workers ready to run the payload
 
@@ -108,11 +118,11 @@ export class CoreEstimator {
 
                 if (worker_size === 1) {
                     Array.prototype.push.apply(controldata, data);
-                    control = self.analyse(controldata);
+                    control = CoreEstimator.analyse(controldata);
 
                     report(true);
                 } else {
-                    var group = self.analyse(data);
+                    var group = CoreEstimator.analyse(data);
 
                     var gv_gs = group.uvariance / group.size;
                     var cv_cs = control.uvariance / control.size;
@@ -121,7 +131,7 @@ export class CoreEstimator {
                         (Math.pow(group.uvariance, 2) / (Math.pow(group.size, 2) * (group.size - 1) ) +
                         Math.pow(control.uvariance, 2) / (Math.pow(control.size, 2) * (control.size - 1))); // don't ask
 
-                    report(accept(tscore, freedom));
+                    report(self.accept(tscore, freedom));
                 }
             });
 
@@ -133,9 +143,9 @@ export class CoreEstimator {
             }
 
             // We found an estimate
-            doc.documentElement.style.cursor = "";
+            document.documentElement.style.cursor = "";
             navigator.hardwareConcurrency = cores;
-            previously_run = true;
+            self.previously_run = true;
             callback(cores);
 
         }, options.progress);
@@ -154,10 +164,10 @@ export class CoreEstimator {
 
         // Guarantee that we have enough workers
         for (var i = workers.length; i < worker_size; i++) {
-            workers.push(new Worker(workload));
+            workers.push(new Worker(this.workload));
         }
 
-        loop(function (_repeat) {
+        this.loop(function (_repeat) {
             var begin, left = worker_size; // Number of workers we are waiting to finish
 
             // When a worker completes
@@ -274,7 +284,7 @@ export class CoreEstimator {
      * Given an array of values, it returns a set of statistics.
      *
      **/
-    analyse(data) {
+    static analyse(data) {
         // If we have no values, return null.
         var len = data.length;
         if (!len) {
@@ -305,7 +315,7 @@ export class CoreEstimator {
         }
 
         // Store statistics into object
-        var stats = {
+        return {
             size: len,
             //min: min,
             //max: max,
@@ -313,8 +323,6 @@ export class CoreEstimator {
             //variance: variance,
             uvariance: unbiased_variance
         };
-
-        return stats;
     }
 
     /**
@@ -327,7 +335,7 @@ export class CoreEstimator {
      **/
 
     // This object is created from a t-table given a one-sided test and a 99.5% confidence.
-    /** @const */ private table = {
+    /** @const */ static table = {
         1: 63.66,
         2: 9.925,
         3: 5.841,
@@ -379,7 +387,7 @@ export class CoreEstimator {
     };
 
     accept(tscore, freedom) {
-        var keys = Object.keys(table);
+        var keys = Object.keys(CoreEstimator.table);
 
         var key_low = keys.reduce(function (p, c) {
             if (freedom < c) return p;
@@ -391,12 +399,12 @@ export class CoreEstimator {
         });
 
         var span = key_high - key_low;
-        var critical = linear(table[key_low], table[key_high], (freedom - key_low) / span);
+        var critical = CoreEstimator.linear(CoreEstimator.table[key_low], CoreEstimator.table[key_high], (freedom - key_low) / span);
 
         return tscore < critical;
     }
 
-    linear(a, b, t) {
+    static linear(a, b, t) {
         return a + (b - a) * t;
     }
 }

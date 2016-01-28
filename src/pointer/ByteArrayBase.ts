@@ -744,6 +744,21 @@ export class ByteArrayBase {
     }
 
     /**
+     * Read and copy value to provided Uint8Array from the byte stream.
+     * @param    b          the buffer into which the data is read.
+     * @param    offset     the start offset in the destination array <code>b</code>
+     * @param    length     An unsigned short indicating the length of the Uint8Array.
+     */
+    public read(b:Uint8Array, offset:number, length:number):number {
+        if (!this.validate(length)) return null;
+        for (var i = 0; i < length; i++) {
+            b[i] = this.data.getUint8(this.position + offset);
+            this.position += ByteArrayBase.SIZE_OF_UINT8;
+        }
+        return length;
+    }
+
+    /**
      * Read a Uint16Array from the byte stream.
      * @param    length An unsigned short indicating the length of the Uint16Array.
      */

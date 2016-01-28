@@ -1,62 +1,76 @@
+import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
+import {IBitmap} from "../../image/IBitmap";
+import {RGBSpace} from "../../image/RGBSpace";
 /**
  * Created by Nidin Vinayakan on 27/1/2016.
  */
-export function TGAPipe(response){
-    return response.arrayBuffer();
+export function TGAPipe(isLinear?:boolean) {
+
+    return function (response:Response) {
+        return new Promise(function (resolve, reject) {
+            response.arrayBuffer().then(function (data) {
+                try {
+                    resolve(TGAParser.parse(data, isLinear));
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
+    };
 }
 export class TGAParser {
 
-    constructor() {
-
-    }
-    parse(){
-        isHDR = false;
-        FileInputStream f = new FileInputStream(filename);
-        int pix_ptr = 0, pix = 0, r, j;
-        byte[] read = new byte[4];
+    static parse(buffer:ArrayBuffer, isLinear:boolean = false, offset:int = 0, length:int = 0):IBitmap {
+        var data:ByteArrayBase = new ByteArrayBase(buffer, offset, length == 0 ? buffer.byteLength : length);
+        var pix_ptr:int = 0;
+        var pix:int = 0;
+        var r:int;
+        var j:int;
+        var read:Uint8Array = new Uint8Array(4);
 
         // read header
-        int idsize = f.read() & 0xFF;
-        f.read(); // cmap byte (unsupported)
-        int datatype = f.read() & 0xFF;
+        var idsize:int = data.readByte() & 0xFF;
+        data.readByte(); // cmap byte (unsupported)
+        var datatype:int = data.readByte() & 0xFF;
 
         // colormap info (not supported)
-        f.read();
-        f.read();
-        f.read();
-        f.read();
-        f.read();
+        data.readByte();
+        data.readByte();
+        data.readByte();
+        data.readByte();
+        data.readByte();
 
-        f.read(); // xstart, 16 bits
-        f.read();
-        f.read(); // ystart, 16 bits
-        f.read();
+        data.readByte(); // xstart, 16 bits
+        data.readByte();
+        data.readByte(); // ystart, 16 bits
+        data.readByte();
 
         // read resolution
-        width = (f.read() & 0xFF);
-        width |= ((f.read() & 0xFF) << 8);
-        height = (f.read() & 0xFF);
-        height |= ((f.read() & 0xFF) << 8);
+        var width = (data.readByte() & 0xFF);
+        width |= ((data.readByte() & 0xFF) << 8);
+        var height = (data.readByte() & 0xFF);
+        height |= ((data.readByte() & 0xFF) << 8);
 
-        pixels = new int[width * height];
+        var pixels = new Int32Array(width * height);
 
-        int bpp = (f.read() & 0xFF) / 8;
+        var bpp:int = (data.readByte() & 0xFF) / 8;
 
-        int imgdscr = (f.read() & 0xFF);
+        var imgdscr:int = data.readByte() & 0xFF;
 
         // skip image ID
-        if (idsize != 0)
-            f.skip(idsize);
+        if (idsize != 0) {
+            data.position += idsize;
+        }
 
         switch (datatype) {
             case 10:
                 // RLE RGB image
                 while (pix_ptr < (width * height)) {
-                    r = (f.read() & 0xFF);
+                    r = (data.readByte() & 0xFF);
                     if ((r & 128) == 128) {
                         // a runlength packet
                         r &= 127;
-                        f.read(read, 0, bpp);
+                        data.read(read, 0, bpp);
                         // alpha not yet supported
                         pix = (read[2] & 0xFF) << 16;
                         pix |= (read[1] & 0xFF) << 8;
@@ -69,7 +83,7 @@ export class TGAParser {
                         // a raw packet
                         r &= 127;
                         for (j = 0; j <= r; j++, pix_ptr++) {
-                            f.read(read, 0, bpp);
+                            data.read(read, 0, bpp);
                             // alpha not yet supported
                             pix = ((read[2] & 0xFF) << 16);
                             pix |= ((read[1] & 0xFF) << 8);
@@ -82,7 +96,7 @@ export class TGAParser {
             case 2:
                 // Uncompressed RGB
                 for (pix_ptr = 0; pix_ptr < (width * height); pix_ptr++) {
-                    f.read(read, 0, bpp);
+                    data.read(read, 0, bpp);
                     // the order is bgr reading from the file
                     // alpha not yet supported
                     pix = ((read[2] & 0xFF) << 16);
@@ -92,20 +106,21 @@ export class TGAParser {
                 }
                 break;
             default:
-                UI.printWarning(Module.IMG, "Unsupported TGA datatype: %s", datatype);
+                console.log("Unsupported TGA datatype: " + datatype);
                 break;
         }
         if ((imgdscr & 32) == 32) {
             pix_ptr = 0;
-            for (int y = 0; y < (height / 2); y++)
-            for (int x = 0; x < width; x++) {
-                int t = pixels[pix_ptr];
-                pixels[pix_ptr] = pixels[(height - y - 1) * width + x];
-                pixels[(height - y - 1) * width + x] = t;
-                pix_ptr++;
+            for (var y:int = 0; y < (height / 2); y++) {
+                for (var x:int = 0; x < width; x++) {
+                    var t:int = pixels[pix_ptr];
+                    pixels[pix_ptr] = pixels[(height - y - 1) * width + x];
+                    pixels[(height - y - 1) * width + x] = t;
+                    pix_ptr++;
+                }
             }
-
         }
-        f.close();
+
+        return <IBitmap>{width: width, height: height, pixels: pixels, isHDR: false};
     }
 }

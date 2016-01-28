@@ -119,16 +119,16 @@ export class Color {
 
     /* operations */
     toNonLinear():Color {
-        this.r = RGBSpace.SRGB.gammaCorrect(r);
-        this.g = RGBSpace.SRGB.gammaCorrect(g);
-        this.b = RGBSpace.SRGB.gammaCorrect(b);
+        this.r = RGBSpace.SRGB.gammaCorrect(this.r);
+        this.g = RGBSpace.SRGB.gammaCorrect(this.g);
+        this.b = RGBSpace.SRGB.gammaCorrect(this.b);
         return this;
     }
 
     toLinear():Color {
-        this.r = RGBSpace.SRGB.ungammaCorrect(r);
-        this.g = RGBSpace.SRGB.ungammaCorrect(g);
-        this.b = RGBSpace.SRGB.ungammaCorrect(b);
+        this.r = RGBSpace.SRGB.ungammaCorrect(this.r);
+        this.g = RGBSpace.SRGB.ungammaCorrect(this.g);
+        this.b = RGBSpace.SRGB.ungammaCorrect(this.b);
         return this;
     }
 
@@ -229,9 +229,9 @@ export class Color {
         return c;
     }
 
-    static toRGBE(r,g?,b?):int {
+    static toRGBE(r, g?, b?):int {
 
-        if(arguments.length == 1){
+        if (arguments.length == 1) {
             var hex = r;
             r = ((hex >> 16) & 255 ) / 255;
             g = ((hex >> 8) & 255) / 255;
@@ -286,6 +286,12 @@ export class Color {
         this.r += s.r * c.r;
         this.g += s.g * c.g;
         this.b += s.b * c.b;
+        return this;
+    }
+    maddScalar(s:float, c:Color):Color {
+        this.r += s * c.r;
+        this.g += s * c.g;
+        this.b += s * c.b;
         return this;
     }
 
@@ -345,6 +351,12 @@ export class Color {
     }
 
     /* STATIC METHODS */
+    static mul(s:float, c:Color, dest:Color = new Color()):Color {
+        dest.r = s * c.r;
+        dest.g = s * c.g;
+        dest.b = s * c.b;
+        return dest;
+    }
 
     static blend(c1:Color, c2:Color, b:Color, dest?:Color) {
         dest = dest ? dest : new Color();

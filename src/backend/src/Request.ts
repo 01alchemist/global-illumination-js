@@ -21,6 +21,6 @@ export function xml(response:Response) {
         return parser.parseFromString(text,"application/xml");
     });
 }
-export function arrayBuffer(response:Response):ArrayBuffer {
+export function arrayBuffer(response:Response):Promise {
     return response.arrayBuffer();
 }

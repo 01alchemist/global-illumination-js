@@ -19,11 +19,11 @@ interface Response {
     clone():Response;
     error();
     redirect();
-    arrayBuffer():ArrayBuffer;
-    blob():Blob;
+    arrayBuffer():Promise;
+    blob():Promise;
     formData();
-    json():Object;
-    text():string;
+    json():Promise;
+    text():Promise;
 }
 declare function fetch(url:string, options:any):Promise;
 interface String {

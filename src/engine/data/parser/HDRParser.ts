@@ -1,18 +1,26 @@
 import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
+import {IBitmap} from "../../image/IBitmap";
 /**
  * Created by Nidin Vinayakan on 26/1/2016.
  */
-export function HDRPipe(isLinear:boolean=false){
+export function HDRPipe(isLinear?:boolean) {
 
-    return function (response:Response){
-        var _isLinear = isLinear;
-        return new HDRParser.parse(response.arrayBuffer());
+    return function (response:Response) {
+        return new Promise(function (resolve, reject) {
+            response.arrayBuffer().then(function (data) {
+                try{
+                    resolve(HDRParser.parse(data));
+                }catch (e){
+                    reject(e);
+                }
+            });
+        });
     };
 }
 export class HDRParser {
-    
-    static parse(buffer:ArrayBuffer, offset:int=0, length:int=0){
-        var data:ByteArrayBase = new ByteArrayBase(buffer,  offset, length==0?buffer.byteLength:length);
+
+    static parse(buffer:ArrayBuffer, offset:int = 0, length:int = 0):IBitmap {
+        var data:ByteArrayBase = new ByteArrayBase(buffer, offset, length == 0 ? buffer.byteLength : length);
         var pixels:Int32Array;
         // parse header
         var parseWidth:boolean = false;
@@ -21,55 +29,56 @@ export class HDRParser {
         var height = 0;
         var last:int = 0;
 
-        data.readLine();
-        data.readLine();
-        data.readLine();
-        data.readLine();
-        data.readLine();
+        console.log(data.readLine());
+        console.log(data.readLine());
+        console.log(data.readLine());
+        console.log(data.readLine());
+        console.log(data.readLine());
         var dimension:string[] = data.readLine().split(" ");
-        if(dimension[0] === "-Y"){
+        if (dimension[0] === "-Y") {
             height = parseInt(dimension[1]);
             width = parseInt(dimension[3]);
-        }else if(dimension[0] === "+X"){
+        } else if (dimension[0] === "+X") {
             width = parseInt(dimension[1]);
             height = parseInt(dimension[3]);
         }
+        console.log(width + " x " + height);
         /*while (width == 0 || height == 0 || last != '\n') {
-            var n:string = String.fromCharCode(data.readByte());
-            switch (n) {
-                case 'Y':
-                    parseHeight = last == '-';
-                    parseWidth = false;
-                    break;
-                case 'X':
-                    parseHeight = false;
-                    parseWidth = last == '+';
-                    break;
-                case ' ':
-                    parseWidth &= width == 0;
-                    parseHeight &= height == 0;
-                    break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    if (parseHeight)
-                        height = 10 * height + (n - '0');
-                    else if (parseWidth)
-                        width = 10 * width + (n - '0');
-                    break;
-                default:
-                    parseWidth = parseHeight = false;
-                    break;
-            }
-            last = n;
-        }*/
+         var n:string = String.fromCharCode(data.readByte());
+         switch (n) {
+         case 'Y':
+         parseHeight = last == '-';
+         parseWidth = false;
+         break;
+         case 'X':
+         parseHeight = false;
+         parseWidth = last == '+';
+         break;
+         case ' ':
+         parseWidth &= width == 0;
+         parseHeight &= height == 0;
+         break;
+         case '0':
+         case '1':
+         case '2':
+         case '3':
+         case '4':
+         case '5':
+         case '6':
+         case '7':
+         case '8':
+         case '9':
+         if (parseHeight)
+         height = 10 * height + (n - '0');
+         else if (parseWidth)
+         width = 10 * width + (n - '0');
+         break;
+         default:
+         parseWidth = parseHeight = false;
+         break;
+         }
+         last = n;
+         }*/
         // allocate image
         pixels = new Int32Array[width * height];
         if (width < 8 || width > 0x7fff) {
@@ -175,5 +184,7 @@ export class HDRParser {
                 pixels[i2] = t;
             }
         }
+
+        return <IBitmap>{width: width, height: height, pixels: pixels, isHDR: true};
     }
 }
