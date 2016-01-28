@@ -1,3 +1,11 @@
+import {GlobalIlluminationAPI} from "../../GlobalIlluminatiionAPI";
+import {SceneParser} from "../../core/SceneParser";
+import {TriangleMesh} from "../../primitive/TriangleMesh";
+import {SimpleShader} from "../../shader/SimpleShader";
+import {Parser} from "angular2/src/core/change_detection/parser/parser";
+import {Point3} from "../../math/Point3";
+import {Vector3} from "../../math/Vector3";
+import {PinholeLens} from "../../camera/PinholeLens";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -5,7 +13,7 @@ export class RA2Parser implements SceneParser {
 
     parse(filename:string, api:GlobalIlluminationAPI):boolean {
         try {
-            UI.printInfo(Module.USER, "RA2 - Reading geometry:\""%s\"" ...", filename);
+            console.log("RA2 - Reading geometry:"+filename+" ...");
             let file:File = new File(filename);
             let stream:FileInputStream = new FileInputStream(filename);
             let map:MappedByteBuffer = stream.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, file.length());
@@ -33,18 +41,14 @@ export class RA2Parser implements SceneParser {
             api.parameter("shaders", (filename + ".shader"));
             api.instance((filename + ".instance"), filename);
         }
-        catch (e /*:FileNotFoundException*/) {
-            e.printStackTrace();
-            return false;
-        }
-        catch (e /*:IOException*/) {
-            e.printStackTrace();
+        catch (e) {
+            console.log(e);
             return false;
         }
 
         try {
             filename = filename.replace(".ra2", ".txt");
-            UI.printInfo(Module.USER, "RA2 - Reading camera  :\""%s\"" ...", filename);
+            console.log("RA2 - Reading camera  :"+filename+" ...");
             let p:Parser = new Parser(filename);
             let eye:Point3 = new Point3();
             eye.x = p.getNextFloat();
@@ -83,12 +87,8 @@ export class RA2Parser implements SceneParser {
             api.options(GlobalIlluminationAPI.DEFAULT_OPTIONS);
             p.close();
         }
-        catch (e /*:FileNotFoundException*/) {
-            console.warn(Module.USER, "RA2 - Camera file not found");
-        }
-        catch (e /*:IOException*/) {
-            e.printStackTrace();
-            return false;
+        catch (e) {
+            console.warn("RA2 - Camera file not found");
         }
 
         return true;

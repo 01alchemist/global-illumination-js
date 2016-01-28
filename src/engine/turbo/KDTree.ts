@@ -1,67 +1,21 @@
 /**
  * Created by Nidin Vinayakan on 21/1/2016.
  */
-export class KDTree implements IAccelerationStructure {
-
-    private tree:number[];
-
-    private primitives:number[];
-
-    private primitiveList:PrimitiveList;
-
-    private bounds:BoundingBox;
-
-    private maxPrims:number;
-
-    private static INTERSECT_COST:number = 0.5;
-
-    private static TRAVERSAL_COST:number = 1;
-
-    private static EMPTY_BONUS:number = 0.2;
-
-    private static MAX_DEPTH:number = 64;
-
-    private static dump:boolean = false;
-
-    private static dumpPrefix:string = "kdtree";
-
-    constructor () :
-    this(0) {
-    this.(0);
-}
-
-constructor (maxPrims:number) {
-    this.maxPrims = this.maxPrims;
-}
-
 class BuildStats {
 
     private numNodes:number;
-
     private numLeaves:number;
-
     private sumObjects:number;
-
     private minObjects:number;
-
     private maxObjects:number;
-
     private sumDepth:number;
-
     private minDepth:number;
-
     private maxDepth:number;
-
     private numLeaves0:number;
-
     private numLeaves1:number;
-
     private numLeaves2:number;
-
     private numLeaves3:number;
-
     private numLeaves4:number;
-
     private numLeaves4p:number;
 
     constructor () {
@@ -118,31 +72,49 @@ class BuildStats {
     }
 
     printStats() {
-        UI.printDetailed(Module.ACCEL, "KDTree stats:");
-        UI.printDetailed(Module.ACCEL, "  * Nodes:         %d", this.numNodes);
-        UI.printDetailed(Module.ACCEL, "  * Leaves:        %d", this.numLeaves);
-        UI.printDetailed(Module.ACCEL, "  * Objects:min    %d", this.minObjects);
-        UI.printDetailed(Module.ACCEL, "             avg    %.2f", ((<number>(this.sumObjects)) / this.numLeaves));
-        UI.printDetailed(Module.ACCEL, "           avg(n>0) %.2f", ((<number>(this.sumObjects))
-        / (this.numLeaves - this.numLeaves0)));
-        UI.printDetailed(Module.ACCEL, "             max    %d", this.maxObjects);
-        UI.printDetailed(Module.ACCEL, "  * Depth:  min    %d", this.minDepth);
-        UI.printDetailed(Module.ACCEL, "             avg    %.2f", ((<number>(this.sumDepth)) / this.numLeaves));
-        UI.printDetailed(Module.ACCEL, "             max    %d", this.maxDepth);
-        UI.printDetailed(Module.ACCEL, "  * Leaves w/:N=0  %3d%%", (100
+        console.log("KDTree stats:");
+        console.log("  * Nodes:         "+ this.numNodes);
+        console.log("  * Leaves:        "+ this.numLeaves);
+        console.log("  * Objects:min    "+ this.minObjects);
+        console.log("             avg    "+ this.sumObjects / this.numLeaves;
+        console.log("           avg(n>0) "+ this.sumObjects / this.numLeaves - this.numLeaves0;
+        console.log("             max    "+ this.maxObjects);
+        console.log("  * Depth:  min    "+ this.minDepth);
+        console.log("             avg    %.2f", this.sumDepth / this.numLeaves;
+        console.log("             max    "+ this.maxDepth);
+        console.log("  * Leaves w/:N=0  %3d%%", (100
         * (this.numLeaves0 / this.numLeaves)));
-        UI.printDetailed(Module.ACCEL, "               N=1  %3d%%", (100
+        console.log("               N=1  %3d%%", (100
         * (this.numLeaves1 / this.numLeaves)));
-        UI.printDetailed(Module.ACCEL, "               N=2  %3d%%", (100
+        console.log("               N=2  %3d%%", (100
         * (this.numLeaves2 / this.numLeaves)));
-        UI.printDetailed(Module.ACCEL, "               N=3  %3d%%", (100
+        console.log("               N=3  %3d%%", (100
         * (this.numLeaves3 / this.numLeaves)));
-        UI.printDetailed(Module.ACCEL, "               N=4  %3d%%", (100
+        console.log("               N=4  %3d%%", (100
         * (this.numLeaves4 / this.numLeaves)));
-        UI.printDetailed(Module.ACCEL, "               N>4  %3d%%", (100
+        console.log("               N>4  %3d%%", (100
         * (this.numLeaves4p / this.numLeaves)));
     }
 }
+export class KDTree implements IAccelerationStructure {
+
+    private tree:number[];
+    private primitives:number[];
+    private primitiveList:PrimitiveList;
+    private bounds:BoundingBox;
+    private maxPrims:number;
+    private static INTERSECT_COST:number = 0.5;
+    private static TRAVERSAL_COST:number = 1;
+    private static EMPTY_BONUS:number = 0.2;
+    private static MAX_DEPTH:number = 64;
+    private static dump:boolean = false;
+    private static dumpPrefix:string = "kdtree";
+
+constructor (maxPrims:number) {
+    this.maxPrims = maxPrims;
+}
+
+
 
 static setDumpMode(dump:boolean, prefix:string) {
     KDTree.dump = dump;
@@ -150,13 +122,13 @@ static setDumpMode(dump:boolean, prefix:string) {
 }
 
 build(primitives:PrimitiveList) {
-    UI.printDetailed(Module.ACCEL, "KDTree settings");
-    UI.printDetailed(Module.ACCEL, "  * Max Leaf Size: %d", this.maxPrims);
-    UI.printDetailed(Module.ACCEL, "  * Max Depth:     %d", MAX_DEPTH);
-    UI.printDetailed(Module.ACCEL, "  * Traversal cost:%.2f", TRAVERSAL_COST);
-    UI.printDetailed(Module.ACCEL, "  * Intersect cost:%.2f", INTERSECT_COST);
-    UI.printDetailed(Module.ACCEL, "  * Empty bonus:   %.2f", EMPTY_BONUS);
-    UI.printDetailed(Module.ACCEL, "  * Dump leaves:   %s", dump);
+    console.log("KDTree settings");
+    console.log("  * Max Leaf Size: "+ this.maxPrims);
+    console.log("  * Max Depth:     "+ MAX_DEPTH);
+    console.log("  * Traversal cost:%.2f", TRAVERSAL_COST);
+    console.log("  * Intersect cost:%.2f", INTERSECT_COST);
+    console.log("  * Empty bonus:   %.2f", EMPTY_BONUS);
+    console.log("  * Dump leaves:   %s", dump);
     // TODO:Warning!!!, inline IF is not supported ?
     let total:Timer = new Timer();
     total.start();
@@ -216,15 +188,15 @@ build(primitives:PrimitiveList) {
     total.end();
     //  display some extra info
     stats.printStats();
-    UI.printDetailed(Module.ACCEL, "  * Node memory:   %s", Memory.sizeof(this.tree));
-    UI.printDetailed(Module.ACCEL, "  * Object memory: %s", Memory.sizeof(this.primitives));
-    UI.printDetailed(Module.ACCEL, "  * Prepare time:  %s", prepare);
-    UI.printDetailed(Module.ACCEL, "  * Sorting time:  %s", sorting);
-    UI.printDetailed(Module.ACCEL, "  * Tree creation: %s", t);
-    UI.printDetailed(Module.ACCEL, "  * Build time:    %s", total);
+    console.log("  * Node memory:   %s", Memory.sizeof(this.tree));
+    console.log("  * Object memory: %s", Memory.sizeof(this.primitives));
+    console.log("  * Prepare time:  %s", prepare);
+    console.log("  * Sorting time:  %s", sorting);
+    console.log("  * Tree creation: %s", t);
+    console.log("  * Build time:    %s", total);
     if (dump) {
         try {
-            UI.printInfo(Module.ACCEL, "Dumping mtls to %s.mtl ...", dumpPrefix);
+            UI.printInfo("Dumping mtls to %s.mtl ...", dumpPrefix);
             let mtlFile:FileWriter = new FileWriter((dumpPrefix + ".mtl"));
             let maxN:number = stats.maxObjects;
             for (let n:number = 0; (n <= maxN); n++) {
@@ -258,7 +230,7 @@ build(primitives:PrimitiveList) {
             }
 
             let objFile:FileWriter = new FileWriter((dumpPrefix + ".obj"));
-            UI.printInfo(Module.ACCEL, "Dumping tree to %s.obj ...", dumpPrefix);
+            UI.printInfo("Dumping tree to %s.obj ...", dumpPrefix);
             this.dumpObj(0, 0, maxN, new BoundingBox(this.bounds), objFile, mtlFile);
             objFile.close();
             mtlFile.close();
@@ -681,7 +653,7 @@ private buildTree(minx:number, maxx:number, miny:number, maxy:number, minz:numbe
             let numRight:number = nr[axis];
             if (((numLeft != task.numObjects)
                 || (numRight != 0))) {
-                console.error(Module.ACCEL, "Didn't scan full range of objects @depth=%d. Left overs for axis %d:[L:%d] [R:%d]", depth, axis, numLeft, numRight);
+                console.error("Didn't scan full range of objects @depth=%d. Left overs for axis %d:[L:%d] [R:%d]", depth, axis, numLeft, numRight);
             }
 
         }
@@ -842,7 +814,7 @@ private buildTree(minx:number, maxx:number, miny:number, maxy:number, minz:numbe
 
     stats.updateLeaf(depth, n);
     if ((n != task.numObjects)) {
-        console.error(Module.ACCEL, "Error creating leaf node - expecting %d found %d", task.numObjects, n);
+        console.error("Error creating leaf node - expecting "+task.numObjects+" found "+ n);
     }
 
     tempTree.set((offset + 0), ((3 + 30)

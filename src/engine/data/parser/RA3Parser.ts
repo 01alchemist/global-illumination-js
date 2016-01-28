@@ -1,3 +1,8 @@
+import {GlobalIlluminationAPI} from "../../GlobalIlluminatiionAPI";
+import {SceneParser} from "../../core/SceneParser";
+import {SimpleShader} from "../../shader/SimpleShader";
+import {Shader} from "../../core/Shader";
+import {TriangleMesh} from "../../primitive/TriangleMesh";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -5,7 +10,7 @@ export class RA3Parser implements SceneParser {
 
     parse(filename:string, api:GlobalIlluminationAPI):boolean {
         try {
-            UI.printInfo(Module.USER, "RA3 - Reading geometry:\""%s\"" ...", filename);
+            console.log("RA3 - Reading geometry:"+filename+" ...");
             let file:File = new File(filename);
             let stream:FileInputStream = new FileInputStream(filename);
             let map:MappedByteBuffer = stream.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, file.length());
@@ -14,13 +19,13 @@ export class RA3Parser implements SceneParser {
             let buffer:FloatBuffer = map.asFloatBuffer();
             let numVerts:number = ints.get(0);
             let numTris:number = ints.get(1);
-            UI.printInfo(Module.USER, "RA3 -   * Reading %d vertices ...", numVerts);
+            console.log("RA3 -   * Reading %d vertices ...", numVerts);
             let verts:number[] = new Array((3 * numVerts));
             for (let i:number = 0; (i < verts.length); i++) {
                 verts[i] = buffer.get((2 + i));
             }
 
-            UI.printInfo(Module.USER, "RA3 -   * Reading %d triangles ...", numTris);
+            console.log("RA3 -   * Reading %d triangles ...", numTris);
             let tris:number[] = new Array((3 * numTris));
             for (let i:number = 0; (i < tris.length); i++) {
                 tris[i] = ints.get((2
@@ -28,7 +33,7 @@ export class RA3Parser implements SceneParser {
             }
 
             stream.close();
-            UI.printInfo(Module.USER, "RA3 -   * Creating mesh ...");
+            console.log("RA3 -   * Creating mesh ...");
             //  create geometry
             api.parameter("triangles", tris);
             api.parameter("points", "point", "vertex", verts);
@@ -48,12 +53,8 @@ export class RA3Parser implements SceneParser {
             //  create instance
             api.instance((filename + ".instance"), filename);
         }
-        catch (e /*:FileNotFoundException*/) {
-            e.printStackTrace();
-            return false;
-        }
-        catch (e /*:IOException*/) {
-            e.printStackTrace();
+        catch (e) {
+            console.log(e);
             return false;
         }
 

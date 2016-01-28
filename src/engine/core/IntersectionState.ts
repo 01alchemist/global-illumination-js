@@ -27,7 +27,6 @@ export class IntersectionState {
         for (let i:number = 0; (i < this.stack.length); i++) {
             this.stack[i] = new StackNode();
         }
-
         this.rstack = new Float32Array(53 * 256);
     }
 

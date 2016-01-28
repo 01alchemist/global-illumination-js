@@ -16,6 +16,29 @@ import {PrimitiveList} from "./PrimitiveList";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
+
+class LightSampleIterator implements Iterator<LightSample> {
+
+    private current:LightSample;
+
+    constructor (head:LightSample) {
+        this.current = head;
+    }
+
+    hasNext():boolean {
+        return (this.current != null);
+    }
+
+    next():LightSample {
+        let c:LightSample = this.current;
+        this.current = this.current.next;
+        return c;
+    }
+
+    remove() {
+        throw new UnsupportedOperationException();
+    }
+}
 export class ShadingState implements Iterable<LightSample> {
 
     private istate:IntersectionState;
@@ -549,27 +572,4 @@ export class ShadingState implements Iterable<LightSample> {
     iterator():Iterator<LightSample> {
         return new LightSampleIterator(this.lightSample);
     }
-
-    class LightSampleIterator implements Iterator<LightSample> {
-
-private current:LightSample;
-
-    constructor (head:LightSample) {
-        this.current = head;
-    }
-
-hasNext():boolean {
-        return (this.current != null);
-    }
-
-next():LightSample {
-        let c:LightSample = this.current;
-        this.current = this.current.next;
-        return c;
-    }
-
-remove() {
-        throw new UnsupportedOperationException();
-    }
-}
 }

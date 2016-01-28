@@ -1,11 +1,15 @@
 
+import {GlobalIlluminationAPI} from "../../GlobalIlluminatiionAPI";
+import {Parser} from "angular2/src/core/change_detection/parser/parser";
+import {SceneParser} from "../../core/SceneParser";
+import {ConstantShader} from "../../shader/ConstantShader";
+import {Background} from "../../primitive/Background";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
 export class SCParser implements SceneParser {
 
     private p:Parser;
-
     private numLightSamples:number;
 
     constructor () {
@@ -17,7 +21,7 @@ export class SCParser implements SceneParser {
         this.numLightSamples = 1;
         let timer:Timer = new Timer();
         timer.start();
-        UI.printInfo(Module.API, "Parsing \""%s\"" ...", filename);
+        console.log("Parsing "+filename+" ...");
         try {
             this.p = new Parser(filename);
             while (true) {
@@ -27,42 +31,42 @@ export class SCParser implements SceneParser {
                 }
 
                 if (token.equals("image")) {
-                    UI.printInfo(Module.API, "Reading image settings ...");
+                    console.log("Reading image settings ...");
                     this.parseImageBlock(api);
                 }
                 else if (token.equals("background")) {
-                    UI.printInfo(Module.API, "Reading background ...");
+                    console.log("Reading background ...");
                     this.parseBackgroundBlock(api);
                 }
                 else if (token.equals("accel")) {
-                    UI.printInfo(Module.API, "Reading accelerator type ...");
+                    console.log("Reading accelerator type ...");
                     this.p.getNextToken();
-                    console.warn(Module.API, "Setting accelerator type is not recommended - ignoring");
+                    console.warn("Setting accelerator type is not recommended - ignoring");
                 }
                 else if (token.equals("filter")) {
-                    UI.printInfo(Module.API, "Reading image filter type ...");
+                    console.log("Reading image filter type ...");
                     this.parseFilter(api);
                 }
                 else if (token.equals("bucket")) {
-                    UI.printInfo(Module.API, "Reading bucket settings ...");
+                    console.log("Reading bucket settings ...");
                     api.parameter("bucket.size", this.p.getNextInt());
                     api.parameter("bucket.order", this.p.getNextToken());
                     api.options(GlobalIlluminationAPI.DEFAULT_OPTIONS);
                 }
                 else if (token.equals("photons")) {
-                    UI.printInfo(Module.API, "Reading photon settings ...");
+                    console.log("Reading photon settings ...");
                     this.parsePhotonBlock(api);
                 }
                 else if (token.equals("gi")) {
-                    UI.printInfo(Module.API, "Reading global illumination settings ...");
+                    console.log("Reading global illumination settings ...");
                     this.parseGIBlock(api);
                 }
                 else if (token.equals("lightserver")) {
-                    UI.printInfo(Module.API, "Reading light server settings ...");
+                    console.log("Reading light server settings ...");
                     this.parseLightserverBlock(api);
                 }
                 else if (token.equals("trace-depths")) {
-                    UI.printInfo(Module.API, "Reading trace depths ...");
+                    console.log("Reading trace depths ...");
                     this.parseTraceBlock(api);
                 }
                 else if (token.equals("camera")) {
@@ -114,34 +118,25 @@ export class SCParser implements SceneParser {
                 }
                 else if (token.equals("include")) {
                     let file:string = this.p.getNextToken();
-                    UI.printInfo(Module.API, "Including:\""%s\"" ...", file);
+                    console.log("Including:"+file+"...");
                     api.parse(file);
                 }
                 else {
-                    console.warn(Module.API, "Unrecognized token %s", token);
+                    console.warn("Unrecognized token "+ token);
                 }
 
             }
 
             this.p.close();
         }
-        catch (e /*:ParserException*/) {
-            console.error(Module.API, "%s", e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-        catch (e /*:FileNotFoundException*/) {
-            console.error(Module.API, "%s", e.getMessage());
-            return false;
-        }
-        catch (e /*:IOException*/) {
-            console.error(Module.API, "%s", e.getMessage());
+        catch (e) {
+            console.error(e);
             return false;
         }
 
         timer.end();
-        UI.printInfo(Module.API, "Done parsing.");
-        UI.printInfo(Module.API, "Parsing time:%s", timer.toString());
+        console.log("Done parsing.");
+        console.log("Parsing time:%s", timer.toString());
         return true;
     }
 
@@ -174,12 +169,12 @@ export class SCParser implements SceneParser {
         }
 
         if (this.p.peekNextToken("show-aa")) {
-            console.warn(Module.API, "Deprecated:show-aa ignored");
+            console.warn("Deprecated:show-aa ignored");
             this.p.getNextBoolean();
         }
 
         if (this.p.peekNextToken("output")) {
-            console.warn(Module.API, "Deprecated:output statement ignored");
+            console.warn("Deprecated:output statement ignored");
             this.p.getNextToken();
         }
 
@@ -199,7 +194,7 @@ export class SCParser implements SceneParser {
     }
 
     private parseFilter(api:GlobalIlluminationAPI) {
-        console.warn(Module.API, "Deprecated keyword \""filter\"" - set this option in the image block");
+        console.warn("Deprecated keyword \"filter\" - set this option in the image block");
         let name:string = this.p.getNextToken();
         api.parameter("filter", name);
         api.options(GlobalIlluminationAPI.DEFAULT_OPTIONS);
@@ -219,13 +214,13 @@ export class SCParser implements SceneParser {
         let globalEmit:boolean = false;
         this.p.checkNextToken("{");
         if (this.p.peekNextToken("emit")) {
-            console.warn(Module.API, "Shared photon emit values are deprectated - specify number of photons to emit per map");
+            console.warn("Shared photon emit values are deprectated - specify number of photons to emit per map");
             numEmit = this.p.getNextInt();
             globalEmit = true;
         }
 
         if (this.p.peekNextToken("global")) {
-            console.warn(Module.API, "Global photon map setting belonds inside the gi block - ignoring");
+            console.warn("Global photon map setting belonds inside the gi block - ignoring");
             if (!globalEmit) {
                 this.p.getNextInt();
             }
@@ -274,7 +269,7 @@ export class SCParser implements SceneParser {
             this.p.checkNextToken("samples");
             api.parameter("gi.path.samples", this.p.getNextInt());
             if (this.p.peekNextToken("bounces")) {
-                console.warn(Module.API, "Deprecated setting:bounces - use diffuse trace depth instead");
+                console.warn("Deprecated setting:bounces - use diffuse trace depth instead");
                 this.p.getNextInt();
             }
 
@@ -320,7 +315,7 @@ export class SCParser implements SceneParser {
             api.parameter("gi.engine", "none");
         }
         else {
-            console.warn(Module.API, "Unrecognized gi engine type \""%s\"" - ignoring", this.p.getNextToken());
+            console.warn("Unrecognized gi engine type \""%s\"" - ignoring", this.p.getNextToken());
         }
 
         api.options(GlobalIlluminationAPI.DEFAULT_OPTIONS);
@@ -330,22 +325,22 @@ export class SCParser implements SceneParser {
     private parseLightserverBlock(api:GlobalIlluminationAPI) {
         this.p.checkNextToken("{");
         if (this.p.peekNextToken("shadows")) {
-            console.warn(Module.API, "Deprecated:shadows setting ignored");
+            console.warn("Deprecated:shadows setting ignored");
             this.p.getNextBoolean();
         }
 
         if (this.p.peekNextToken("direct-samples")) {
-            console.warn(Module.API, "Deprecated:use samples keyword in area light definitions");
+            console.warn("Deprecated:use samples keyword in area light definitions");
             this.numLightSamples = this.p.getNextInt();
         }
 
         if (this.p.peekNextToken("glossy-samples")) {
-            console.warn(Module.API, "Deprecated:use samples keyword in glossy shader definitions");
+            console.warn("Deprecated:use samples keyword in glossy shader definitions");
             this.p.getNextInt();
         }
 
         if (this.p.peekNextToken("max-depth")) {
-            console.warn(Module.API, "Deprecated:max-depth setting - use trace-depths block instead");
+            console.warn("Deprecated:max-depth setting - use trace-depths block instead");
             let d:number = this.p.getNextInt();
             api.parameter("depths.diffuse", 1);
             api.parameter("depths.reflection", (d - 1));
@@ -354,7 +349,7 @@ export class SCParser implements SceneParser {
         }
 
         if (this.p.peekNextToken("global")) {
-            console.warn(Module.API, "Deprecated:global settings ignored - use photons block instead");
+            console.warn("Deprecated:global settings ignored - use photons block instead");
             this.p.getNextBoolean();
             this.p.getNextInt();
             this.p.getNextInt();
@@ -363,7 +358,7 @@ export class SCParser implements SceneParser {
         }
 
         if (this.p.peekNextToken("caustics")) {
-            console.warn(Module.API, "Deprecated:caustics settings ignored - use photons block instead");
+            console.warn("Deprecated:caustics settings ignored - use photons block instead");
             this.p.getNextBoolean();
             this.p.getNextInt();
             this.p.getNextFloat();
@@ -372,7 +367,7 @@ export class SCParser implements SceneParser {
         }
 
         if (this.p.peekNextToken("irr-cache")) {
-            console.warn(Module.API, "Deprecated:irradiance cache settings ignored - use gi block instead");
+            console.warn("Deprecated:irradiance cache settings ignored - use gi block instead");
             this.p.getNextInt();
             this.p.getNextFloat();
             this.p.getNextFloat();
@@ -404,7 +399,7 @@ export class SCParser implements SceneParser {
         this.p.checkNextToken("{");
         this.p.checkNextToken("type");
         let type:string = this.p.getNextToken();
-        UI.printInfo(Module.API, "Reading %s camera ...", type);
+        console.log("Reading %s camera ...", type);
         this.parseCameraTransform(api);
         let name:string = api.getUniqueName("camera");
         if (type.equals("pinhole")) {
@@ -442,7 +437,7 @@ export class SCParser implements SceneParser {
             api.camera(name, new FisheyeLens());
         }
         else {
-            console.warn(Module.API, "Unrecognized camera type:%s", this.p.getNextToken());
+            console.warn("Unrecognized camera type:%s", this.p.getNextToken());
             this.p.checkNextToken("}");
             return;
         }
@@ -502,7 +497,7 @@ export class SCParser implements SceneParser {
         this.p.checkNextToken("{");
         this.p.checkNextToken("name");
         let name:string = this.p.getNextToken();
-        UI.printInfo(Module.API, "Reading shader:%s ...", name);
+        console.log("Reading shader:%s ...", name);
         this.p.checkNextToken("type");
         if (this.p.peekNextToken("diffuse")) {
             if (this.p.peekNextToken("diff")) {
@@ -514,7 +509,7 @@ export class SCParser implements SceneParser {
                 api.shader(name, new TexturedDiffuseShader());
             }
             else {
-                console.warn(Module.API, "Unrecognized option in diffuse shader block:%s", this.p.getNextToken());
+                console.warn("Unrecognized option in diffuse shader block:%s", this.p.getNextToken());
             }
 
         }
@@ -657,26 +652,26 @@ export class SCParser implements SceneParser {
                 api.shader(name, shader);
             }
             catch (e /*:CompileException*/) {
-                UI.printDetailed(Module.API, "Compiling:%s", code);
-                console.error(Module.API, "%s", e.getMessage());
+                UI.printDetailed("Compiling:%s", code);
+                console.error("%s", e.getMessage());
                 e.printStackTrace();
                 return false;
             }
             catch (e /*:ParseException*/) {
-                UI.printDetailed(Module.API, "Compiling:%s", code);
-                console.error(Module.API, "%s", e.getMessage());
+                UI.printDetailed("Compiling:%s", code);
+                console.error("%s", e.getMessage());
                 e.printStackTrace();
                 return false;
             }
             catch (e /*:ScanException*/) {
-                UI.printDetailed(Module.API, "Compiling:%s", code);
-                console.error(Module.API, "%s", e.getMessage());
+                UI.printDetailed("Compiling:%s", code);
+                console.error("%s", e.getMessage());
                 e.printStackTrace();
                 return false;
             }
             catch (e /*:IOException*/) {
-                UI.printDetailed(Module.API, "Compiling:%s", code);
-                console.error(Module.API, "%s", e.getMessage());
+                UI.printDetailed("Compiling:%s", code);
+                console.error("%s", e.getMessage());
                 e.printStackTrace();
                 return false;
             }
@@ -704,7 +699,7 @@ export class SCParser implements SceneParser {
 
             if (this.p.peekNextToken("texture")) {
                 //  deprecated
-                console.warn(Module.API, "Deprecated uber shader parameter \""texture\"" - please use \""diffuse.texture\"" and \""diffuse.blend\"" instead");
+                console.warn("Deprecated uber shader parameter \""texture\"" - please use \""diffuse.texture\"" and \""diffuse.blend\"" instead");
                 api.parameter("diffuse.texture", this.p.getNextToken());
                 api.parameter("diffuse.blend", this.p.getNextFloat());
             }
@@ -728,7 +723,7 @@ export class SCParser implements SceneParser {
             api.shader(name, new UberShader());
         }
         else {
-            console.warn(Module.API, "Unrecognized shader type:%s", this.p.getNextToken());
+            console.warn("Unrecognized shader type:%s", this.p.getNextToken());
         }
 
         this.p.checkNextToken("}");
@@ -739,7 +734,7 @@ export class SCParser implements SceneParser {
         this.p.checkNextToken("{");
         this.p.checkNextToken("name");
         let name:string = this.p.getNextToken();
-        UI.printInfo(Module.API, "Reading shader:%s ...", name);
+        console.log("Reading shader:%s ...", name);
         this.p.checkNextToken("type");
         if (this.p.peekNextToken("bump")) {
             this.p.checkNextToken("texture");
@@ -754,7 +749,7 @@ export class SCParser implements SceneParser {
             api.modifier(name, new NormalMapModifier());
         }
         else {
-            console.warn(Module.API, "Unrecognized modifier type:%s", this.p.getNextToken());
+            console.warn("Unrecognized modifier type:%s", this.p.getNextToken());
         }
 
         this.p.checkNextToken("}");
@@ -822,8 +817,8 @@ export class SCParser implements SceneParser {
         }
 
         if (type.equals("mesh")) {
-            console.warn(Module.API, "Deprecated object type:mesh");
-            UI.printInfo(Module.API, "Reading mesh:%s ...", name);
+            console.warn("Deprecated object type:mesh");
+            console.log("Reading mesh:%s ...", name);
             let numVertices:number = this.p.getNextInt();
             let numTriangles:number = this.p.getNextInt();
             let points:number[] = new Array((numVertices * 3));
@@ -868,8 +863,8 @@ export class SCParser implements SceneParser {
             api.geometry(name, new TriangleMesh());
         }
         else if (type.equals("flat-mesh")) {
-            console.warn(Module.API, "Deprecated object type:flat-mesh");
-            UI.printInfo(Module.API, "Reading flat mesh:%s ...", name);
+            console.warn("Deprecated object type:flat-mesh");
+            console.log("Reading flat mesh:%s ...", name);
             let numVertices:number = this.p.getNextInt();
             let numTriangles:number = this.p.getNextInt();
             let points:number[] = new Array((numVertices * 3));
@@ -909,7 +904,7 @@ export class SCParser implements SceneParser {
             api.geometry(name, new TriangleMesh());
         }
         else if (type.equals("sphere")) {
-            UI.printInfo(Module.API, "Reading sphere ...");
+            console.log("Reading sphere ...");
             api.geometry(name, new Sphere());
             if (((transform == null)
                 && !noInstance)) {
@@ -934,18 +929,18 @@ export class SCParser implements SceneParser {
 
         }
         else if (type.equals("banchoff")) {
-            UI.printInfo(Module.API, "Reading banchoff ...");
+            console.log("Reading banchoff ...");
             api.geometry(name, new BanchoffSurface());
         }
         else if (type.equals("torus")) {
-            UI.printInfo(Module.API, "Reading torus ...");
+            console.log("Reading torus ...");
             this.p.checkNextToken("r");
             api.parameter("radiusInner", this.p.getNextFloat());
             api.parameter("radiusOuter", this.p.getNextFloat());
             api.geometry(name, new Torus());
         }
         else if (type.equals("plane")) {
-            UI.printInfo(Module.API, "Reading plane ...");
+            console.log("Reading plane ...");
             this.p.checkNextToken("p");
             api.parameter("center", this.parsePoint());
             if (this.p.peekNextToken("n")) {
@@ -961,9 +956,9 @@ export class SCParser implements SceneParser {
             api.geometry(name, new Plane());
         }
         else if (type.equals("cornellbox")) {
-            UI.printInfo(Module.API, "Reading cornell box ...");
+            console.log("Reading cornell box ...");
             if ((transform != null)) {
-                console.warn(Module.API, "Instancing is not supported on cornell box -- ignoring transform");
+                console.warn("Instancing is not supported on cornell box -- ignoring transform");
             }
 
             this.p.checkNextToken("corner0");
@@ -992,7 +987,7 @@ export class SCParser implements SceneParser {
             //  method
         }
         else if (type.equals("generic-mesh")) {
-            UI.printInfo(Module.API, "Reading generic mesh:%s ... ", name);
+            console.log("Reading generic mesh:%s ... ", name);
             //  parse vertices
             this.p.checkNextToken("points");
             let np:number = this.p.getNextInt();
@@ -1032,7 +1027,7 @@ export class SCParser implements SceneParser {
             api.geometry(name, new TriangleMesh());
         }
         else if (type.equals("hair")) {
-            UI.printInfo(Module.API, "Reading hair curves:%s ... ", name);
+            console.log("Reading hair curves:%s ... ", name);
             this.p.checkNextToken("segments");
             api.parameter("segments", this.p.getNextInt());
             this.p.checkNextToken("width");
@@ -1042,40 +1037,40 @@ export class SCParser implements SceneParser {
             api.geometry(name, new Hair());
         }
         else if (type.equals("janino-tesselatable")) {
-            UI.printInfo(Module.API, "Reading procedural primitive:%s ... ", name);
+            console.log("Reading procedural primitive:%s ... ", name);
             let code:string = this.p.getNextCodeBlock();
             try {
                 let tess:Tesselatable = (<Tesselatable>(ClassBodyEvaluator.createFastClassBodyEvaluator(new Scanner(null, new StringReader(code)), Tesselatable.class, ClassLoader.getSystemClassLoader())));
                 api.geometry(name, tess);
             }
             catch (e /*:CompileException*/) {
-                UI.printDetailed(Module.API, "Compiling:%s", code);
-                console.error(Module.API, "%s", e.getMessage());
+                UI.printDetailed("Compiling:%s", code);
+                console.error("%s", e.getMessage());
                 e.printStackTrace();
                 noInstance = true;
             }
             catch (e /*:ParseException*/) {
-                UI.printDetailed(Module.API, "Compiling:%s", code);
-                console.error(Module.API, "%s", e.getMessage());
+                UI.printDetailed("Compiling:%s", code);
+                console.error("%s", e.getMessage());
                 e.printStackTrace();
                 noInstance = true;
             }
             catch (e /*:ScanException*/) {
-                UI.printDetailed(Module.API, "Compiling:%s", code);
-                console.error(Module.API, "%s", e.getMessage());
+                UI.printDetailed("Compiling:%s", code);
+                console.error("%s", e.getMessage());
                 e.printStackTrace();
                 noInstance = true;
             }
             catch (e /*:IOException*/) {
-                UI.printDetailed(Module.API, "Compiling:%s", code);
-                console.error(Module.API, "%s", e.getMessage());
+                UI.printDetailed("Compiling:%s", code);
+                console.error("%s", e.getMessage());
                 e.printStackTrace();
                 noInstance = true;
             }
 
         }
         else if (type.equals("teapot")) {
-            UI.printInfo(Module.API, "Reading teapot:%s ... ", name);
+            console.log("Reading teapot:%s ... ", name);
             let hasTesselationArguments:boolean = false;
             if (this.p.peekNextToken("subdivs")) {
                 api.parameter("subdivs", this.p.getNextInt());
@@ -1096,7 +1091,7 @@ export class SCParser implements SceneParser {
 
         }
         else if (type.equals("gumbo")) {
-            UI.printInfo(Module.API, "Reading gumbo:%s ... ", name);
+            console.log("Reading gumbo:%s ... ", name);
             let hasTesselationArguments:boolean = false;
             if (this.p.peekNextToken("subdivs")) {
                 api.parameter("subdivs", this.p.getNextInt());
@@ -1117,7 +1112,7 @@ export class SCParser implements SceneParser {
 
         }
         else if (type.equals("julia")) {
-            UI.printInfo(Module.API, "Reading julia fractal:%s ... ", name);
+            console.log("Reading julia fractal:%s ... ", name);
             if (this.p.peekNextToken("q")) {
                 api.parameter("cw", this.p.getNextFloat());
                 api.parameter("cx", this.p.getNextFloat());
@@ -1137,7 +1132,7 @@ export class SCParser implements SceneParser {
         }
         else if ((type.equals("particles") || type.equals("dlasurface"))) {
             if (type.equals("dlasurface")) {
-                console.warn(Module.API, "Deprecated object type:\""dlasurface\"" - please use \""particles\"" instead");
+                console.warn("Deprecated object type:\""dlasurface\"" - please use \""particles\"" instead");
             }
 
             this.p.checkNextToken("filename");
@@ -1175,7 +1170,7 @@ export class SCParser implements SceneParser {
             api.geometry(name, new ParticleSurface());
         }
         else if (type.equals("file-mesh")) {
-            UI.printInfo(Module.API, "Reading file mesh:%s ... ", name);
+            console.log("Reading file mesh:%s ... ", name);
             this.p.checkNextToken("filename");
             api.parameter("filename", this.p.getNextToken());
             if (this.p.peekNextToken("smooth_normals")) {
@@ -1185,7 +1180,7 @@ export class SCParser implements SceneParser {
             api.geometry(name, new FileMesh());
         }
         else if (type.equals("bezier-mesh")) {
-            UI.printInfo(Module.API, "Reading bezier mesh:%s ... ", name);
+            console.log("Reading bezier mesh:%s ... ", name);
             this.p.checkNextToken("n");
             let nv:number;
             let nu:number;
@@ -1215,7 +1210,7 @@ export class SCParser implements SceneParser {
             api.geometry(name, (<Tesselatable>(new BezierMesh())));
         }
         else {
-            console.warn(Module.API, "Unrecognized object type:%s", this.p.getNextToken());
+            console.warn("Unrecognized object type:%s", this.p.getNextToken());
             noInstance = true;
         }
 
@@ -1240,7 +1235,7 @@ export class SCParser implements SceneParser {
         this.p.checkNextToken("{");
         this.p.checkNextToken("name");
         let name:string = this.p.getNextToken();
-        UI.printInfo(Module.API, "Reading instance:%s ...", name);
+        console.log("Reading instance:%s ...", name);
         this.p.checkNextToken("geometry");
         let geoname:string = this.p.getNextToken();
         this.p.checkNextToken("transform");
@@ -1287,10 +1282,10 @@ export class SCParser implements SceneParser {
         this.p.checkNextToken("{");
         this.p.checkNextToken("type");
         if (this.p.peekNextToken("mesh")) {
-            console.warn(Module.API, "Deprecated light type:mesh");
+            console.warn("Deprecated light type:mesh");
             this.p.checkNextToken("name");
             let name:string = this.p.getNextToken();
-            UI.printInfo(Module.API, "Reading light mesh:%s ...", name);
+            console.log("Reading light mesh:%s ...", name);
             this.p.checkNextToken("emit");
             api.parameter("radiance", this.parseColor());
             let samples:number = this.numLightSamples;
@@ -1298,7 +1293,7 @@ export class SCParser implements SceneParser {
                 samples = this.p.getNextInt();
             }
             else {
-                console.warn(Module.API, "Samples keyword not found - defaulting to %d", samples);
+                console.warn("Samples keyword not found - defaulting to %d", samples);
             }
 
             api.parameter("samples", samples);
@@ -1338,7 +1333,7 @@ export class SCParser implements SceneParser {
             mesh.init(name, api);
         }
         else if (this.p.peekNextToken("point")) {
-            UI.printInfo(Module.API, "Reading point light ...");
+            console.log("Reading point light ...");
             let pow:Color;
             if (this.p.peekNextToken("color")) {
                 pow = this.parseColor();
@@ -1347,7 +1342,7 @@ export class SCParser implements SceneParser {
                 pow.mul(po);
             }
             else {
-                console.warn(Module.API, "Deprecated color specification - please use color and power instead");
+                console.warn("Deprecated color specification - please use color and power instead");
                 this.p.checkNextToken("power");
                 pow = this.parseColor();
             }
@@ -1358,7 +1353,7 @@ export class SCParser implements SceneParser {
             api.light(api.getUniqueName("pointlight"), new PointLight());
         }
         else if (this.p.peekNextToken("spherical")) {
-            UI.printInfo(Module.API, "Reading spherical light ...");
+            console.log("Reading spherical light ...");
             this.p.checkNextToken("color");
             let pow:Color = this.parseColor();
             this.p.checkNextToken("radiance");
@@ -1374,7 +1369,7 @@ export class SCParser implements SceneParser {
             light.init(api.getUniqueName("spherelight"), api);
         }
         else if (this.p.peekNextToken("directional")) {
-            UI.printInfo(Module.API, "Reading directional light ...");
+            console.log("Reading directional light ...");
             this.p.checkNextToken("source");
             let s:Point3 = this.parsePoint();
             api.parameter("source", s);
@@ -1390,14 +1385,14 @@ export class SCParser implements SceneParser {
                 e.mul(i);
             }
             else {
-                console.warn(Module.API, "Deprecated color specification - please use emit and intensity instead");
+                console.warn("Deprecated color specification - please use emit and intensity instead");
             }
 
             api.parameter("radiance", e);
             api.light(api.getUniqueName("dirlight"), new DirectionalSpotlight());
         }
         else if (this.p.peekNextToken("ibl")) {
-            UI.printInfo(Module.API, "Reading image based light ...");
+            console.log("Reading image based light ...");
             this.p.checkNextToken("image");
             api.parameter("texture", this.p.getNextToken());
             this.p.checkNextToken("center");
@@ -1411,7 +1406,7 @@ export class SCParser implements SceneParser {
                 samples = this.p.getNextInt();
             }
             else {
-                console.warn(Module.API, "Samples keyword not found - defaulting to %d", samples);
+                console.warn("Samples keyword not found - defaulting to %d", samples);
             }
 
             api.parameter("samples", samples);
@@ -1421,7 +1416,7 @@ export class SCParser implements SceneParser {
         else if (this.p.peekNextToken("meshlight")) {
             this.p.checkNextToken("name");
             let name:string = this.p.getNextToken();
-            UI.printInfo(Module.API, "Reading meshlight:%s ...", name);
+            console.log("Reading meshlight:%s ...", name);
             this.p.checkNextToken("emit");
             let e:Color = this.parseColor();
             if (this.p.peekNextToken("radiance")) {
@@ -1429,7 +1424,7 @@ export class SCParser implements SceneParser {
                 e.mul(r);
             }
             else {
-                console.warn(Module.API, "Deprecated color specification - please use emit and radiance instead");
+                console.warn("Deprecated color specification - please use emit and radiance instead");
             }
 
             api.parameter("radiance", e);
@@ -1438,7 +1433,7 @@ export class SCParser implements SceneParser {
                 samples = this.p.getNextInt();
             }
             else {
-                console.warn(Module.API, "Samples keyword not found - defaulting to %d", samples);
+                console.warn("Samples keyword not found - defaulting to %d", samples);
             }
 
             api.parameter("samples", samples);
@@ -1470,7 +1465,7 @@ export class SCParser implements SceneParser {
             sunsky.init(api.getUniqueName("sunsky"), api);
         }
         else {
-            console.warn(Module.API, "Unrecognized object type:%s", this.p.getNextToken());
+            console.warn("Unrecognized object type:%s", this.p.getNextToken());
         }
 
         this.p.checkNextToken("}");
@@ -1494,7 +1489,7 @@ export class SCParser implements SceneParser {
                 c = new Color(r, g, b);
             }
             else {
-                console.warn(Module.API, "Unrecognized color space:%s", space);
+                console.warn("Unrecognized color space:%s", space);
             }
 
             this.p.checkNextToken("}");
@@ -1589,7 +1584,7 @@ export class SCParser implements SceneParser {
                     t = Matrix4.rotate(x, y, z, (<number>(Math.toRadians(angle))));
                 }
                 else {
-                    console.warn(Module.API, "Unrecognized transformation type:%s", this.p.getNextToken());
+                    console.warn("Unrecognized transformation type:%s", this.p.getNextToken());
                 }
 
                 if ((t != null)) {
