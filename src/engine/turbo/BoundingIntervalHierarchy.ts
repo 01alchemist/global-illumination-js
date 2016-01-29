@@ -1,84 +1,27 @@
+import {AccelerationStructure} from "../core/AccelerationStructure";
+import {PrimitiveList} from "../core/PrimitiveList";
+import {BoundingBox} from "../math/BoundingBox";
+import {IntArray} from "../utils/IntArray";
+import {Float} from "../../utils/BrowserPlatform";
 /**
  * Created by Nidin Vinayakan on 21/1/2016.
  */
-export class BoundingIntervalHierarchy implements AccelerationStructure {
-
-    private tree:number[];
-
-    private objects:number[];
-
-    private primitives:PrimitiveList;
-
-    private bounds:BoundingBox;
-
-    private maxPrims:number;
-
-    constructor () {
-        this.maxPrims = 2;
-    }
-
-    build(primitives:PrimitiveList) {
-        this.primitives = this.primitives;
-        let n:number = this.primitives.getNumPrimitives();
-        UI.printDetailed(Module.ACCEL, "Getting bounding box ...");
-        this.bounds = this.primitives.getWorldBounds(null);
-        this.objects = new Array(n);
-        for (let i:number = 0; (i < n); i++) {
-            this.objects[i] = i;
-        }
-
-        UI.printDetailed(Module.ACCEL, "Creating tree ...");
-        let initialSize:number = (3
-        * ((2 * (6 * n))
-        + 1));
-        let tempTree:IntArray = new IntArray(((initialSize + 3)
-        / 4));
-        let stats:BuildStats = new BuildStats();
-        let t:Timer = new Timer();
-        t.start();
-        this.buildHierarchy(tempTree, this.objects, stats);
-        t.end();
-        UI.printDetailed(Module.ACCEL, "Trimming tree ...");
-        this.tree = tempTree.trim();
-        //  display stats
-        stats.printStats();
-        UI.printDetailed(Module.ACCEL, "  * Creation time: %s", t);
-        UI.printDetailed(Module.ACCEL, "  * Usage of init: %3d%%", (100
-        * (this.tree.length / initialSize)));
-        UI.printDetailed(Module.ACCEL, "  * Tree memory:   %s", Memory.sizeof(this.tree));
-        UI.printDetailed(Module.ACCEL, "  * Indices memory:%s", Memory.sizeof(this.objects));
-    }
-
-    class BuildStats {
+class BuildStats {
 
     private numNodes:number;
-
     private numLeaves:number;
-
     private sumObjects:number;
-
     private minObjects:number;
-
     private maxObjects:number;
-
     private sumDepth:number;
-
     private minDepth:number;
-
     private maxDepth:number;
-
     private numLeaves0:number;
-
     private numLeaves1:number;
-
     private numLeaves2:number;
-
     private numLeaves3:number;
-
     private numLeaves4:number;
-
     private numLeaves4p:number;
-
     private numBVH2:number;
 
     constructor () {
@@ -140,35 +83,84 @@ export class BoundingIntervalHierarchy implements AccelerationStructure {
     }
 
     printStats() {
-        UI.printDetailed(Module.ACCEL, "Tree stats:");
-        UI.printDetailed(Module.ACCEL, "  * Nodes:         %d", this.numNodes);
-        UI.printDetailed(Module.ACCEL, "  * Leaves:        %d", this.numLeaves);
-        UI.printDetailed(Module.ACCEL, "  * Objects:min    %d", this.minObjects);
-        UI.printDetailed(Module.ACCEL, "             avg    %.2f", ((<number>(this.sumObjects)) / this.numLeaves));
-        UI.printDetailed(Module.ACCEL, "           avg(n>0) %.2f", ((<number>(this.sumObjects))
+        console.log("Tree stats:");
+        console.log("  * Nodes:         %d", this.numNodes);
+        console.log("  * Leaves:        %d", this.numLeaves);
+        console.log("  * Objects:min    %d", this.minObjects);
+        console.log("             avg    %.2f", ((<number>(this.sumObjects)) / this.numLeaves));
+        console.log("           avg(n>0) %.2f", ((<number>(this.sumObjects))
         / (this.numLeaves - this.numLeaves0)));
-        UI.printDetailed(Module.ACCEL, "             max    %d", this.maxObjects);
-        UI.printDetailed(Module.ACCEL, "  * Depth:  min    %d", this.minDepth);
-        UI.printDetailed(Module.ACCEL, "             avg    %.2f", ((<number>(this.sumDepth)) / this.numLeaves));
-        UI.printDetailed(Module.ACCEL, "             max    %d", this.maxDepth);
-        UI.printDetailed(Module.ACCEL, "  * Leaves w/:N=0  %3d%%", (100
+        console.log("             max    %d", this.maxObjects);
+        console.log("  * Depth:  min    %d", this.minDepth);
+        console.log("             avg    %.2f", ((<number>(this.sumDepth)) / this.numLeaves));
+        console.log("             max    %d", this.maxDepth);
+        console.log("  * Leaves w/:N=0  %3d%%", (100
         * (this.numLeaves0 / this.numLeaves)));
-        UI.printDetailed(Module.ACCEL, "               N=1  %3d%%", (100
+        console.log("               N=1  %3d%%", (100
         * (this.numLeaves1 / this.numLeaves)));
-        UI.printDetailed(Module.ACCEL, "               N=2  %3d%%", (100
+        console.log("               N=2  %3d%%", (100
         * (this.numLeaves2 / this.numLeaves)));
-        UI.printDetailed(Module.ACCEL, "               N=3  %3d%%", (100
+        console.log("               N=3  %3d%%", (100
         * (this.numLeaves3 / this.numLeaves)));
-        UI.printDetailed(Module.ACCEL, "               N=4  %3d%%", (100
+        console.log("               N=4  %3d%%", (100
         * (this.numLeaves4 / this.numLeaves)));
-        UI.printDetailed(Module.ACCEL, "               N>4  %3d%%", (100
+        console.log("               N>4  %3d%%", (100
         * (this.numLeaves4p / this.numLeaves)));
-        UI.printDetailed(Module.ACCEL, "  * BVH2 nodes:    %d (%3d%%)", this.numBVH2, (100
+        console.log("  * BVH2 nodes:    %d (%3d%%)", this.numBVH2, (100
         * (this.numBVH2
         / (this.numNodes
         + (this.numLeaves - (2 * this.numBVH2))))));
     }
 }
+export class BoundingIntervalHierarchy implements AccelerationStructure {
+
+    private tree:number[];
+
+    private objects:number[];
+
+    private primitives:PrimitiveList;
+
+    private bounds:BoundingBox;
+
+    private maxPrims:number;
+
+    constructor () {
+        this.maxPrims = 2;
+    }
+
+    build(primitives:PrimitiveList) {
+        this.primitives = this.primitives;
+        let n:number = this.primitives.getNumPrimitives();
+        console.log("Getting bounding box ...");
+        this.bounds = this.primitives.getWorldBounds(null);
+        this.objects = new Array(n);
+        for (let i:number = 0; (i < n); i++) {
+            this.objects[i] = i;
+        }
+
+        console.log("Creating tree ...");
+        let initialSize:number = (3
+        * ((2 * (6 * n))
+        + 1));
+        let tempTree:IntArray = new IntArray(((initialSize + 3)
+        / 4));
+        let stats:BuildStats = new BuildStats();
+        let t:Timer = new Timer();
+        t.start();
+        this.buildHierarchy(tempTree, this.objects, stats);
+        t.end();
+        console.log("Trimming tree ...");
+        this.tree = tempTree.trim();
+        //  display stats
+        stats.printStats();
+        console.log("  * Creation time: %s", t);
+        console.log("  * Usage of init: %3d%%", (100
+        * (this.tree.length / initialSize)));
+        console.log("  * Tree memory:   %s", Memory.sizeof(this.tree));
+        console.log("  * Indices memory:%s", Memory.sizeof(this.objects));
+    }
+
+
 
 private buildHierarchy(tempTree:IntArray, indices:number[], stats:BuildStats) {
     //  create space for the first node

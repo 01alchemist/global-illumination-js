@@ -1,3 +1,14 @@
+import {PrimitiveList} from "../core/PrimitiveList";
+import {BoundingBox} from "../math/BoundingBox";
+import {Matrix4} from "../math/Matrix4";
+import {FloatArray} from "../utils/FloatArray";
+import {IntArray} from "../utils/IntArray";
+import {Float} from "../../utils/BrowserPlatform";
+import {Point3} from "../math/Point3";
+import {Vector3} from "../math/Vector3";
+import {InterpolationType} from "../core/ParameterList";
+import {ParameterList} from "../core/ParameterList";
+import {TriangleMesh} from "../primitive/TriangleMesh";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -16,7 +27,7 @@ export class FileMesh implements Tesselatable {
     tesselate():PrimitiveList {
         if (this.filename.endsWith(".ra3")) {
             try {
-                UI.printInfo(Module.GEOM, "RA3 - Reading geometry:\""%s\"" ...", this.filename);
+                console.log("RA3 - Reading geometry:"+this.filename+" ...");
                 let file:File = new File(this.filename);
                 let stream:FileInputStream = new FileInputStream(this.filename);
                 let map:MappedByteBuffer = stream.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, file.length());
@@ -25,13 +36,13 @@ export class FileMesh implements Tesselatable {
                 let buffer:FloatBuffer = map.asFloatBuffer();
                 let numVerts:number = ints.get(0);
                 let numTris:number = ints.get(1);
-                UI.printInfo(Module.GEOM, "RA3 -   * Reading %d vertices ...", numVerts);
+                console.log("RA3 -   * Reading "+numVerts+" vertices ...");
                 let verts:number[] = new Array((3 * numVerts));
                 for (let i:number = 0; (i < verts.length); i++) {
                     verts[i] = buffer.get((2 + i));
                 }
 
-                UI.printInfo(Module.GEOM, "RA3 -   * Reading %d triangles ...", numTris);
+                console.log("RA3 -   * Reading "+numTris+" triangles ...");
                 let tris:number[] = new Array((3 * numTris));
                 for (let i:number = 0; (i < tris.length); i++) {
                     tris[i] = ints.get((2
@@ -39,23 +50,19 @@ export class FileMesh implements Tesselatable {
                 }
 
                 stream.close();
-                UI.printInfo(Module.GEOM, "RA3 -   * Creating mesh ...");
+                console.log("RA3 -   * Creating mesh ...");
                 return this.generate(tris, verts, this.smoothNormals);
             }
-            catch (e /*:FileNotFoundException*/) {
-                e.printStackTrace();
-                console.error(Module.GEOM, "Unable to read mesh file \""%s\"" - file not found", this.filename);
-            }
-            catch (e /*:IOException*/) {
-                e.printStackTrace();
-                console.error(Module.GEOM, "Unable to read mesh file \""%s\"" - I/O error occured", this.filename);
+            catch (e) {
+                console.error("Unable to read mesh file \""+this.filename+"\" - file not found");
+                //console.error("Unable to read mesh file \""+this.filename+"\" - I/O error occured");
             }
 
         }
         else if (this.filename.endsWith(".obj")) {
             let lineNumber:number = 1;
             try {
-                UI.printInfo(Module.GEOM, "OBJ - Reading geometry:\""%s\"" ...", this.filename);
+                console.log("OBJ - Reading geometry:\""+this.filename+"\" ...");
                 let verts:FloatArray = new FloatArray();
                 let tris:IntArray = new IntArray();
                 let file:FileReader = new FileReader(this.filename);
@@ -64,9 +71,9 @@ export class FileMesh implements Tesselatable {
                 while ((bf.readLine() != null)) {
                     if (line.startsWith("v")) {
                         let v:string[] = line.split("\\s+");
-                        verts.add(Float.parseFloat(v[1]));
-                        verts.add(Float.parseFloat(v[2]));
-                        verts.add(Float.parseFloat(v[3]));
+                        verts.add(parseFloat(v[1]));
+                        verts.add(parseFloat(v[2]));
+                        verts.add(parseFloat(v[3]));
                     }
                     else if (line.startsWith("f")) {
                         let f:string[] = line.split("\\s+");
@@ -88,41 +95,34 @@ export class FileMesh implements Tesselatable {
 
                     if (((lineNumber % 100000)
                         == 0)) {
-                        UI.printInfo(Module.GEOM, "OBJ -   * Parsed %7d lines ...", lineNumber);
+                        console.log("OBJ -   * Parsed %7d lines ...", lineNumber);
                     }
 
                     lineNumber++;
                 }
 
                 file.close();
-                UI.printInfo(Module.GEOM, "OBJ -   * Creating mesh ...");
+                console.log("OBJ -   * Creating mesh ...");
                 return this.generate(tris.trim(), verts.trim(), this.smoothNormals);
             }
-            catch (e /*:FileNotFoundException*/) {
-                e.printStackTrace();
-                console.error(Module.GEOM, "Unable to read mesh file \""%s\"" - file not found", this.filename);
-            }
-            catch (e /*:NumberFormatException*/) {
-                e.printStackTrace();
-                console.error(Module.GEOM, "Unable to read mesh file \""%s\"" - syntax error at line %d", lineNumber);
-            }
-            catch (e /*:IOException*/) {
-                e.printStackTrace();
-                console.error(Module.GEOM, "Unable to read mesh file \""%s\"" - I/O error occured", this.filename);
+            catch (e) {
+                console.error("Unable to read mesh file \""+this.filename+"\" - file not found");
+                //console.error("Unable to read mesh file \""+this.filename+"\" - syntax error at line "+lineNumber);
+                //console.error("Unable to read mesh file \""+this.filename+"\" - I/O error occured");
             }
 
         }
         else if (this.filename.endsWith(".stl")) {
             try {
-                UI.printInfo(Module.GEOM, "STL - Reading geometry:\""%s\"" ...", this.filename);
+                console.log("STL - Reading geometry:\""+this.filename+"\" ...");
                 let file:FileInputStream = new FileInputStream(this.filename);
                 let stream:DataInputStream = new DataInputStream(new BufferedInputStream(file));
                 file.skip(80);
                 let numTris:number = this.getLittleEndianInt(stream.readInt());
-                UI.printInfo(Module.GEOM, "STL -   * Reading %d triangles ...", numTris);
+                console.log("STL -   * Reading %d triangles ...", numTris);
                 let filesize:number = (new File(this.filename) + length());
                 if ((filesize != (84 + (50 * numTris)))) {
-                    console.warn(Module.GEOM, "STL - Size of file mismatch (expecting %s, found %s)", Memory.bytesToString((84 + (14 * numTris))), Memory.bytesToString(filesize));
+                    console.warn("STL - Size of file mismatch (expecting %s, found %s)", Memory.bytesToString((84 + (14 * numTris))), Memory.bytesToString(filesize));
                     return null;
                 }
 
@@ -151,30 +151,26 @@ export class FileMesh implements Tesselatable {
                 if ((((i + 1)
                     % 100000)
                     == 0)) {
-                    UI.printInfo(Module.GEOM, "STL -   * Parsed %7d triangles ...", (i + 1));
+                    console.log("STL -   * Parsed %7d triangles ...", (i + 1));
                 }
 
                 file.close();
                 //  create geometry
-                UI.printInfo(Module.GEOM, "STL -   * Creating mesh ...");
+                console.log("STL -   * Creating mesh ...");
                 if (this.smoothNormals) {
-                    console.warn(Module.GEOM, "STL - format does not support shared vertices - normal smoothing disabled");
+                    console.warn("STL - format does not support shared vertices - normal smoothing disabled");
                 }
 
                 return this.generate(tris, verts, false);
             }
-            catch (e /*:FileNotFoundException*/) {
-                e.printStackTrace();
-                console.error(Module.GEOM, "Unable to read mesh file \""%s\"" - file not found", this.filename);
-            }
-            catch (e /*:IOException*/) {
-                e.printStackTrace();
-                console.error(Module.GEOM, "Unable to read mesh file \""%s\"" - I/O error occured", this.filename);
+            catch (e) {
+                console.error("Unable to read mesh file \""+this.filename+"\" - file not found");
+                //console.error("Unable to read mesh file \""+this.filename+"\" - I/O error occured");
             }
 
         }
         else {
-            console.warn(Module.GEOM, "Unable to read mesh file \""%s\"" - unrecognized format", this.filename);
+            console.warn("Unable to read mesh file \""+this.filename+"\" - unrecognized format");
         }
 
         return null;

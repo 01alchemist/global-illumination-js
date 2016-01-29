@@ -2,6 +2,18 @@ import {CoreEstimator} from "./CoreEstimator";
 /**
  * Created by Nidin Vinayakan on 27/1/2016.
  */
+export class Float{
+    static POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
+    static NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
+
+    static intBitsToFloat(tree:number):float {
+
+    }
+
+    static floatToRawIntBits(split:float):int {
+
+    }
+}
 export class BrowserPlatform {
 
     static saveFile(fileName:string, data:any, type:string = "application/octet-binary") {
