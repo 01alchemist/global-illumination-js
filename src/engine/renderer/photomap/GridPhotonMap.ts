@@ -1,30 +1,43 @@
+import {Vector3} from "../../math/Vector3";
+import {Color} from "../../math/Color";
+import {GlobalPhotonMapInterface} from "../../core/GlobalPhotonMapInterface";
+import {BoundingBox} from "../../math/BoundingBox";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
+class PhotonGroup {
+
+    id:number;
+    count:number;
+    normal:Vector3;
+    flux:Color;
+    radiance:Color;
+    diffuse:Color;
+    next:PhotonGroup;
+
+    constructor (id:number, n:Vector3) {
+        this.normal = new Vector3(n);
+        this.flux = Color.black();
+        this.diffuse = Color.black();
+        this.radiance = null;
+        this.count = 0;
+        this.id = id;
+        this.next = null;
+    }
+}
 export class GridPhotonMap implements GlobalPhotonMapInterface {
 
     private numGather:number;
-
     private gatherRadius:number;
-
     private numStoredPhotons:number;
-
     private nx:number;
-
     private ny:number;
-
     private nz:number;
-
     private bounds:BoundingBox;
-
     private cellHash:PhotonGroup[];
-
     private hashSize:number;
-
     private hashPrime:number;
-
     private rwl:ReentrantReadWriteLock;
-
     private numEmit:number;
 
     private static NORMAL_THRESHOLD:number = (<number>(Math.cos((10
@@ -412,32 +425,7 @@ export class GridPhotonMap implements GlobalPhotonMapInterface {
         % this.cellHash.length)];
     }
 
-    class PhotonGroup {
 
-    id:number;
-
-    count:number;
-
-    normal:Vector3;
-
-    flux:Color;
-
-    radiance:Color;
-
-    diffuse:Color;
-
-    next:PhotonGroup;
-
-    constructor (id:number, n:Vector3) {
-        this.normal = new Vector3(n);
-        this.flux = Color.black();
-        this.diffuse = Color.black();
-        this.radiance = null;
-        this.count = 0;
-        this.id = this.id;
-        this.next = null;
-    }
-}
 
 allowDiffuseBounced():boolean {
     return true;

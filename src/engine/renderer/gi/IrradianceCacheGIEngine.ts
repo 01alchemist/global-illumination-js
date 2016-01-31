@@ -1,6 +1,140 @@
+import {GridPhotonMap} from "../photomap/GridPhotonMap";
+import {GlobalPhotonMap} from "../photomap/GlobalPhotonMap";
+import {Color} from "../../math/Color";
+import {Vector3} from "../../math/Vector3";
 /**
  * Created by Nidin Vinayakan on 21/1/2016.
  */
+class Node {
+
+    children:Node[];
+
+    first:Sample;
+
+    center:Point3;
+
+    sideLength:number;
+
+    halfSideLength:number;
+
+    quadSideLength:number;
+
+    constructor (center:Point3, sideLength:number) {
+        this.children = new Array(8);
+        for (let i:number = 0; (i < 8); i++) {
+            this.children[i] = null;
+        }
+
+        this.center = new Point3(this.center);
+        this.sideLength = this.sideLength;
+        this.halfSideLength = (0.5 * this.sideLength);
+        this.quadSideLength = (0.5 * this.halfSideLength);
+        this.first = null;
+    }
+
+    isInside(p:Point3):boolean {
+        return ((Math.abs((p.x - this.center.x)) < this.halfSideLength)
+        && ((Math.abs((p.y - this.center.y)) < this.halfSideLength)
+        && (Math.abs((p.z - this.center.z)) < this.halfSideLength)));
+    }
+
+    find(x:Sample):number {
+        let weight:number = 0;
+        for (let s:Sample = this.first; (s != null); s = s.next) {
+            let c2:number = (1
+            - ((x.nix * s.nix)
+            + ((x.niy * s.niy)
+            + (x.niz * s.niz))));
+            let d2:number = (((x.pix - s.pix)
+            * (x.pix - s.pix))
+            + (((x.piy - s.piy)
+            * (x.piy - s.piy))
+            + ((x.piz - s.piz)
+            * (x.piz - s.piz))));
+            if (((c2
+                > (tolerance * tolerance))
+                || (d2
+                > (maxSpacing * maxSpacing)))) {
+                // TODO:Warning!!! continue If
+            }
+
+            let invWi:number = (<number>(((Math.sqrt(d2) * s.invR0)
+            + Math.sqrt(Math.max(c2, 0)))));
+            if (((invWi < tolerance)
+                || (d2
+                < (minSpacing * minSpacing)))) {
+                let wi:number = Math.min(1E+10, (1 / invWi));
+                if ((x.irr != null)) {
+                    x.irr.madd(wi, s.irr);
+                }
+                else {
+                    x.irr = s.irr.copy().mul(wi);
+                }
+
+                weight = (weight + wi);
+            }
+
+        }
+
+        for (let i:number = 0; (i < 8); i++) {
+            if (((this.children[i] != null)
+                && ((Math.abs((this.children[i].center.x - x.pix)) <= this.halfSideLength)
+                && ((Math.abs((this.children[i].center.y - x.piy)) <= this.halfSideLength)
+                && (Math.abs((this.children[i].center.z - x.piz)) <= this.halfSideLength))))) {
+                weight = (weight + this.children[i].find(x));
+            }
+
+        }
+
+        return weight;
+    }
+}
+
+class Sample {
+
+    pix:number;
+
+    piy:number;
+
+    piz:number;
+
+    nix:number;
+
+    niy:number;
+
+    niz:number;
+
+    invR0:number;
+
+    irr:Color;
+
+    next:Sample;
+
+    constructor (p:Point3, n:Vector3) {
+        this.pix = p.x;
+        this.piy = p.y;
+        this.piz = p.z;
+        let ni:Vector3 = (new Vector3(n) + normalize());
+        this.nix = ni.x;
+        this.niy = ni.y;
+        this.niz = ni.z;
+        this.irr = null;
+        this.next = null;
+    }
+
+    constructor (p:Point3, n:Vector3, r0:number, irr:Color) {
+        this.pix = p.x;
+        this.piy = p.y;
+        this.piz = p.z;
+        let ni:Vector3 = (new Vector3(n) + normalize());
+        this.nix = ni.x;
+        this.niy = ni.y;
+        this.niz = ni.z;
+        this.invR0 = (1 / r0);
+        this.irr = this.irr;
+        this.next = null;
+    }
+}
 export class IrradianceCacheGIEngine implements GIEngine {
 
     private samples:number;
@@ -44,7 +178,7 @@ export class IrradianceCacheGIEngine implements GIEngine {
             this.globalPhotonMap = new GridPhotonMap(numEmit, gather, radius);
         }
         else {
-            console.warn(Module.LIGHT, "Unrecognized global photon map type \""%s\"" - ignoring", gmap);
+            console.warn(Module.LIGHT, "Unrecognized global photon map type \""+gmap+"\" - ignoring");
         }
 
     }
@@ -217,135 +351,4 @@ export class IrradianceCacheGIEngine implements GIEngine {
         return (x.irr == null);
         // TODO:Warning!!!, inline IF is not supported ?
     }
-
-    class Node {
-
-    children:Node[];
-
-    first:Sample;
-
-    center:Point3;
-
-    sideLength:number;
-
-    halfSideLength:number;
-
-    quadSideLength:number;
-
-    constructor (center:Point3, sideLength:number) {
-        this.children = new Array(8);
-        for (let i:number = 0; (i < 8); i++) {
-            this.children[i] = null;
-        }
-
-        this.center = new Point3(this.center);
-        this.sideLength = this.sideLength;
-        this.halfSideLength = (0.5 * this.sideLength);
-        this.quadSideLength = (0.5 * this.halfSideLength);
-        this.first = null;
-    }
-
-    isInside(p:Point3):boolean {
-        return ((Math.abs((p.x - this.center.x)) < this.halfSideLength)
-        && ((Math.abs((p.y - this.center.y)) < this.halfSideLength)
-        && (Math.abs((p.z - this.center.z)) < this.halfSideLength)));
-    }
-
-    find(x:Sample):number {
-        let weight:number = 0;
-        for (let s:Sample = this.first; (s != null); s = s.next) {
-            let c2:number = (1
-            - ((x.nix * s.nix)
-            + ((x.niy * s.niy)
-            + (x.niz * s.niz))));
-            let d2:number = (((x.pix - s.pix)
-            * (x.pix - s.pix))
-            + (((x.piy - s.piy)
-            * (x.piy - s.piy))
-            + ((x.piz - s.piz)
-            * (x.piz - s.piz))));
-            if (((c2
-                > (tolerance * tolerance))
-                || (d2
-                > (maxSpacing * maxSpacing)))) {
-                // TODO:Warning!!! continue If
-            }
-
-            let invWi:number = (<number>(((Math.sqrt(d2) * s.invR0)
-            + Math.sqrt(Math.max(c2, 0)))));
-            if (((invWi < tolerance)
-                || (d2
-                < (minSpacing * minSpacing)))) {
-                let wi:number = Math.min(1E+10, (1 / invWi));
-                if ((x.irr != null)) {
-                    x.irr.madd(wi, s.irr);
-                }
-                else {
-                    x.irr = s.irr.copy().mul(wi);
-                }
-
-                weight = (weight + wi);
-            }
-
-        }
-
-        for (let i:number = 0; (i < 8); i++) {
-            if (((this.children[i] != null)
-                && ((Math.abs((this.children[i].center.x - x.pix)) <= this.halfSideLength)
-                && ((Math.abs((this.children[i].center.y - x.piy)) <= this.halfSideLength)
-                && (Math.abs((this.children[i].center.z - x.piz)) <= this.halfSideLength))))) {
-                weight = (weight + this.children[i].find(x));
-            }
-
-        }
-
-        return weight;
-    }
-}
-
-class Sample {
-
-    pix:number;
-
-    piy:number;
-
-    piz:number;
-
-    nix:number;
-
-    niy:number;
-
-    niz:number;
-
-    invR0:number;
-
-    irr:Color;
-
-    next:Sample;
-
-    constructor (p:Point3, n:Vector3) {
-        this.pix = p.x;
-        this.piy = p.y;
-        this.piz = p.z;
-        let ni:Vector3 = (new Vector3(n) + normalize());
-        this.nix = ni.x;
-        this.niy = ni.y;
-        this.niz = ni.z;
-        this.irr = null;
-        this.next = null;
-    }
-
-    constructor (p:Point3, n:Vector3, r0:number, irr:Color) {
-        this.pix = p.x;
-        this.piy = p.y;
-        this.piz = p.z;
-        let ni:Vector3 = (new Vector3(n) + normalize());
-        this.nix = ni.x;
-        this.niy = ni.y;
-        this.niz = ni.z;
-        this.invR0 = (1 / r0);
-        this.irr = this.irr;
-        this.next = null;
-    }
-}
 }

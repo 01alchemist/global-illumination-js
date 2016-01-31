@@ -1,6 +1,50 @@
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
+class SmallBucketThread extends Thread {
+
+    run() {
+        let istate:IntersectionState = new IntersectionState();
+        while (true) {
+            let n:number = this.progressiveRenderNext(istate);
+            ProgressiveRenderer.this;
+            if ((counter >= counterMax)) {
+                return;
+            }
+
+            counter = (counter + n);
+            UI.taskUpdate(counter);
+            if (UI.taskCanceled()) {
+                return;
+            }
+
+        }
+
+    }
+}
+//  progressive rendering
+class SmallBucket implements Comparable<SmallBucket> {
+
+    x:number;
+
+    y:number;
+
+    size:number;
+
+    constrast:number;
+
+    compareTo(o:SmallBucket):number {
+        if ((this.constrast < o.constrast)) {
+            return -1;
+        }
+
+        if ((this.constrast == o.constrast)) {
+            return 0;
+        }
+
+        return 1;
+    }
+}
 export class ProgressiveRenderer implements ImageSampler {
 
     private scene:Scene;
@@ -77,27 +121,7 @@ export class ProgressiveRenderer implements ImageSampler {
         this.display.imageEnd();
     }
 
-    class SmallBucketThread extends Thread {
 
-    run() {
-        let istate:IntersectionState = new IntersectionState();
-        while (true) {
-            let n:number = this.progressiveRenderNext(istate);
-            ProgressiveRenderer.this;
-            if ((counter >= counterMax)) {
-                return;
-            }
-
-            counter = (counter + n);
-            UI.taskUpdate(counter);
-            if (UI.taskCanceled()) {
-                return;
-            }
-
-        }
-
-    }
-}
 
 private progressiveRenderNext(istate:IntersectionState):number {
     let TASK_SIZE:number = 16;
@@ -178,29 +202,5 @@ private progressiveRenderNext(istate:IntersectionState):number {
     }
 
     return pixels;
-}
-
-//  progressive rendering
-class SmallBucket implements Comparable<SmallBucket> {
-
-    x:number;
-
-    y:number;
-
-    size:number;
-
-    constrast:number;
-
-    compareTo(o:SmallBucket):number {
-        if ((this.constrast < o.constrast)) {
-            return -1;
-        }
-
-        if ((this.constrast == o.constrast)) {
-            return 0;
-        }
-
-        return 1;
-    }
 }
 }

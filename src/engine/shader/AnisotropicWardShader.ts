@@ -1,3 +1,8 @@
+import {Color} from "../math/Color";
+import {OrthoNormalBasis} from "../math/OrthoNormalBasis";
+import {ShadingState} from "../core/ShadingState";
+import {Vector3} from "../math/Vector3";
+import {LightSample} from "../core/LightSample";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -64,10 +69,10 @@ export class AnisotropicWardShader implements Shader {
         let lr:Color = Color.black();
         //  compute specular contribution
         if (state.includeSpecular()) {
-            let in:Vector3 = state.getRay().getDirection().negate(new Vector3());
+            let _in:Vector3 = state.getRay().getDirection().negate(new Vector3());
             for (let sample:LightSample in state) {
                 let cosNL:number = sample.dot(state.getNormal());
-                let fr:number = this.brdf(in, sample.getShadowRay().getDirection(), onb);
+                let fr:number = this.brdf(_in, sample.getShadowRay().getDirection(), onb);
                 lr.madd((cosNL * fr), sample.getSpecularRadiance());
             }
 
@@ -119,18 +124,18 @@ export class AnisotropicWardShader implements Shader {
                     h.z = cosTheta;
                     onb.transform(h);
                     let o:Vector3 = new Vector3();
-                    let ih:number = Vector3.dot(h, in);
+                    let ih:number = Vector3.dot(h, _in);
                     o.x = ((2
                     * (ih * h.x))
-                    - in.x);
+                    - _in.x);
                     o.y = ((2
                     * (ih * h.y))
-                    - in.y);
+                    - _in.y);
                     o.z = ((2
                     * (ih * h.z))
-                    - in.z);
+                    - _in.z);
                     let no:number = onb.untransformZ(o);
-                    let ni:number = onb.untransformZ(in);
+                    let ni:number = onb.untransformZ(_in);
                     let w:number = (ih
                     * (cosTheta
                     * (cosTheta
@@ -176,7 +181,7 @@ export class AnisotropicWardShader implements Shader {
             //  photon is scattered specularly
             power.mul(this.rhoS).mul((1 / avgS));
             let basis:OrthoNormalBasis = state.getBasis();
-            let in:Vector3 = state.getRay().getDirection().negate(new Vector3());
+            let _in:Vector3 = state.getRay().getDirection().negate(new Vector3());
             let r1:number = (rnd / avgS);
             let r2:number = state.getRandom(0, 1, 1);
             let alphaRatio:number = (this.alphaY / this.alphaX);
@@ -219,16 +224,16 @@ export class AnisotropicWardShader implements Shader {
             h.z = cosTheta;
             basis.transform(h);
             let o:Vector3 = new Vector3();
-            let ih:number = Vector3.dot(h, in);
+            let ih:number = Vector3.dot(h, _in);
             o.x = ((2
             * (ih * h.x))
-            - in.x);
+            - _in.x);
             o.y = ((2
             * (ih * h.y))
-            - in.y);
+            - _in.y);
             o.z = ((2
             * (ih * h.z))
-            - in.z);
+            - _in.z);
             let r:Ray = new Ray(state.getPoint(), o);
             state.traceReflectionPhoton(r, power);
         }

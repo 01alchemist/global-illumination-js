@@ -1,5 +1,5 @@
 export function status(response:Response) {
-    if (response.status >= 200 && response.status < 300) {
+    if (parseInt(response.status) >= 200 && parseInt(response.status) < 300) {
         return Promise.resolve(response);
     }
     return response.text().then(function(text) {
@@ -7,11 +7,11 @@ export function status(response:Response) {
     });
 }
 
-export function text(response:Response) {
+export function text(response:Response):Promise<string> {
     return response.text();
 }
 
-export function json(response:Response) {
+export function json(response:Response):Promise<Object> {
     return response.json();
 }
 
@@ -21,6 +21,6 @@ export function xml(response:Response) {
         return parser.parseFromString(text,"application/xml");
     });
 }
-export function arrayBuffer(response:Response):Promise {
+export function arrayBuffer(response:Response):Promise<ArrayBuffer> {
     return response.arrayBuffer();
 }

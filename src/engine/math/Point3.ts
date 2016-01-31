@@ -4,25 +4,21 @@
 export class Point3 {
 
     x:number;
-
     y:number;
-
     z:number;
 
-    constructor () {
+    constructor (p:Point3)
+    constructor (x:number=0, y:number=0, z:number=0) {
 
-    }
-
-    constructor (x:number, y:number, z:number) {
-        this.x = this.x;
-        this.y = this.y;
-        this.z = this.z;
-    }
-
-    constructor (p:Point3) {
-        this.x = p.x;
-        this.y = p.y;
-        this.z = p.z;
+        if(arguments[0] instanceof Point3){
+            this.x = arguments[0].x;
+            this.y = arguments[1].y;
+            this.z = arguments[2].z;
+        }else{
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
     }
 
     get(i:number):number {

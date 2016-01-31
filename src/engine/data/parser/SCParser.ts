@@ -1,9 +1,19 @@
-
 import {GlobalIlluminationAPI} from "../../GlobalIlluminatiionAPI";
 import {Parser} from "angular2/src/core/change_detection/parser/parser";
 import {SceneParser} from "../../core/SceneParser";
 import {ConstantShader} from "../../shader/ConstantShader";
 import {Background} from "../../primitive/Background";
+import {TexturedDiffuseShader} from "../../shader/TexturedDiffuseShader";
+import {DiffuseShader} from "../../shader/DiffuseShader";
+import {TexturedShinyDiffuseShader} from "../../shader/TexturedShinyDiffuseShader";
+import {TexturedWardShader} from "../../shader/TexturedWardShader";
+import {AnisotropicWardShader} from "../../shader/AnisotropicWardShader";
+import {ViewCausticsShader} from "../../shader/ViewCausticsShader";
+import {ViewIrradianceShader} from "../../shader/ViewIrradianceShader";
+import {ViewGlobalPhotonsShader} from "../../shader/ViewGlobalPhotonsShader";
+import {Shader} from "../../core/Shader";
+import {IDShader} from "../../shader/IDShader";
+import {UberShader} from "../../shader/UberShader";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -12,7 +22,7 @@ export class SCParser implements SceneParser {
     private p:Parser;
     private numLightSamples:number;
 
-    constructor () {
+    constructor() {
 
     }
 
@@ -21,7 +31,7 @@ export class SCParser implements SceneParser {
         this.numLightSamples = 1;
         let timer:Timer = new Timer();
         timer.start();
-        console.log("Parsing "+filename+" ...");
+        console.log("Parsing " + filename + " ...");
         try {
             this.p = new Parser(filename);
             while (true) {
@@ -118,11 +128,11 @@ export class SCParser implements SceneParser {
                 }
                 else if (token.equals("include")) {
                     let file:string = this.p.getNextToken();
-                    console.log("Including:"+file+"...");
+                    console.log("Including:" + file + "...");
                     api.parse(file);
                 }
                 else {
-                    console.warn("Unrecognized token "+ token);
+                    console.warn("Unrecognized token " + token);
                 }
 
             }
@@ -315,7 +325,7 @@ export class SCParser implements SceneParser {
             api.parameter("gi.engine", "none");
         }
         else {
-            console.warn("Unrecognized gi engine type \""%s\"" - ignoring", this.p.getNextToken());
+            console.warn("Unrecognized gi engine type \"" + this.p.getNextToken() + "\" - ignoring");
         }
 
         api.options(GlobalIlluminationAPI.DEFAULT_OPTIONS);
@@ -509,14 +519,14 @@ export class SCParser implements SceneParser {
                 api.shader(name, new TexturedDiffuseShader());
             }
             else {
-                console.warn("Unrecognized option in diffuse shader block:%s", this.p.getNextToken());
+                console.warn("Unrecognized option in diffuse shader block:" + this.p.getNextToken());
             }
 
         }
         else if (this.p.peekNextToken("phong")) {
             let tex:string = null;
             if (this.p.peekNextToken("texture")) {
-                api.parameter("texture", tex=p.getNextToken(Unknown);
+                api.parameter("texture", tex = p.getNextToken());
             }
             else {
                 this.p.checkNextToken("diff");
@@ -544,7 +554,7 @@ export class SCParser implements SceneParser {
                 api.parameter("bright", this.parseColor());
             }
             else if (this.p.peekNextToken("texture")) {
-                api.parameter("texture", tex=p.getNextToken(Unknown);
+                api.parameter("texture", tex = p.getNextToken());
             }
 
             if (this.p.peekNextToken("dark")) {
@@ -586,7 +596,7 @@ export class SCParser implements SceneParser {
         else if (this.p.peekNextToken("shiny")) {
             let tex:string = null;
             if (this.p.peekNextToken("texture")) {
-                api.parameter("texture", tex=p.getNextToken(Unknown);
+                api.parameter("texture", tex = p.getNextToken());
             }
             else {
                 this.p.checkNextToken("diff");
@@ -606,7 +616,7 @@ export class SCParser implements SceneParser {
         else if (this.p.peekNextToken("ward")) {
             let tex:string = null;
             if (this.p.peekNextToken("texture")) {
-                api.parameter("texture", tex=p.getNextToken(Unknown);
+                api.parameter("texture", tex = p.getNextToken());
             }
             else {
                 this.p.checkNextToken("diff");
@@ -651,28 +661,9 @@ export class SCParser implements SceneParser {
                 let shader:Shader = (<Shader>(ClassBodyEvaluator.createFastClassBodyEvaluator(new Scanner(null, new StringReader(code)), Shader.class, ClassLoader.getSystemClassLoader())));
                 api.shader(name, shader);
             }
-            catch (e /*:CompileException*/) {
-                UI.printDetailed("Compiling:%s", code);
-                console.error("%s", e.getMessage());
-                e.printStackTrace();
-                return false;
-            }
-            catch (e /*:ParseException*/) {
-                UI.printDetailed("Compiling:%s", code);
-                console.error("%s", e.getMessage());
-                e.printStackTrace();
-                return false;
-            }
-            catch (e /*:ScanException*/) {
-                UI.printDetailed("Compiling:%s", code);
-                console.error("%s", e.getMessage());
-                e.printStackTrace();
-                return false;
-            }
-            catch (e /*:IOException*/) {
-                UI.printDetailed("Compiling:%s", code);
-                console.error("%s", e.getMessage());
-                e.printStackTrace();
+            catch (e) {
+                console.log("Compiling:", code);
+                console.error(e);
                 return false;
             }
 
@@ -699,7 +690,7 @@ export class SCParser implements SceneParser {
 
             if (this.p.peekNextToken("texture")) {
                 //  deprecated
-                console.warn("Deprecated uber shader parameter \""texture\"" - please use \""diffuse.texture\"" and \""diffuse.blend\"" instead");
+                console.warn("Deprecated uber shader parameter \"texture\" - please use \"diffuse.texture\" and \"diffuse.blend\" instead");
                 api.parameter("diffuse.texture", this.p.getNextToken());
                 api.parameter("diffuse.blend", this.p.getNextFloat());
             }
@@ -1044,27 +1035,8 @@ export class SCParser implements SceneParser {
                 api.geometry(name, tess);
             }
             catch (e /*:CompileException*/) {
-                UI.printDetailed("Compiling:%s", code);
-                console.error("%s", e.getMessage());
-                e.printStackTrace();
-                noInstance = true;
-            }
-            catch (e /*:ParseException*/) {
-                UI.printDetailed("Compiling:%s", code);
-                console.error("%s", e.getMessage());
-                e.printStackTrace();
-                noInstance = true;
-            }
-            catch (e /*:ScanException*/) {
-                UI.printDetailed("Compiling:%s", code);
-                console.error("%s", e.getMessage());
-                e.printStackTrace();
-                noInstance = true;
-            }
-            catch (e /*:IOException*/) {
-                UI.printDetailed("Compiling:%s", code);
-                console.error("%s", e.getMessage());
-                e.printStackTrace();
+                console.log("Compiling:" + code);
+                console.error(e);
                 noInstance = true;
             }
 
@@ -1132,7 +1104,7 @@ export class SCParser implements SceneParser {
         }
         else if ((type.equals("particles") || type.equals("dlasurface"))) {
             if (type.equals("dlasurface")) {
-                console.warn("Deprecated object type:\""dlasurface\"" - please use \""particles\"" instead");
+                console.warn("Deprecated object type:\"dlasurface\" - please use \"particles\" instead");
             }
 
             this.p.checkNextToken("filename");
@@ -1184,8 +1156,8 @@ export class SCParser implements SceneParser {
             this.p.checkNextToken("n");
             let nv:number;
             let nu:number;
-            api.parameter("nu", nu=p.getNextInt(Unknown);
-            api.parameter("nv", nv=p.getNextInt(Unknown);
+            api.parameter("nu", nu = p.getNextInt());
+            api.parameter("nv", nv = p.getNextInt());
             if (this.p.peekNextToken("wrap")) {
                 api.parameter("uwrap", this.p.getNextBoolean());
                 api.parameter("vwrap", this.p.getNextBoolean());

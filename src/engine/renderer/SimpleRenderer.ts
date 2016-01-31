@@ -1,6 +1,28 @@
+import {IntersectionState} from "../core/IntersectionState";
+import {Thread} from "./worker/Thread";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
+class BucketThread extends Thread {
+
+    run() {
+        let istate:IntersectionState = new IntersectionState();
+        while (true) {
+            let by:number;
+            let bx:number;
+            SimpleRenderer.this;
+            if ((bucketCounter >= numBuckets)) {
+                return;
+            }
+
+            by = (bucketCounter / numBucketsX);
+            bx = (bucketCounter % numBucketsX);
+            bucketCounter++;
+            this.renderBucket(bx, by, istate);
+        }
+
+    }
+}
 export class SimpleRenderer implements ImageSampler {
 
     private scene:Scene;
@@ -58,26 +80,7 @@ export class SimpleRenderer implements ImageSampler {
         this.display.imageEnd();
     }
 
-    class BucketThread extends Thread {
 
-    run() {
-        let istate:IntersectionState = new IntersectionState();
-        while (true) {
-            let by:number;
-            let bx:number;
-            SimpleRenderer.this;
-            if ((bucketCounter >= numBuckets)) {
-                return;
-            }
-
-            by = (bucketCounter / numBucketsX);
-            bx = (bucketCounter % numBucketsX);
-            bucketCounter++;
-            this.renderBucket(bx, by, istate);
-        }
-
-    }
-}
 
 renderBucket(bx:number, by:number, istate:IntersectionState) {
     //  pixel sized extents

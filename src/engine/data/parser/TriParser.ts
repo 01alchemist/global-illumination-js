@@ -1,3 +1,8 @@
+import {GlobalIlluminationAPI} from "../../GlobalIlluminatiionAPI";
+import {SceneParser} from "../../core/SceneParser";
+import {Parser} from "angular2/src/core/change_detection/parser/parser";
+import {TriangleMesh} from "../../primitive/TriangleMesh";
+import {SimpleShader} from "../../shader/SimpleShader";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -5,7 +10,7 @@ export class TriParser implements SceneParser {
 
     parse(filename:string, api:GlobalIlluminationAPI):boolean {
         try {
-            UI.printInfo(Module.USER, "TRI - Reading geometry:\""%s\"" ...", filename);
+            console.log("TRI - Reading geometry:\""+filename+"\" ...");
             let p:Parser = new Parser(filename);
             let verts:number[] = new Array((3 * p.getNextInt()));
             for (let v:number = 0; (v < verts.length); v += 3) {
@@ -53,12 +58,8 @@ export class TriParser implements SceneParser {
 
             stream.close();
         }
-        catch (e /*:FileNotFoundException*/) {
-            e.printStackTrace();
-            return false;
-        }
-        catch (e /*:IOException*/) {
-            e.printStackTrace();
+        catch (e) {
+            console.error(e);
             return false;
         }
 

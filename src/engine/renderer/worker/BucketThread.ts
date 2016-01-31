@@ -10,7 +10,7 @@ export class BucketThread extends Thread {
 
     run() {
         var istate:IntersectionState = new IntersectionState();
-        while (true) {
+        /*while (true) {
             var bx, by;
             synchronized (BucketRenderer.this) {
                 if (bucketCounter >= bucketCoords.length)
@@ -23,6 +23,6 @@ export class BucketThread extends Thread {
             renderBucket(display, bx, by, threadID, istate);
             if (UI.taskCanceled())
                 return;
-        }
+        }*/
     }
 }

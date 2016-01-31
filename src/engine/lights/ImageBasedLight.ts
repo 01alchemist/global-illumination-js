@@ -1,22 +1,26 @@
+import {Texture} from "../scene/materials/Texture";
+import {OrthoNormalBasis} from "../math/OrthoNormalBasis";
+import {Vector3} from "../math/Vector3";
+import {Color} from "../math/Color";
+import {Shader} from "../core/Shader";
+import {LightSource} from "../core/LightSource";
+import {PrimitiveList} from "../core/PrimitiveList";
+import {ParameterList} from "../core/ParameterList";
+import {GlobalIlluminationAPI} from "../GlobalIlluminatiionAPI";
+import {FloatArray} from "../utils/FloatArray";
+import {Bitmap} from "../image/Bitmap";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
 export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
 
     private texture:Texture;
-
     private basis:OrthoNormalBasis;
-
     private numSamples:number;
-
     private jacobian:number;
-
     private colHistogram:number[];
-
-    private imageHistogram:number[,];
-
+    private imageHistogram:FloatArray[];
     private samples:Vector3[];
-
     private colors:Color[];
 
     constructor () {
@@ -26,8 +30,7 @@ export class ImageBasedLight implements PrimitiveList, LightSource, Shader {
     }
 
     private updateBasis(center:Vector3, up:Vector3) {
-        if (((center != null)
-            && (up != null))) {
+        if (((center != null) && (up != null))) {
             this.basis = OrthoNormalBasis.makeFromWV(center, up);
             this.basis.swapWU();
             this.basis.flipV();

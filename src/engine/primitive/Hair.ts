@@ -1,3 +1,9 @@
+import {InterpolationType} from "../core/ParameterList";
+import {FloatParameter} from "../core/ParameterList";
+import {GlobalIlluminationAPI} from "../GlobalIlluminatiionAPI";
+import {ParameterList} from "../core/ParameterList";
+import {Vector3} from "../math/Vector3";
+import {OrthoNormalBasis} from "../math/OrthoNormalBasis";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -9,7 +15,7 @@ export class Hair implements PrimitiveList, Shader {
 
     private widths:FloatParameter;
 
-    constructor () {
+    constructor() {
         this.numSegments = 1;
         this.points = null;
         this.widths = new FloatParameter(1);
@@ -266,72 +272,75 @@ export class Hair implements PrimitiveList, Shader {
     update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
         this.numSegments = pl.getInt("segments", this.numSegments);
         if ((this.numSegments < 1)) {
-            console.error(Module.HAIR, "Invalid number of segments:%d", this.numSegments);
+            console.error("Invalid number of segments:%d", this.numSegments);
             return false;
         }
 
         let pointsP:FloatParameter = pl.getPointArray("points");
         if ((pointsP != null)) {
             if ((pointsP.interp != InterpolationType.VERTEX)) {
-                console.error(Module.HAIR, "Point interpolation type must be set to \""vertex\"" - was \""%s\"""", pointsP.interp.name().toLowerCase())", else, {, points=pointsP.data);
+                console.error("Point interpolation type must be set to \"vertex\" - was \"" + pointsP.interp.name().toLowerCase() + "\"")
+            } else {
+                points = pointsP.data;
+            }
+        }
+        if (points == null) {
+            console.error("Unabled to update hair - vertices are missing");
+            return false;
+        }
+        pl.setVertexCount((points.length / 3));
+        let widthsP:FloatParameter = pl.getFloatArray("widths");
+        if ((widthsP != null)) {
+            if (((widthsP.interp == InterpolationType.NONE)
+                || (widthsP.interp == InterpolationType.VERTEX))) {
+                widths = widthsP;
+            }
+            else {
+                console.warn("Width interpolation type %s is not supported -- ignoring", widthsP.interp.name().toLowerCase());
             }
 
         }
 
-    }
-}
-pl.setVertexCount((points.length / 3));
-let widthsP:FloatParameter = pl.getFloatArray("widths");
-if ((widthsP != null)) {
-    if (((widthsP.interp == InterpolationType.NONE)
-        || (widthsP.interp == InterpolationType.VERTEX))) {
-        widths = widthsP;
-    }
-    else {
-        console.warn(Module.HAIR, "Width interpolation type %s is not supported -- ignoring", widthsP.interp.name().toLowerCase());
+        return true;
     }
 
-}
+    getRadiance(state:ShadingState):Color {
+        //  don't use these - gather lights for sphere of directions
+        //  gather lights
+        state.initLightSamples();
+        state.initCausticSamples();
+        let v:Vector3 = state.getRay().getDirection();
+        v.negate();
+        let h:Vector3 = new Vector3();
+        let t:Vector3 = state.getBasis().transform(new Vector3(0, 1, 0));
+        let diff:Color = Color.black();
+        let spec:Color = Color.black();
+        for (let ls:LightSample in state) {
+            let l:Vector3 = ls.getShadowRay().getDirection();
+            let dotTL:number = Vector3.dot(t, l);
+            let sinTL:number = (<number>(Math.sqrt((1
+            - (dotTL * dotTL)))));
+            //  float dotVL = Vector3.dot(v, l);
+            diff.madd(sinTL, ls.getDiffuseRadiance());
+            Vector3.add(v, l, h);
+            h.normalize();
+            let dotTH:number = Vector3.dot(t, h);
+            let sinTH:number = (<number>(Math.sqrt((1
+            - (dotTH * dotTH)))));
+            let s:number = (<number>(Math.pow(sinTH, 10)));
+            spec.madd(s, ls.getSpecularRadiance());
+        }
 
-return true;
-UnknownUnknown
-
-getRadiance(state:ShadingState):Color {
-    //  don't use these - gather lights for sphere of directions
-    //  gather lights
-    state.initLightSamples();
-    state.initCausticSamples();
-    let v:Vector3 = state.getRay().getDirection();
-    v.negate();
-    let h:Vector3 = new Vector3();
-    let t:Vector3 = state.getBasis().transform(new Vector3(0, 1, 0));
-    let diff:Color = Color.black();
-    let spec:Color = Color.black();
-    for (let ls:LightSample in state) {
-        let l:Vector3 = ls.getShadowRay().getDirection();
-        let dotTL:number = Vector3.dot(t, l);
-        let sinTL:number = (<number>(Math.sqrt((1
-        - (dotTL * dotTL)))));
-        //  float dotVL = Vector3.dot(v, l);
-        diff.madd(sinTL, ls.getDiffuseRadiance());
-        Vector3.add(v, l, h);
-        h.normalize();
-        let dotTH:number = Vector3.dot(t, h);
-        let sinTH:number = (<number>(Math.sqrt((1
-        - (dotTH * dotTH)))));
-        let s:number = (<number>(Math.pow(sinTH, 10)));
-        spec.madd(s, ls.getSpecularRadiance());
+        let c:Color = Color.add(diff, spec, new Color());
+        //  transparency
+        return Color.blend(c, state.traceTransparency(), state.getV(), new Color());
     }
 
-    let c:Color = Color.add(diff, spec, new Color());
-    //  transparency
-    return Color.blend(c, state.traceTransparency(), state.getV(), new Color());
-}
+    scatterPhoton(state:ShadingState, power:Color) {
 
-scatterPhoton(state:ShadingState, power:Color) {
+    }
 
-}
-
-getBakingPrimitives():PrimitiveList {
-    return null;
+    getBakingPrimitives():PrimitiveList {
+        return null;
+    }
 }

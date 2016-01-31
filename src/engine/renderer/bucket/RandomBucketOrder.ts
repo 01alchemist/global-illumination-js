@@ -48,21 +48,14 @@ export class RandomBucketOrder implements BucketOrder {
     }
 
     private mod(a:number, b:number):number {
-        let m:number = (a % b);
-        return (m < 0);
-        // TODO:Warning!!!, inline IF is not supported ?
+        let m:int = a % b;
+        return (m < 0) ? m + b : m;
     }
 
     private xorshift(y:number):number {
-        y = (y
-        | (y + 13));
-        // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-        let (:y;
-        17;
-        //  unsigned
-        y = (y
-        | (y + 5));
-        // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
+        y = y ^ (y << 13);
+        y = y ^ (y >>> 17); // unsigned
+        y = y ^ (y << 5);
         return y;
     }
 }

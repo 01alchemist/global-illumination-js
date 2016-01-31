@@ -1,24 +1,17 @@
+import {Display} from "../core/Display";
 /**
  * Created by Nidin Vinayakan on 21/1/2016.
  */
 export class OpenExrDisplay implements Display {
 
     private static HALF:number = 1;
-
     private static FLOAT:number = 2;
-
     private static HALF_SIZE:number = 2;
-
     private static FLOAT_SIZE:number = 4;
-
     private static OE_MAGIC:number = 20000630;
-
     private static OE_EXR_VERSION:number = 2;
-
     private static OE_TILED_FLAG:number = 512;
-
     private static NO_COMPRESSION:number = 0;
-
     private static RLE_COMPRESSION:number = 1;
 
     //  private static final int ZIPS_COMPRESSION = 2;
@@ -27,66 +20,53 @@ export class OpenExrDisplay implements Display {
     //  private static final int PIZ_COMPRESSION = 4;
     //  private static final int PXR24_COMPRESSION = 5;
     private static RLE_MIN_RUN:number = 3;
-
     private static RLE_MAX_RUN:number = 127;
-
     private filename:string;
-
     private file:RandomAccessFile;
-
-    private tileOffsets:number[,];
-
+    private tileOffsets:Float64Array[];
     private tileOffsetsPosition:number;
-
     private tilesX:number;
-
     private tilesY:number;
-
     private tileSize:number;
-
     private compression:number;
-
     private channelType:number;
-
     private channelSize:number;
+    private tmpbuf:Uint8Array;
+    private comprbuf:Uint8Array;
 
-    private tmpbuf:number[];
-
-    private comprbuf:number[];
-
-    constructor (filename:string, compression:string, channelType:string) {
+    constructor(filename:string, compression:string, channelType:string) {
         this.filename = (this.filename == null);
         // TODO:Warning!!!, inline IF is not supported ?
         // TODO:Warning!!!, inline IF is not supported ?
         if (((this.compression == null)
             || this.compression.equals("none"))) {
-            this.compression = NO_COMPRESSION;
+            this.compression = OpenExrDisplay.NO_COMPRESSION;
         }
         else if (this.compression.equals("rle")) {
-            this.compression = RLE_COMPRESSION;
+            this.compression = OpenExrDisplay.RLE_COMPRESSION;
         }
         else if (this.compression.equals("zip")) {
-            this.compression = ZIP_COMPRESSION;
+            this.compression = OpenExrDisplay.ZIP_COMPRESSION;
         }
         else {
             console.warn(Module.DISP, "EXR - Compression type was not recognized - defaulting to zip");
-            this.compression = ZIP_COMPRESSION;
+            this.compression = OpenExrDisplay.ZIP_COMPRESSION;
         }
 
         if (((this.channelType != null)
             && this.channelType.equals("float"))) {
-            this.channelType = FLOAT;
-            this.channelSize = FLOAT_SIZE;
+            this.channelType = OpenExrDisplay.FLOAT;
+            this.channelSize = OpenExrDisplay.FLOAT_SIZE;
         }
         else if (((this.channelType != null)
             && this.channelType.equals("half"))) {
-            this.channelType = HALF;
-            this.channelSize = HALF_SIZE;
+            this.channelType = OpenExrDisplay.HALF;
+            this.channelSize = OpenExrDisplay.HALF_SIZE;
         }
         else {
             console.warn(Module.DISP, "EXR - Channel type was not recognized - defaulting to float");
-            this.channelType = FLOAT;
-            this.channelSize = FLOAT_SIZE;
+            this.channelType = OpenExrDisplay.FLOAT;
+            this.channelSize = OpenExrDisplay.FLOAT_SIZE;
         }
 
     }
@@ -363,120 +343,120 @@ export class OpenExrDisplay implements Display {
 
     }
 
-    private static compress(tp:number, in:number[], inSize:number, out:number[]):number {
-    if ((inSize == 0)) {
-    return 0;
-}
+    private static compress(tp:number, _in:number[], inSize:number, out:number[]):number {
+        if ((inSize == 0)) {
+            return 0;
+        }
 
-let t2:number = ((inSize + 1)
-/ 2);
-let t1:number = 0;
-let ret:number;
-let inPtr:number = 0;
-let tmp:number[] = new Array(inSize);
+        let t2:number = ((inSize + 1)
+        / 2);
+        let t1:number = 0;
+        let ret:number;
+        let inPtr:number = 0;
+        let tmp:number[] = new Array(inSize);
 //  zip and rle treat the data first, in the same way so I'm not
 //  repeating the code
-if (((tp == ZIP_COMPRESSION)
-    || (tp == RLE_COMPRESSION))) {
-    //  reorder the pixel data ~ straight from ImfZipCompressor.cpp :)
-    while (true) {
-        if ((inPtr < inSize)) {
-            tmp[t1++] = in[inPtr++];
-        }
-        else {
-            break;
-        }
+        if (((tp == ZIP_COMPRESSION)
+            || (tp == RLE_COMPRESSION))) {
+            //  reorder the pixel data ~ straight from ImfZipCompressor.cpp :)
+            while (true) {
+                if ((inPtr < inSize)) {
+                    tmp[t1++] = _in[inPtr++];
+                }
+                else {
+                    break;
+                }
 
-        if ((inPtr < inSize)) {
-            tmp[t2++] = in[inPtr++];
+                if ((inPtr < inSize)) {
+                    tmp[t2++] = _in[inPtr++];
+                }
+                else {
+                    break;
+                }
+
+            }
+
+            //  Predictor ~ straight from ImfZipCompressor.cpp :)
+            t1 = 1;
+            let p:number = tmp[(t1 - 1)];
+            while ((t1 < inSize)) {
+                let d:number = (((<number>(tmp[t1])) - p) + (128 + 256));
+                p = (<number>(tmp[t1]));
+                tmp[t1] = (<number>(d));
+                t1++;
+            }
+
         }
-        else {
-            break;
-        }
-
-    }
-
-    //  Predictor ~ straight from ImfZipCompressor.cpp :)
-    t1 = 1;
-    let p:number = tmp[(t1 - 1)];
-    while ((t1 < inSize)) {
-        let d:number = (((<number>(tmp[t1])) - p) + (128 + 256));
-        p = (<number>(tmp[t1]));
-        tmp[t1] = (<number>(d));
-        t1++;
-    }
-
-}
 
 //  We'll just jump from here to the wanted compress/decompress stuff if
 //  need be
-switch (tp) {
-    case ZIP_COMPRESSION:
-        let def:Deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, false);
-        def.setInput(tmp, 0, inSize);
-        def.finish();
-        ret = def.deflate(/* out */Unknown);
-        return ret;
-        break;
-    case RLE_COMPRESSION:
-        return OpenExrDisplay.rleCompress(tmp, inSize, /* out */Unknown);
-        break;
-    default:
-        return -1;
-        break;
-}
-
-}
-
-private static rleCompress(in:number[], inLen:number, out:number[]):number {
-    let outWrite:number = 0;
-    let runStart:number = 0;
-    let runEnd:number = 1;
-    while ((runStart < inLen)) {
-        while (((runEnd < inLen)
-        && ((in[runStart] == in[runEnd])
-        && ((runEnd
-        - (runStart - 1))
-        < RLE_MAX_RUN)))) {
-            runEnd++;
+        switch (tp) {
+            case ZIP_COMPRESSION:
+                let def:Deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, false);
+                def.setInput(tmp, 0, inSize);
+                def.finish();
+                ret = def.deflate(/* out */Unknown);
+                return ret;
+                break;
+            case RLE_COMPRESSION:
+                return OpenExrDisplay.rleCompress(tmp, inSize, /* out */Unknown);
+                break;
+            default:
+                return -1;
+                break;
         }
 
-        if (((runEnd - runStart)
-            >= RLE_MIN_RUN)) {
-            //  Compressable run
-            outWrite++;
-            (<number>(((runEnd - runStart)
-            - 1)));
-            outWrite++;
-        in[runStart];
-            runStart = runEnd;
-        }
-        else {
-            //  Uncompressable run
+    }
+
+    private static rleCompress(_in:number[], inLen:number, out:number[]):number {
+        let outWrite:number = 0;
+        let runStart:number = 0;
+        let runEnd:number = 1;
+        while ((runStart < inLen)) {
             while (((runEnd < inLen)
-            && (((((runEnd + 1)
-            >= inLen)
-            || (in[runEnd] != in[(runEnd + 1)]))
-            || (((runEnd + 2)
-            >= inLen)
-            || (in[(runEnd + 1)] != in[(runEnd + 2)])))
-            && ((runEnd - runStart)
+            && ((_in[runStart] == _in[runEnd])
+            && ((runEnd
+            - (runStart - 1))
             < RLE_MAX_RUN)))) {
                 runEnd++;
             }
 
-            outWrite++;
-            (<number>((runStart - runEnd)));
-            while ((runStart < runEnd)) {
+            if (((runEnd - runStart)
+                >= RLE_MIN_RUN)) {
+                //  Compressable run
+                outWrite++;
+                (<number>(((runEnd - runStart)
+                - 1)));
+                outWrite++;
+                _in[runStart];
+                runStart = runEnd;
+            }
+            else {
+                //  Uncompressable run
+                while (((runEnd < inLen)
+                && (((((runEnd + 1)
+                >= inLen)
+                || (_in[runEnd] != _in[(runEnd + 1)]))
+                || (((runEnd + 2)
+                >= inLen)
+                || (_in[(runEnd + 1)] != _in[(runEnd + 2)])))
+                && ((runEnd - runStart)
+                < RLE_MAX_RUN)))) {
+                    runEnd++;
+                }
+
+                outWrite++;
+                (<number>((runStart - runEnd)));
+                while ((runStart < runEnd)) {
+                }
+
+                outWrite++;
+                _in[runStart++];
             }
 
-            outWrite++;
-        in[runStart++];
+            runEnd++;
         }
 
-        runEnd++;
+        return outWrite;
     }
-
-    return outWrite;
-}
 }

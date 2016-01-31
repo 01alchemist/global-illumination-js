@@ -349,11 +349,8 @@ export /* abstract */ class CubeGrid implements PrimitiveList {
                 //  we hit a boundary
                 r.setMax(intervalMin);
                 //  if we are inside, the last bit needs to be flipped
-                if (isInside) {
-                    let =:curr;
-                }
-
-                1;
+                if (isInside)
+                    curr ^= 1;
                 state.setIntersection(curr, 0, 0);
                 return;
             }

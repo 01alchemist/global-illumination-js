@@ -1,3 +1,4 @@
+import {BucketOrder} from "../../core/BucketOrder";
 /**
  * Created by Nidin Vinayakan on 20/1/2016.
  */
@@ -43,88 +44,39 @@ export class HilbertBucketOrder implements BucketOrder {
                 let swap:number;
                 let cs:number;
                 let t:number;
-                s = (s | (1431655765 + (2 * hn)));
-                //  Pad s on left with 01
-                1;
-                1431655765;
-                //  (no change) groups.
-                cs = (((s & 1431655765)
-                + sr)
-                | 1431655765);
-                // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-                //  Compute
-                //  complement
-                //  & swap info in
-                //  two-bit groups.
-                //  Parallel prefix xor op to propagate both complement
-                //  and swap info together from left to right (there is
-                //  no step "cs ^= cs >> 1", so in effect it computes
-                //  two independent parallel prefix operations on two
-                //  interleaved sets of sixteen bits).
-                let (:cs;
-                2;
-                let (:cs;
-                4;
-                let (:cs;
-                8;
-                let (:cs;
-                16;
-                swap = (cs & 1431655765);
-                //  Separate the swap and
-                1;
-                1431655765;
-                //  complement bits.
-                t = ((s & swap)
-                | comp);
-                // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-                //  Calculate x and y in
-                s = (s
-                | (sr
-                | (t
-                | (t + 1))));
-                // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-                // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-                // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-                //  the odd & even bit
-                //  positions, resp.
-                s = (s
-                & ((1 + (2 * hn))
-                - 1));
-                //  Clear out any junk
-                //  on the left (unpad).
-                //  Now "unshuffle" to separate the x and y bits.
-                1;
-                572662306;
-                s = (s
-                | (t
-                | (t + 1)));
-                // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-                // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-                2;
-                202116108;
-                s = (s
-                | (t
-                | (t + 2)));
-                // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-                // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-                4;
-                15728880;
-                s = (s
-                | (t
-                | (t + 4)));
-                // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-                // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-                8;
-                65280;
-                s = (s
-                | (t
-                | (t + 8)));
-                // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-                // The operator should be an XOR ^ instead of an OR, but not available in CodeDOM
-                16;
-                //  Assign the two halves
-                hy = (s & 65535);
-                //  of t to x and y.
+                s = s | (0x55555555 << (2 * hn)); // Pad s on left with 01
+                sr = (s >>> 1) & 0x55555555; // (no change) groups.
+                cs = ((s & 0x55555555) + sr) ^ 0x55555555;// Compute
+                // complement
+                // & swap info in
+                // two-bit groups.
+                // Parallel prefix xor op to propagate both complement
+                // and swap info together from left to right (there is
+                // no step "cs ^= cs >> 1", so in effect it computes
+                // two independent parallel prefix operations on two
+                // interleaved sets of sixteen bits).
+                cs = cs ^ (cs >>> 2);
+                cs = cs ^ (cs >>> 4);
+                cs = cs ^ (cs >>> 8);
+                cs = cs ^ (cs >>> 16);
+                swap = cs & 0x55555555; // Separate the swap and
+                comp = (cs >>> 1) & 0x55555555; // complement bits.
+                t = (s & swap) ^ comp; // Calculate x and y in
+                s = s ^ sr ^ t ^ (t << 1); // the odd & even bit
+                // positions, resp.
+                s = s & ((1 << 2 * hn) - 1); // Clear out any junk
+                // on the left (unpad).
+                // Now "unshuffle" to separate the x and y bits.
+                t = (s ^ (s >>> 1)) & 0x22222222;
+                s = s ^ t ^ (t << 1);
+                t = (s ^ (s >>> 2)) & 0x0C0C0C0C;
+                s = s ^ t ^ (t << 2);
+                t = (s ^ (s >>> 4)) & 0x00F000F0;
+                s = s ^ t ^ (t << 4);
+                t = (s ^ (s >>> 8)) & 0x0000FF00;
+                s = s ^ t ^ (t << 8);
+                hx = s >>> 16; // Assign the two halves
+                hy = s & 0xFFFF; // of t to x and y.
                 hi++;
             }
 

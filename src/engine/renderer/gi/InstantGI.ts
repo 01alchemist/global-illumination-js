@@ -1,6 +1,55 @@
+import {GIEngine} from "../../core/GIEngine";
+import {PointLight} from "../../lights/PointLight";
 /**
  * Created by Nidin Vinayakan on 21/1/2016.
  */
+class PointLight {
+
+    p:Point3;
+
+    n:Vector3;
+
+    power:Color;
+}
+
+class PointLightStore implements PhotonStore {
+
+    virtualLights:ArrayList<PointLight> = new ArrayList<PointLight>();
+
+    numEmit():number {
+        return numPhotons;
+    }
+
+    prepare(sceneBounds:BoundingBox) {
+
+    }
+
+    store(state:ShadingState, dir:Vector3, power:Color, diffuse:Color) {
+        state.faceforward();
+        let vpl:PointLight = new PointLight();
+        vpl.p = state.getPoint();
+        vpl.n = state.getNormal();
+        vpl.power = power;
+        this;
+        this.virtualLights.add(vpl);
+    }
+
+    init() {
+
+    }
+
+    allowDiffuseBounced():boolean {
+        return true;
+    }
+
+    allowReflectionBounced():boolean {
+        return true;
+    }
+
+    allowRefractionBounced():boolean {
+        return true;
+    }
+}
 export class InstantGI implements GIEngine {
 
     private numPhotons:number;
@@ -11,7 +60,7 @@ export class InstantGI implements GIEngine {
 
     private numBias:number;
 
-    private virtualLights:PointLight[,];
+    private virtualLights:Array<PointLight[]>;
 
     constructor (options:Options) {
         this.numPhotons = options.getInt("gi.igi.samples", 64);
@@ -161,52 +210,4 @@ export class InstantGI implements GIEngine {
 
         return irr;
     }
-
-    class PointLight {
-
-    p:Point3;
-
-    n:Vector3;
-
-    power:Color;
-}
-
-class PointLightStore implements PhotonStore {
-
-    virtualLights:ArrayList<PointLight> = new ArrayList<PointLight>();
-
-    numEmit():number {
-        return numPhotons;
-    }
-
-    prepare(sceneBounds:BoundingBox) {
-
-    }
-
-    store(state:ShadingState, dir:Vector3, power:Color, diffuse:Color) {
-        state.faceforward();
-        let vpl:PointLight = new PointLight();
-        vpl.p = state.getPoint();
-        vpl.n = state.getNormal();
-        vpl.power = power;
-        this;
-        this.virtualLights.add(vpl);
-    }
-
-    init() {
-
-    }
-
-    allowDiffuseBounced():boolean {
-        return true;
-    }
-
-    allowReflectionBounced():boolean {
-        return true;
-    }
-
-    allowRefractionBounced():boolean {
-        return true;
-    }
-}
 }

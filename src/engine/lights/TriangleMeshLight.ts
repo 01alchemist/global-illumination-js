@@ -1,38 +1,7 @@
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
-export class TriangleMeshLight extends TriangleMesh implements Shader {
-
-    private radiance:Color;
-
-    private numSamples:number;
-
-    constructor () {
-        this.radiance = Color.WHITE;
-        this.numSamples = 4;
-    }
-
-    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
-        this.radiance = pl.getColor("radiance", this.radiance);
-        this.numSamples = pl.getInt("samples", this.numSamples);
-        return super.update(pl, api);
-    }
-
-    init(name:string, api:GlobalIlluminationAPI) {
-        api.geometry(name, this);
-        api.shader((name + ".shader"), this);
-        api.parameter("shaders", (name + ".shader"));
-        api.instance((name + ".instance"), name);
-        for (let j:number = 0; (i < triangles.length); i += 3) {
-            let t:TriangleLight = new TriangleLight(j);
-            let i:number = 0;
-            let lname:string = String.format("%s.light[%d]", name, j);
-            api.light(lname, t);
-        }
-
-    }
-
-    class TriangleLight implements LightSource {
+class TriangleLight implements LightSource {
 
     private tri3:number;
 
@@ -323,6 +292,38 @@ export class TriangleMeshLight extends TriangleMesh implements Shader {
         return radiance.copy().mul(((<number>(Math.PI)) * this.area)).getLuminance();
     }
 }
+export class TriangleMeshLight extends TriangleMesh implements Shader {
+
+    private radiance:Color;
+
+    private numSamples:number;
+
+    constructor () {
+        this.radiance = Color.WHITE;
+        this.numSamples = 4;
+    }
+
+    update(pl:ParameterList, api:GlobalIlluminationAPI):boolean {
+        this.radiance = pl.getColor("radiance", this.radiance);
+        this.numSamples = pl.getInt("samples", this.numSamples);
+        return super.update(pl, api);
+    }
+
+    init(name:string, api:GlobalIlluminationAPI) {
+        api.geometry(name, this);
+        api.shader((name + ".shader"), this);
+        api.parameter("shaders", (name + ".shader"));
+        api.instance((name + ".instance"), name);
+        for (let j:number = 0; (i < triangles.length); i += 3) {
+            let t:TriangleLight = new TriangleLight(j);
+            let i:number = 0;
+            let lname:string = String.format("%s.light[%d]", name, j);
+            api.light(lname, t);
+        }
+
+    }
+
+
 
 getRadiance(state:ShadingState):Color {
     if (!state.includeLights()) {

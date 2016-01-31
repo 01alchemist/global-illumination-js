@@ -1,6 +1,191 @@
+import {CausticPhotonMapInterface} from "../../core/CausticPhotonMapInterface";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
+class NearestPhotons {
+
+    found:number;
+
+    px:number;
+
+    py:number;
+
+    pz:number;
+
+    private max:number;
+
+    private gotHeap:boolean;
+
+    protected dist2:number[];
+
+    protected index:Photon[];
+
+    constructor (p:Point3, n:number, maxDist2:number) {
+        this.max = n;
+        this.found = 0;
+        this.gotHeap = false;
+        this.px = p.x;
+        this.py = p.y;
+        this.pz = p.z;
+        this.dist2 = new Array((n + 1));
+        this.index = new Array((n + 1));
+        this.dist2[0] = maxDist2;
+    }
+
+    reset(p:Point3, maxDist2:number) {
+        this.found = 0;
+        this.gotHeap = false;
+        this.px = p.x;
+        this.py = p.y;
+        this.pz = p.z;
+        this.dist2[0] = maxDist2;
+    }
+
+    checkAddNearest(p:Photon) {
+        let fdist2:number = p.getDist2(this.px, this.py, this.pz);
+        if ((fdist2 < this.dist2[0])) {
+            if ((this.found < this.max)) {
+                this.found++;
+                this.dist2[this.found] = fdist2;
+                this.index[this.found] = p;
+            }
+            else {
+                let j:number;
+                let parent:number;
+                if (!this.gotHeap) {
+                    let dst2:number;
+                    let phot:Photon;
+                    let halfFound:number = (this.found + 1);
+                    for (let k:number = halfFound; (k >= 1); k--) {
+                        parent = k;
+                        phot = this.index[k];
+                        dst2 = this.dist2[k];
+                        while ((parent <= halfFound)) {
+                            j = (parent + parent);
+                            if (((j < this.found)
+                                && (this.dist2[j] < this.dist2[(j + 1)]))) {
+                                j++;
+                            }
+
+                            if ((dst2 >= this.dist2[j])) {
+                                break;
+                            }
+
+                            this.dist2[parent] = this.dist2[j];
+                            this.index[parent] = this.index[j];
+                            parent = j;
+                        }
+
+                        this.dist2[parent] = dst2;
+                        this.index[parent] = phot;
+                    }
+
+                    this.gotHeap = true;
+                }
+
+                parent = 1;
+                j = 2;
+                while ((j <= this.found)) {
+                    if (((j < this.found)
+                        && (this.dist2[j] < this.dist2[(j + 1)]))) {
+                        j++;
+                    }
+
+                    if ((fdist2 > this.dist2[j])) {
+                        break;
+                    }
+
+                    this.dist2[parent] = this.dist2[j];
+                    this.index[parent] = this.index[j];
+                    parent = j;
+                    j = (j + j);
+                }
+
+                this.dist2[parent] = fdist2;
+                this.index[parent] = p;
+                this.dist2[0] = this.dist2[1];
+            }
+
+        }
+
+    }
+}
+
+class Photon {
+
+    x:number;
+
+    y:number;
+
+    z:number;
+
+    dir:number;
+
+    power:number;
+
+    flags:number;
+
+    static SPLIT_X:number = 0;
+
+    static SPLIT_Y:number = 1;
+
+    static SPLIT_Z:number = 2;
+
+    static SPLIT_MASK:number = 3;
+
+    constructor (p:Point3, dir:Vector3, power:Color) {
+        this.x = p.x;
+        this.y = p.y;
+        this.z = p.z;
+        this.dir = this.dir.encode();
+        this.power = this.power.toRGBE();
+        this.flags = SPLIT_X;
+    }
+
+    setSplitAxis(axis:number) {
+        SPLIT_MASK;
+        this.flags = (this.flags | axis);
+    }
+
+    getCoord(axis:number):number {
+        switch (axis) {
+            case SPLIT_X:
+                return this.x;
+                break;
+            case SPLIT_Y:
+                return this.y;
+                break;
+            default:
+                return this.z;
+                break;
+        }
+
+    }
+
+    getDist1(px:number, py:number, pz:number):number {
+        switch ((this.flags & SPLIT_MASK)) {
+            case SPLIT_X:
+                return (px - this.x);
+                break;
+            case SPLIT_Y:
+                return (py - this.y);
+                break;
+            default:
+                return (pz - this.z);
+                break;
+        }
+
+    }
+
+    getDist2(px:number, py:number, pz:number):number {
+        let dx:number = (this.x - px);
+        let dy:number = (this.y - py);
+        let dz:number = (this.z - pz);
+        return ((dx * dx)
+        + ((dy * dy)
+        + (dz * dz)));
+    }
+}
 export class CausticPhotonMap implements CausticPhotonMapInterface {
 
     private photonList:ArrayList<Photon>;
@@ -320,190 +505,7 @@ export class CausticPhotonMap implements CausticPhotonMapInterface {
 
     }
 
-    class NearestPhotons {
 
-    found:number;
-
-    px:number;
-
-    py:number;
-
-    pz:number;
-
-    private max:number;
-
-    private gotHeap:boolean;
-
-    protected dist2:number[];
-
-    protected index:Photon[];
-
-    constructor (p:Point3, n:number, maxDist2:number) {
-        this.max = n;
-        this.found = 0;
-        this.gotHeap = false;
-        this.px = p.x;
-        this.py = p.y;
-        this.pz = p.z;
-        this.dist2 = new Array((n + 1));
-        this.index = new Array((n + 1));
-        this.dist2[0] = maxDist2;
-    }
-
-    reset(p:Point3, maxDist2:number) {
-        this.found = 0;
-        this.gotHeap = false;
-        this.px = p.x;
-        this.py = p.y;
-        this.pz = p.z;
-        this.dist2[0] = maxDist2;
-    }
-
-    checkAddNearest(p:Photon) {
-        let fdist2:number = p.getDist2(this.px, this.py, this.pz);
-        if ((fdist2 < this.dist2[0])) {
-            if ((this.found < this.max)) {
-                this.found++;
-                this.dist2[this.found] = fdist2;
-                this.index[this.found] = p;
-            }
-            else {
-                let j:number;
-                let parent:number;
-                if (!this.gotHeap) {
-                    let dst2:number;
-                    let phot:Photon;
-                    let halfFound:number = (this.found + 1);
-                    for (let k:number = halfFound; (k >= 1); k--) {
-                        parent = k;
-                        phot = this.index[k];
-                        dst2 = this.dist2[k];
-                        while ((parent <= halfFound)) {
-                            j = (parent + parent);
-                            if (((j < this.found)
-                                && (this.dist2[j] < this.dist2[(j + 1)]))) {
-                                j++;
-                            }
-
-                            if ((dst2 >= this.dist2[j])) {
-                                break;
-                            }
-
-                            this.dist2[parent] = this.dist2[j];
-                            this.index[parent] = this.index[j];
-                            parent = j;
-                        }
-
-                        this.dist2[parent] = dst2;
-                        this.index[parent] = phot;
-                    }
-
-                    this.gotHeap = true;
-                }
-
-                parent = 1;
-                j = 2;
-                while ((j <= this.found)) {
-                    if (((j < this.found)
-                        && (this.dist2[j] < this.dist2[(j + 1)]))) {
-                        j++;
-                    }
-
-                    if ((fdist2 > this.dist2[j])) {
-                        break;
-                    }
-
-                    this.dist2[parent] = this.dist2[j];
-                    this.index[parent] = this.index[j];
-                    parent = j;
-                    j = (j + j);
-                }
-
-                this.dist2[parent] = fdist2;
-                this.index[parent] = p;
-                this.dist2[0] = this.dist2[1];
-            }
-
-        }
-
-    }
-}
-
-class Photon {
-
-    x:number;
-
-    y:number;
-
-    z:number;
-
-    dir:number;
-
-    power:number;
-
-    flags:number;
-
-    static SPLIT_X:number = 0;
-
-    static SPLIT_Y:number = 1;
-
-    static SPLIT_Z:number = 2;
-
-    static SPLIT_MASK:number = 3;
-
-    constructor (p:Point3, dir:Vector3, power:Color) {
-        this.x = p.x;
-        this.y = p.y;
-        this.z = p.z;
-        this.dir = this.dir.encode();
-        this.power = this.power.toRGBE();
-        this.flags = SPLIT_X;
-    }
-
-    setSplitAxis(axis:number) {
-        SPLIT_MASK;
-        this.flags = (this.flags | axis);
-    }
-
-    getCoord(axis:number):number {
-        switch (axis) {
-            case SPLIT_X:
-                return this.x;
-                break;
-            case SPLIT_Y:
-                return this.y;
-                break;
-            default:
-                return this.z;
-                break;
-        }
-
-    }
-
-    getDist1(px:number, py:number, pz:number):number {
-        switch ((this.flags & SPLIT_MASK)) {
-            case SPLIT_X:
-                return (px - this.x);
-                break;
-            case SPLIT_Y:
-                return (py - this.y);
-                break;
-            default:
-                return (pz - this.z);
-                break;
-        }
-
-    }
-
-    getDist2(px:number, py:number, pz:number):number {
-        let dx:number = (this.x - px);
-        let dy:number = (this.y - py);
-        let dz:number = (this.z - pz);
-        return ((dx * dx)
-        + ((dy * dy)
-        + (dz * dz)));
-    }
-}
 
 allowDiffuseBounced():boolean {
     return false;

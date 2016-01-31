@@ -9,23 +9,14 @@ import {RenderObjectMap} from "./renderer/utils/RenderObjectMap";
 export class GlobalIlluminationAPI {
 
     static VERSION:string = "0.07.2";
-
     static DEFAULT_OPTIONS:string = "::options";
-
     private scene:SharedScene;
-
     private bucketRenderer:BucketRenderer;
-
     private progressiveRenderer:ProgressiveRenderer;
-
     private includeSearchPath:SearchPath;
-
     private textureSearchPath:SearchPath;
-
     private parameterList:ParameterList;
-
     private renderObjects:RenderObjectMap;
-
     private currentFrame:number;
 
     static runSystemCheck() {

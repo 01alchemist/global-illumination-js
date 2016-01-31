@@ -1,3 +1,6 @@
+import {Hair} from "../../primitive/Hair";
+import {Parser} from "angular2/src/core/change_detection/parser/parser";
+import {IntArray} from "../../utils/IntArray";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -16,7 +19,7 @@ export class ShaveRibParser implements SceneParser {
                     p.checkNextToken("DelayedReadArchive");
                     p.checkNextToken("[");
                     let f:string = p.getNextToken();
-                    UI.printInfo(Module.USER, "RIB - Reading voxel:\""%s\"" ...", f);
+                    console.log("RIB - Reading voxel:\""+f+"\" ...");
                     api.parse(f);
                     p.checkNextToken("]");
                     while (true) {
@@ -78,7 +81,7 @@ export class ShaveRibParser implements SceneParser {
                 }
 
                 let nhairs:number = nverts.length;
-                UI.printInfo(Module.USER, "RIB - Parsed %d hair curves", nhairs);
+                console.log("RIB - Parsed %d hair curves", nhairs);
                 api.parameter("segments", (nverts[0] - 1));
                 p.checkNextToken("nonperiodic");
                 p.checkNextToken("P");
@@ -90,7 +93,7 @@ export class ShaveRibParser implements SceneParser {
                 }
 
                 api.parameter("points", "point", "vertex", points);
-                UI.printInfo(Module.USER, "RIB - Parsed %d hair vertices", (points.length / 3));
+                console.log("RIB - Parsed %d hair vertices", (points.length / 3));
                 p.checkNextToken("width");
                 let w:number[] = this.parseFloatArray(p);
                 if ((w.length
@@ -100,11 +103,12 @@ export class ShaveRibParser implements SceneParser {
                 }
 
                 api.parameter("widths", "float", "vertex", w);
-                UI.printInfo(Module.USER, "RIB - Parsed %d hair widths", w.length);
+                console.log("RIB - Parsed %d hair widths", w.length);
                 let name:string = String.format("%s[%d]", filename, index);
-                UI.printInfo(Module.USER, "RIB - Creating hair object \""%s\"""", name)", api.geometry(name, new Hair()));
+                console.log("RIB - Creating hair object \""+name+"\"")
+                api.geometry(name, new Hair());
                 api.instance((name + ".instance"), name);
-                UI.printInfo(Module.USER, "RIB - Searching for next curve group ...");
+                console.log("RIB - Searching for next curve group ...");
                 while (true) {
                     let t:string = p.getNextToken();
                     if (((t == null)
@@ -121,21 +125,12 @@ export class ShaveRibParser implements SceneParser {
                 index++;
             }
 
-            UI.printInfo(Module.USER, "RIB - Finished reading rib file");
+            console.log("RIB - Finished reading rib file");
         }
-        catch (e /*:FileNotFoundException*/) {
-            console.error(Module.USER, "RIB - File not found:%s", filename);
-            e.printStackTrace();
-            return false;
-        }
-        catch (e /*:ParserException*/) {
-            console.error(Module.USER, "RIB - Parser exception:%s", e);
-            e.printStackTrace();
-            return false;
-        }
-        catch (e /*:IOException*/) {
-            console.error(Module.USER, "RIB - I/O exception:%s", e);
-            e.printStackTrace();
+        catch (e) {
+            //console.error("RIB - File not found:%s", filename);
+            console.error("RIB - Parser exception");
+            console.error(e);
             return false;
         }
 

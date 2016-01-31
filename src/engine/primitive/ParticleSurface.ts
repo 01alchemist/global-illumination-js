@@ -23,7 +23,7 @@ export class ParticleSurface implements PrimitiveList {
     }
 
     getPrimitiveBound(primID:number, i:number):number {
-        let c:number = this.particles[primIDStar3, +(i, >>, Greater, 1];
+        let c:number = this.particles[primID * 3 + (i >>> 1)];
         return ((i & 1)
         == 0);
         // TODO:Warning!!!, inline IF is not supported ?
