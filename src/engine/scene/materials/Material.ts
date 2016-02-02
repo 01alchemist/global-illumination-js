@@ -37,17 +37,17 @@ export class Material {
      * @param tint -> specular and refractive tinting
      * @param transparent
      */
-    constructor(color:Color = new Color(),
-                texture?:Texture,
-                normalTexture?:Texture,
-                bumpTexture?:Texture,
-                bumpMultiplier?:number,
-                emittance?:number,
-                attenuation:Attenuation=NoAttenuation,
-                ior?:number,
-                gloss?:number,
-                tint?:number,
-                transparent?:boolean) {
+    constructor(public color:Color = new Color(),
+                public texture?:Texture,
+                public normalTexture?:Texture,
+                public bumpTexture?:Texture,
+                public bumpMultiplier?:number,
+                public emittance?:number,
+                public attenuation:Attenuation=NoAttenuation,
+                public ior?:number,
+                public gloss?:number,
+                public tint?:number,
+                public transparent?:boolean) {
         this.index = Material.map.push(this) - 1;
     }
 
