@@ -1,6 +1,6 @@
 import {XYZColor} from "./XYZColor";
 import {Color} from "../math/Color";
-import {MathUtils} from "../../system/utils/MathUtils";
+import {MathUtils} from "../utils/MathUtils";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */

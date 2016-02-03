@@ -2,7 +2,7 @@ import {Mesh} from "../scene/shapes/Mesh";
 import {Material} from "../scene/materials/Material";
 import {Vector3} from "../math/Vector3";
 import {Triangle} from "../scene/shapes/Triangle";
-import {append} from "../../system/utils/ArrayUtils";
+import {append} from "../utils/ArrayUtils";
 import {Color} from "../math/Color";
 import {Texture} from "../scene/materials/Texture";
 /**

@@ -4,16 +4,17 @@ import {HeapRegister} from "./HeapRegister";
  */
 export function initParallelz():number{
     new ParallelFramework();
+    return ParallelFramework._instance.heapSize;
 }
 export function alloc(size:number):number{
-    return ParallelFramework.instance.alloc(size);
+    return ParallelFramework._instance.alloc(size);
 }
 export function free(ptr:number):boolean{
-    return ParallelFramework.instance.free(ptr);
+    return ParallelFramework._instance.free(ptr);
 }
 export class ParallelFramework{
 
-    static instance:ParallelFramework;
+    static _instance:ParallelFramework;
 
     private heapBuffer:SharedArrayBuffer;
     private HEAP:Uint8Array;
@@ -21,7 +22,7 @@ export class ParallelFramework{
     private lastPointer:number;
     private defaultSize:number = 32 * 1024 * 1024;
 
-    constructor(heapSize:number){
+    constructor(heapSize?:number){
         if(ParallelFramework._instance){
             throw "ParallelFramework is singleton";
         }
@@ -30,6 +31,9 @@ export class ParallelFramework{
         this.heapBuffer = new SharedArrayBuffer(heapSize);
         this.HEAP = new Uint8Array(this.heapBuffer);
         this.heapRegister = new HeapRegister(heapSize);
+    }
+    get heapSize():number{
+        return this.heapBuffer.byteLength;
     }
     alloc(size):number{
         return this.heapRegister.register(size);

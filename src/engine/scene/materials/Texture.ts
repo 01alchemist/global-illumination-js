@@ -1,7 +1,7 @@
 import {Color} from "../../math/Color";
 import {Vector3} from "../../math/Vector3";
 import {ImageLoader} from "../../data/ImageLoader";
-import {MathUtils} from "../../../system/utils/MathUtils";
+import {MathUtils} from "../../utils/MathUtils";
 import {RGBA} from "../../math/Color";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.

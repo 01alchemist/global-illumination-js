@@ -2,21 +2,17 @@ import {GridPhotonMap} from "../photomap/GridPhotonMap";
 import {GlobalPhotonMap} from "../photomap/GlobalPhotonMap";
 import {Color} from "../../math/Color";
 import {Vector3} from "../../math/Vector3";
+import {Point3} from "../../math/Point3";
 /**
  * Created by Nidin Vinayakan on 21/1/2016.
  */
 class Node {
 
     children:Node[];
-
     first:Sample;
-
     center:Point3;
-
     sideLength:number;
-
     halfSideLength:number;
-
     quadSideLength:number;
 
     constructor (center:Point3, sideLength:number) {
@@ -26,7 +22,7 @@ class Node {
         }
 
         this.center = new Point3(this.center);
-        this.sideLength = this.sideLength;
+        this.sideLength = sideLength;
         this.halfSideLength = (0.5 * this.sideLength);
         this.quadSideLength = (0.5 * this.halfSideLength);
         this.first = null;

@@ -1,4 +1,4 @@
-import {FastHashMap} from "../../system/utils/FastHashMap";
+import {FastHashMap} from "../utils/FastHashMap";
 import {Point3} from "../math/Point3";
 import {Vector3} from "../math/Vector3";
 import {Matrix4} from "../math/Matrix4";
@@ -94,7 +94,7 @@ export class ParameterList {
         this.add(name, new Parameter(value));
     }
 
-    addIntegerArray(name:string, array:number[]) {
+    addIntegerArray(name:string, array:Int32Array) {
         if ((array == null)) {
             throw new NullPointerException();
         }

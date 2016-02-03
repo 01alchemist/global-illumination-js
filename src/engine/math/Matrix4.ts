@@ -12,101 +12,146 @@ export class Matrix4 {
 
     m:Float32Array;
 
-    constructor(x00 = 0, x01 = 0, x02 = 0, x03 = 0,
-                x10 = 0, x11 = 0, x12 = 0, x13 = 0,
-                x20 = 0, x21 = 0, x22 = 0, x23 = 0,
-                x30 = 0, x31 = 0, x32 = 0, x33 = 0) {
-        this.m = new Float32Array(16);
+    // matrix elements, m(row,col)
+    /**
+     * Creates a matrix with the specified elements
+     *
+     * @param m00 value at row 0, col 0
+     * @param m01 value at row 0, col 1
+     * @param m02 value at row 0, col 2
+     * @param m03 value at row 0, col 3
+     * @param m10 value at row 1, col 0
+     * @param m11 value at row 1, col 1
+     * @param m12 value at row 1, col 2
+     * @param m13 value at row 1, col 3
+     * @param m20 value at row 2, col 0
+     * @param m21 value at row 2, col 1
+     * @param m22 value at row 2, col 2
+     * @param m23 value at row 2, col 3
+     * @param m30 value at row 3, col 0
+     * @param m31 value at row 3, col 1
+     * @param m32 value at row 3, col 2
+     * @param m33 value at row 3, col 3
+     */
+    constructor(public m00:float = 0, public m01:float = 0, public m02:float = 0, public m03:float = 0,
+                public m10:float = 0, public m11:float = 0, public m12:float = 0, public m13:float = 0,
+                public m20:float = 0, public m21:float = 0, public m22:float = 0, public m23:float = 0,
+                public m30:float = 0, public m31:float = 0, public m32:float = 0, public m33:float = 0) {
+
+        this.m = new Float32Array([
+            m00, m01, m02, m03,
+            m10, m11, m12, m13,
+            m20, m21, m22, m23,
+            m30, m31, m32, m33
+        ]);
     }
 
     directRead(memory:Float32Array, offset:number):number {
         var m:Matrix4 = this;
-        m.x00 = memory[offset++];
-        m.x01 = memory[offset++];
-        m.x02 = memory[offset++];
-        m.x03 = memory[offset++];
-        m.x10 = memory[offset++];
-        m.x11 = memory[offset++];
-        m.x12 = memory[offset++];
-        m.x13 = memory[offset++];
-        m.x20 = memory[offset++];
-        m.x21 = memory[offset++];
-        m.x22 = memory[offset++];
-        m.x23 = memory[offset++];
-        m.x30 = memory[offset++];
-        m.x31 = memory[offset++];
-        m.x32 = memory[offset++];
-        m.x33 = memory[offset++];
+        m.m00 = memory[offset++];
+        m.m01 = memory[offset++];
+        m.m02 = memory[offset++];
+        m.m03 = memory[offset++];
+        m.m10 = memory[offset++];
+        m.m11 = memory[offset++];
+        m.m12 = memory[offset++];
+        m.m13 = memory[offset++];
+        m.m20 = memory[offset++];
+        m.m21 = memory[offset++];
+        m.m22 = memory[offset++];
+        m.m23 = memory[offset++];
+        m.m30 = memory[offset++];
+        m.m31 = memory[offset++];
+        m.m32 = memory[offset++];
+        m.m33 = memory[offset++];
         return offset;
     }
 
     directWrite(memory:Float32Array, offset:number):number {
         var m:Matrix4 = this;
-        memory[offset++] = m.x00;
-        memory[offset++] = m.x01;
-        memory[offset++] = m.x02;
-        memory[offset++] = m.x03;
-        memory[offset++] = m.x10;
-        memory[offset++] = m.x11;
-        memory[offset++] = m.x12;
-        memory[offset++] = m.x13;
-        memory[offset++] = m.x20;
-        memory[offset++] = m.x21;
-        memory[offset++] = m.x22;
-        memory[offset++] = m.x23;
-        memory[offset++] = m.x30;
-        memory[offset++] = m.x31;
-        memory[offset++] = m.x32;
-        memory[offset++] = m.x33;
+        memory[offset++] = m.m00;
+        memory[offset++] = m.m01;
+        memory[offset++] = m.m02;
+        memory[offset++] = m.m03;
+        memory[offset++] = m.m10;
+        memory[offset++] = m.m11;
+        memory[offset++] = m.m12;
+        memory[offset++] = m.m13;
+        memory[offset++] = m.m20;
+        memory[offset++] = m.m21;
+        memory[offset++] = m.m22;
+        memory[offset++] = m.m23;
+        memory[offset++] = m.m30;
+        memory[offset++] = m.m31;
+        memory[offset++] = m.m32;
+        memory[offset++] = m.m33;
         return offset;
     }
 
     read(memory:ByteArrayBase|DirectMemory):number {
-        this.x00 = memory.readFloat();
-        this.x01 = memory.readFloat();
-        this.x02 = memory.readFloat();
-        this.x03 = memory.readFloat();
-        this.x10 = memory.readFloat();
-        this.x11 = memory.readFloat();
-        this.x12 = memory.readFloat();
-        this.x13 = memory.readFloat();
-        this.x20 = memory.readFloat();
-        this.x21 = memory.readFloat();
-        this.x22 = memory.readFloat();
-        this.x23 = memory.readFloat();
-        this.x30 = memory.readFloat();
-        this.x31 = memory.readFloat();
-        this.x32 = memory.readFloat();
-        this.x33 = memory.readFloat();
+        this.m00 = memory.readFloat();
+        this.m01 = memory.readFloat();
+        this.m02 = memory.readFloat();
+        this.m03 = memory.readFloat();
+        this.m10 = memory.readFloat();
+        this.m11 = memory.readFloat();
+        this.m12 = memory.readFloat();
+        this.m13 = memory.readFloat();
+        this.m20 = memory.readFloat();
+        this.m21 = memory.readFloat();
+        this.m22 = memory.readFloat();
+        this.m23 = memory.readFloat();
+        this.m30 = memory.readFloat();
+        this.m31 = memory.readFloat();
+        this.m32 = memory.readFloat();
+        this.m33 = memory.readFloat();
         return memory.position;
     }
 
     write(memory:ByteArrayBase|DirectMemory):number {
-        memory.writeFloat(this.x00);
-        memory.writeFloat(this.x01);
-        memory.writeFloat(this.x02);
-        memory.writeFloat(this.x03);
-        memory.writeFloat(this.x10);
-        memory.writeFloat(this.x11);
-        memory.writeFloat(this.x12);
-        memory.writeFloat(this.x13);
-        memory.writeFloat(this.x20);
-        memory.writeFloat(this.x21);
-        memory.writeFloat(this.x22);
-        memory.writeFloat(this.x23);
-        memory.writeFloat(this.x30);
-        memory.writeFloat(this.x31);
-        memory.writeFloat(this.x32);
-        memory.writeFloat(this.x33);
+        memory.writeFloat(this.m00);
+        memory.writeFloat(this.m01);
+        memory.writeFloat(this.m02);
+        memory.writeFloat(this.m03);
+        memory.writeFloat(this.m10);
+        memory.writeFloat(this.m11);
+        memory.writeFloat(this.m12);
+        memory.writeFloat(this.m13);
+        memory.writeFloat(this.m20);
+        memory.writeFloat(this.m21);
+        memory.writeFloat(this.m22);
+        memory.writeFloat(this.m23);
+        memory.writeFloat(this.m30);
+        memory.writeFloat(this.m31);
+        memory.writeFloat(this.m32);
+        memory.writeFloat(this.m33);
         return memory.position;
+    }
+
+    asRowMajor():Float32Array {
+        return new Float32Array([
+            this.m00, this.m01, this.m02, this.m03,
+            this.m10, this.m11, this.m12, this.m13,
+            this.m20, this.m21, this.m22, this.m23,
+            this.m30, this.m31, this.m32, this.m33
+        ]);
+    }
+
+    asColMajor():Float32Array {
+        return new Float32Array([
+            this.m00, this.m10, this.m20, this.m30,
+            this.m01, this.m11, this.m21, this.m31,
+            this.m02, this.m12, this.m22, this.m32,
+            this.m03, this.m13, this.m23, this.m33
+        ]);
     }
 
     static fromJson(m:Matrix4):Matrix4 {
         return new Matrix4(
-            m.x00, m.x01, m.x02, m.x03,
-            m.x10, m.x11, m.x12, m.x13,
-            m.x20, m.x21, m.x22, m.x23,
-            m.x30, m.x31, m.x32, m.x33
+            m.m00, m.m01, m.m02, m.m03,
+            m.m10, m.m11, m.m12, m.m13,
+            m.m20, m.m21, m.m22, m.m23,
+            m.m30, m.m31, m.m32, m.m33
         )
     }
 
@@ -120,7 +165,7 @@ export class Matrix4 {
 
     static translate(v:Vector3):Matrix4 {
         return new Matrix4(
-            1, 0, 0, v.x,
+            1, 0, 0, v.m,
             0, 1, 0, v.y,
             0, 0, 1, v.z,
             0, 0, 0, 1)
@@ -128,7 +173,7 @@ export class Matrix4 {
 
     static scale(v:Vector3):Matrix4 {
         return new Matrix4(
-            v.x, 0, 0, 0,
+            v.m, 0, 0, 0,
             0, v.y, 0, 0,
             0, 0, v.z, 0,
             0, 0, 0, 1);
@@ -140,9 +185,9 @@ export class Matrix4 {
         var c = Math.cos(a);
         var m = 1 - c;
         return new Matrix4(
-            m * v.x * v.x + c, m * v.x * v.y + v.z * s, m * v.z * v.x - v.y * s, 0,
-            m * v.x * v.y - v.z * s, m * v.y * v.y + c, m * v.y * v.z + v.x * s, 0,
-            m * v.z * v.x + v.y * s, m * v.y * v.z - v.x * s, m * v.z * v.z + c, 0,
+            m * v.m * v.m + c, m * v.m * v.y + v.z * s, m * v.z * v.m - v.y * s, 0,
+            m * v.m * v.y - v.z * s, m * v.y * v.y + c, m * v.y * v.z + v.m * s, 0,
+            m * v.z * v.m + v.y * s, m * v.y * v.z - v.m * s, m * v.z * v.z + c, 0,
             0, 0, 0, 1);
     }
 
@@ -199,38 +244,38 @@ export class Matrix4 {
     mul(b:Matrix4):Matrix4 {
         var a:Matrix4 = this;
         var m:Matrix4 = new Matrix4();
-        m.x00 = a.x00 * b.x00 + a.x01 * b.x10 + a.x02 * b.x20 + a.x03 * b.x30;
-        m.x10 = a.x10 * b.x00 + a.x11 * b.x10 + a.x12 * b.x20 + a.x13 * b.x30;
-        m.x20 = a.x20 * b.x00 + a.x21 * b.x10 + a.x22 * b.x20 + a.x23 * b.x30;
-        m.x30 = a.x30 * b.x00 + a.x31 * b.x10 + a.x32 * b.x20 + a.x33 * b.x30;
-        m.x01 = a.x00 * b.x01 + a.x01 * b.x11 + a.x02 * b.x21 + a.x03 * b.x31;
-        m.x11 = a.x10 * b.x01 + a.x11 * b.x11 + a.x12 * b.x21 + a.x13 * b.x31;
-        m.x21 = a.x20 * b.x01 + a.x21 * b.x11 + a.x22 * b.x21 + a.x23 * b.x31;
-        m.x31 = a.x30 * b.x01 + a.x31 * b.x11 + a.x32 * b.x21 + a.x33 * b.x31;
-        m.x02 = a.x00 * b.x02 + a.x01 * b.x12 + a.x02 * b.x22 + a.x03 * b.x32;
-        m.x12 = a.x10 * b.x02 + a.x11 * b.x12 + a.x12 * b.x22 + a.x13 * b.x32;
-        m.x22 = a.x20 * b.x02 + a.x21 * b.x12 + a.x22 * b.x22 + a.x23 * b.x32;
-        m.x32 = a.x30 * b.x02 + a.x31 * b.x12 + a.x32 * b.x22 + a.x33 * b.x32;
-        m.x03 = a.x00 * b.x03 + a.x01 * b.x13 + a.x02 * b.x23 + a.x03 * b.x33;
-        m.x13 = a.x10 * b.x03 + a.x11 * b.x13 + a.x12 * b.x23 + a.x13 * b.x33;
-        m.x23 = a.x20 * b.x03 + a.x21 * b.x13 + a.x22 * b.x23 + a.x23 * b.x33;
-        m.x33 = a.x30 * b.x03 + a.x31 * b.x13 + a.x32 * b.x23 + a.x33 * b.x33;
+        m.m00 = a.m00 * b.m00 + a.m01 * b.m10 + a.m02 * b.m20 + a.m03 * b.m30;
+        m.m10 = a.m10 * b.m00 + a.m11 * b.m10 + a.m12 * b.m20 + a.m13 * b.m30;
+        m.m20 = a.m20 * b.m00 + a.m21 * b.m10 + a.m22 * b.m20 + a.m23 * b.m30;
+        m.m30 = a.m30 * b.m00 + a.m31 * b.m10 + a.m32 * b.m20 + a.m33 * b.m30;
+        m.m01 = a.m00 * b.m01 + a.m01 * b.m11 + a.m02 * b.m21 + a.m03 * b.m31;
+        m.m11 = a.m10 * b.m01 + a.m11 * b.m11 + a.m12 * b.m21 + a.m13 * b.m31;
+        m.m21 = a.m20 * b.m01 + a.m21 * b.m11 + a.m22 * b.m21 + a.m23 * b.m31;
+        m.m31 = a.m30 * b.m01 + a.m31 * b.m11 + a.m32 * b.m21 + a.m33 * b.m31;
+        m.m02 = a.m00 * b.m02 + a.m01 * b.m12 + a.m02 * b.m22 + a.m03 * b.m32;
+        m.m12 = a.m10 * b.m02 + a.m11 * b.m12 + a.m12 * b.m22 + a.m13 * b.m32;
+        m.m22 = a.m20 * b.m02 + a.m21 * b.m12 + a.m22 * b.m22 + a.m23 * b.m32;
+        m.m32 = a.m30 * b.m02 + a.m31 * b.m12 + a.m32 * b.m22 + a.m33 * b.m32;
+        m.m03 = a.m00 * b.m03 + a.m01 * b.m13 + a.m02 * b.m23 + a.m03 * b.m33;
+        m.m13 = a.m10 * b.m03 + a.m11 * b.m13 + a.m12 * b.m23 + a.m13 * b.m33;
+        m.m23 = a.m20 * b.m03 + a.m21 * b.m13 + a.m22 * b.m23 + a.m23 * b.m33;
+        m.m33 = a.m30 * b.m03 + a.m31 * b.m13 + a.m32 * b.m23 + a.m33 * b.m33;
         return m
     }
 
     mulPosition(b:Vector3):Vector3 {
         var a:Matrix4 = this;
-        var x:number = a.x00 * b.x + a.x01 * b.y + a.x02 * b.z + a.x03;
-        var y:number = a.x10 * b.x + a.x11 * b.y + a.x12 * b.z + a.x13;
-        var z:number = a.x20 * b.x + a.x21 * b.y + a.x22 * b.z + a.x23;
+        var x:number = a.m00 * b.m + a.m01 * b.y + a.m02 * b.z + a.m03;
+        var y:number = a.m10 * b.m + a.m11 * b.y + a.m12 * b.z + a.m13;
+        var z:number = a.m20 * b.m + a.m21 * b.y + a.m22 * b.z + a.m23;
         return new Vector3(x, y, z);
     }
 
     mulDirection(b:Vector3):Vector3 {
         var a:Matrix4 = this;
-        var x:number = a.x00 * b.x + a.x01 * b.y + a.x02 * b.z;
-        var y:number = a.x10 * b.x + a.x11 * b.y + a.x12 * b.z;
-        var z:number = a.x20 * b.x + a.x21 * b.y + a.x22 * b.z;
+        var x:number = a.m00 * b.m + a.m01 * b.y + a.m02 * b.z;
+        var y:number = a.m10 * b.m + a.m11 * b.y + a.m12 * b.z;
+        var z:number = a.m20 * b.m + a.m21 * b.y + a.m22 * b.z;
         return new Vector3(x, y, z).normalize();
     }
 
@@ -242,74 +287,74 @@ export class Matrix4 {
     mulBox(b:Box):Box {
         // http://dev.theomader.com/transform-bounding-boxes/
         var a:Matrix4 = this;
-        var minx = b.min.x;
-        var maxx = b.max.x;
+        var minx = b.min.m;
+        var maxx = b.max.m;
         var miny = b.min.y;
         var maxy = b.max.y;
         var minz = b.min.z;
         var maxz = b.max.z;
-        var xa = a.x00 * minx + a.x10 * minx + a.x20 * minx + a.x30 * minx;
-        var xb = a.x00 * maxx + a.x10 * maxx + a.x20 * maxx + a.x30 * maxx;
-        var ya = a.x01 * miny + a.x11 * miny + a.x21 * miny + a.x31 * miny;
-        var yb = a.x01 * maxy + a.x11 * maxy + a.x21 * maxy + a.x31 * maxy;
-        var za = a.x02 * minz + a.x12 * minz + a.x22 * minz + a.x32 * minz;
-        var zb = a.x02 * maxz + a.x12 * maxz + a.x22 * maxz + a.x32 * maxz;
+        var xa = a.m00 * minx + a.m10 * minx + a.m20 * minx + a.m30 * minx;
+        var xb = a.m00 * maxx + a.m10 * maxx + a.m20 * maxx + a.m30 * maxx;
+        var ya = a.m01 * miny + a.m11 * miny + a.m21 * miny + a.m31 * miny;
+        var yb = a.m01 * maxy + a.m11 * maxy + a.m21 * maxy + a.m31 * maxy;
+        var za = a.m02 * minz + a.m12 * minz + a.m22 * minz + a.m32 * minz;
+        var zb = a.m02 * maxz + a.m12 * maxz + a.m22 * maxz + a.m32 * maxz;
         minx = Math.min(xa, xb);
         maxx = Math.max(xa, xb);
         miny = Math.min(ya, yb);
         maxy = Math.max(ya, yb);
         minz = Math.min(za, zb);
         maxz = Math.max(za, zb);
-        var min:Vector3 = new Vector3(minx + a.x03, miny + a.x13, minz + a.x23);
-        var max:Vector3 = new Vector3(maxx + a.x03, maxy + a.x13, maxz + a.x23);
+        var min:Vector3 = new Vector3(minx + a.m03, miny + a.m13, minz + a.m23);
+        var max:Vector3 = new Vector3(maxx + a.m03, maxy + a.m13, maxz + a.m23);
         return new Box(min, max);
     }
 
     transpose():Matrix4 {
         var a:Matrix4 = this;
         return new Matrix4(
-            a.x00, a.x10, a.x20, a.x30,
-            a.x01, a.x11, a.x21, a.x31,
-            a.x02, a.x12, a.x22, a.x32,
-            a.x03, a.x13, a.x23, a.x33)
+            a.m00, a.m10, a.m20, a.m30,
+            a.m01, a.m11, a.m21, a.m31,
+            a.m02, a.m12, a.m22, a.m32,
+            a.m03, a.m13, a.m23, a.m33)
     }
 
     determinant():number {
         var a:Matrix4 = this;
-        return (a.x00 * a.x11 * a.x22 * a.x33 - a.x00 * a.x11 * a.x23 * a.x32 +
-        a.x00 * a.x12 * a.x23 * a.x31 - a.x00 * a.x12 * a.x21 * a.x33 +
-        a.x00 * a.x13 * a.x21 * a.x32 - a.x00 * a.x13 * a.x22 * a.x31 -
-        a.x01 * a.x12 * a.x23 * a.x30 + a.x01 * a.x12 * a.x20 * a.x33 -
-        a.x01 * a.x13 * a.x20 * a.x32 + a.x01 * a.x13 * a.x22 * a.x30 -
-        a.x01 * a.x10 * a.x22 * a.x33 + a.x01 * a.x10 * a.x23 * a.x32 +
-        a.x02 * a.x13 * a.x20 * a.x31 - a.x02 * a.x13 * a.x21 * a.x30 +
-        a.x02 * a.x10 * a.x21 * a.x33 - a.x02 * a.x10 * a.x23 * a.x31 +
-        a.x02 * a.x11 * a.x23 * a.x30 - a.x02 * a.x11 * a.x20 * a.x33 -
-        a.x03 * a.x10 * a.x21 * a.x32 + a.x03 * a.x10 * a.x22 * a.x31 -
-        a.x03 * a.x11 * a.x22 * a.x30 + a.x03 * a.x11 * a.x20 * a.x32 -
-        a.x03 * a.x12 * a.x20 * a.x31 + a.x03 * a.x12 * a.x21 * a.x30)
+        return (a.m00 * a.m11 * a.m22 * a.m33 - a.m00 * a.m11 * a.m23 * a.m32 +
+        a.m00 * a.m12 * a.m23 * a.m31 - a.m00 * a.m12 * a.m21 * a.m33 +
+        a.m00 * a.m13 * a.m21 * a.m32 - a.m00 * a.m13 * a.m22 * a.m31 -
+        a.m01 * a.m12 * a.m23 * a.m30 + a.m01 * a.m12 * a.m20 * a.m33 -
+        a.m01 * a.m13 * a.m20 * a.m32 + a.m01 * a.m13 * a.m22 * a.m30 -
+        a.m01 * a.m10 * a.m22 * a.m33 + a.m01 * a.m10 * a.m23 * a.m32 +
+        a.m02 * a.m13 * a.m20 * a.m31 - a.m02 * a.m13 * a.m21 * a.m30 +
+        a.m02 * a.m10 * a.m21 * a.m33 - a.m02 * a.m10 * a.m23 * a.m31 +
+        a.m02 * a.m11 * a.m23 * a.m30 - a.m02 * a.m11 * a.m20 * a.m33 -
+        a.m03 * a.m10 * a.m21 * a.m32 + a.m03 * a.m10 * a.m22 * a.m31 -
+        a.m03 * a.m11 * a.m22 * a.m30 + a.m03 * a.m11 * a.m20 * a.m32 -
+        a.m03 * a.m12 * a.m20 * a.m31 + a.m03 * a.m12 * a.m21 * a.m30)
     }
 
     inverse():Matrix4 {
         var a:Matrix4 = this;
         var m:Matrix4 = new Matrix4();
         var d:number = a.determinant();
-        m.x00 = (a.x12 * a.x23 * a.x31 - a.x13 * a.x22 * a.x31 + a.x13 * a.x21 * a.x32 - a.x11 * a.x23 * a.x32 - a.x12 * a.x21 * a.x33 + a.x11 * a.x22 * a.x33) / d;
-        m.x01 = (a.x03 * a.x22 * a.x31 - a.x02 * a.x23 * a.x31 - a.x03 * a.x21 * a.x32 + a.x01 * a.x23 * a.x32 + a.x02 * a.x21 * a.x33 - a.x01 * a.x22 * a.x33) / d;
-        m.x02 = (a.x02 * a.x13 * a.x31 - a.x03 * a.x12 * a.x31 + a.x03 * a.x11 * a.x32 - a.x01 * a.x13 * a.x32 - a.x02 * a.x11 * a.x33 + a.x01 * a.x12 * a.x33) / d;
-        m.x03 = (a.x03 * a.x12 * a.x21 - a.x02 * a.x13 * a.x21 - a.x03 * a.x11 * a.x22 + a.x01 * a.x13 * a.x22 + a.x02 * a.x11 * a.x23 - a.x01 * a.x12 * a.x23) / d;
-        m.x10 = (a.x13 * a.x22 * a.x30 - a.x12 * a.x23 * a.x30 - a.x13 * a.x20 * a.x32 + a.x10 * a.x23 * a.x32 + a.x12 * a.x20 * a.x33 - a.x10 * a.x22 * a.x33) / d;
-        m.x11 = (a.x02 * a.x23 * a.x30 - a.x03 * a.x22 * a.x30 + a.x03 * a.x20 * a.x32 - a.x00 * a.x23 * a.x32 - a.x02 * a.x20 * a.x33 + a.x00 * a.x22 * a.x33) / d;
-        m.x12 = (a.x03 * a.x12 * a.x30 - a.x02 * a.x13 * a.x30 - a.x03 * a.x10 * a.x32 + a.x00 * a.x13 * a.x32 + a.x02 * a.x10 * a.x33 - a.x00 * a.x12 * a.x33) / d;
-        m.x13 = (a.x02 * a.x13 * a.x20 - a.x03 * a.x12 * a.x20 + a.x03 * a.x10 * a.x22 - a.x00 * a.x13 * a.x22 - a.x02 * a.x10 * a.x23 + a.x00 * a.x12 * a.x23) / d;
-        m.x20 = (a.x11 * a.x23 * a.x30 - a.x13 * a.x21 * a.x30 + a.x13 * a.x20 * a.x31 - a.x10 * a.x23 * a.x31 - a.x11 * a.x20 * a.x33 + a.x10 * a.x21 * a.x33) / d;
-        m.x21 = (a.x03 * a.x21 * a.x30 - a.x01 * a.x23 * a.x30 - a.x03 * a.x20 * a.x31 + a.x00 * a.x23 * a.x31 + a.x01 * a.x20 * a.x33 - a.x00 * a.x21 * a.x33) / d;
-        m.x22 = (a.x01 * a.x13 * a.x30 - a.x03 * a.x11 * a.x30 + a.x03 * a.x10 * a.x31 - a.x00 * a.x13 * a.x31 - a.x01 * a.x10 * a.x33 + a.x00 * a.x11 * a.x33) / d;
-        m.x23 = (a.x03 * a.x11 * a.x20 - a.x01 * a.x13 * a.x20 - a.x03 * a.x10 * a.x21 + a.x00 * a.x13 * a.x21 + a.x01 * a.x10 * a.x23 - a.x00 * a.x11 * a.x23) / d;
-        m.x30 = (a.x12 * a.x21 * a.x30 - a.x11 * a.x22 * a.x30 - a.x12 * a.x20 * a.x31 + a.x10 * a.x22 * a.x31 + a.x11 * a.x20 * a.x32 - a.x10 * a.x21 * a.x32) / d;
-        m.x31 = (a.x01 * a.x22 * a.x30 - a.x02 * a.x21 * a.x30 + a.x02 * a.x20 * a.x31 - a.x00 * a.x22 * a.x31 - a.x01 * a.x20 * a.x32 + a.x00 * a.x21 * a.x32) / d;
-        m.x32 = (a.x02 * a.x11 * a.x30 - a.x01 * a.x12 * a.x30 - a.x02 * a.x10 * a.x31 + a.x00 * a.x12 * a.x31 + a.x01 * a.x10 * a.x32 - a.x00 * a.x11 * a.x32) / d;
-        m.x33 = (a.x01 * a.x12 * a.x20 - a.x02 * a.x11 * a.x20 + a.x02 * a.x10 * a.x21 - a.x00 * a.x12 * a.x21 - a.x01 * a.x10 * a.x22 + a.x00 * a.x11 * a.x22) / d;
+        m.m00 = (a.m12 * a.m23 * a.m31 - a.m13 * a.m22 * a.m31 + a.m13 * a.m21 * a.m32 - a.m11 * a.m23 * a.m32 - a.m12 * a.m21 * a.m33 + a.m11 * a.m22 * a.m33) / d;
+        m.m01 = (a.m03 * a.m22 * a.m31 - a.m02 * a.m23 * a.m31 - a.m03 * a.m21 * a.m32 + a.m01 * a.m23 * a.m32 + a.m02 * a.m21 * a.m33 - a.m01 * a.m22 * a.m33) / d;
+        m.m02 = (a.m02 * a.m13 * a.m31 - a.m03 * a.m12 * a.m31 + a.m03 * a.m11 * a.m32 - a.m01 * a.m13 * a.m32 - a.m02 * a.m11 * a.m33 + a.m01 * a.m12 * a.m33) / d;
+        m.m03 = (a.m03 * a.m12 * a.m21 - a.m02 * a.m13 * a.m21 - a.m03 * a.m11 * a.m22 + a.m01 * a.m13 * a.m22 + a.m02 * a.m11 * a.m23 - a.m01 * a.m12 * a.m23) / d;
+        m.m10 = (a.m13 * a.m22 * a.m30 - a.m12 * a.m23 * a.m30 - a.m13 * a.m20 * a.m32 + a.m10 * a.m23 * a.m32 + a.m12 * a.m20 * a.m33 - a.m10 * a.m22 * a.m33) / d;
+        m.m11 = (a.m02 * a.m23 * a.m30 - a.m03 * a.m22 * a.m30 + a.m03 * a.m20 * a.m32 - a.m00 * a.m23 * a.m32 - a.m02 * a.m20 * a.m33 + a.m00 * a.m22 * a.m33) / d;
+        m.m12 = (a.m03 * a.m12 * a.m30 - a.m02 * a.m13 * a.m30 - a.m03 * a.m10 * a.m32 + a.m00 * a.m13 * a.m32 + a.m02 * a.m10 * a.m33 - a.m00 * a.m12 * a.m33) / d;
+        m.m13 = (a.m02 * a.m13 * a.m20 - a.m03 * a.m12 * a.m20 + a.m03 * a.m10 * a.m22 - a.m00 * a.m13 * a.m22 - a.m02 * a.m10 * a.m23 + a.m00 * a.m12 * a.m23) / d;
+        m.m20 = (a.m11 * a.m23 * a.m30 - a.m13 * a.m21 * a.m30 + a.m13 * a.m20 * a.m31 - a.m10 * a.m23 * a.m31 - a.m11 * a.m20 * a.m33 + a.m10 * a.m21 * a.m33) / d;
+        m.m21 = (a.m03 * a.m21 * a.m30 - a.m01 * a.m23 * a.m30 - a.m03 * a.m20 * a.m31 + a.m00 * a.m23 * a.m31 + a.m01 * a.m20 * a.m33 - a.m00 * a.m21 * a.m33) / d;
+        m.m22 = (a.m01 * a.m13 * a.m30 - a.m03 * a.m11 * a.m30 + a.m03 * a.m10 * a.m31 - a.m00 * a.m13 * a.m31 - a.m01 * a.m10 * a.m33 + a.m00 * a.m11 * a.m33) / d;
+        m.m23 = (a.m03 * a.m11 * a.m20 - a.m01 * a.m13 * a.m20 - a.m03 * a.m10 * a.m21 + a.m00 * a.m13 * a.m21 + a.m01 * a.m10 * a.m23 - a.m00 * a.m11 * a.m23) / d;
+        m.m30 = (a.m12 * a.m21 * a.m30 - a.m11 * a.m22 * a.m30 - a.m12 * a.m20 * a.m31 + a.m10 * a.m22 * a.m31 + a.m11 * a.m20 * a.m32 - a.m10 * a.m21 * a.m32) / d;
+        m.m31 = (a.m01 * a.m22 * a.m30 - a.m02 * a.m21 * a.m30 + a.m02 * a.m20 * a.m31 - a.m00 * a.m22 * a.m31 - a.m01 * a.m20 * a.m32 + a.m00 * a.m21 * a.m32) / d;
+        m.m32 = (a.m02 * a.m11 * a.m30 - a.m01 * a.m12 * a.m30 - a.m02 * a.m10 * a.m31 + a.m00 * a.m12 * a.m31 + a.m01 * a.m10 * a.m32 - a.m00 * a.m11 * a.m32) / d;
+        m.m33 = (a.m01 * a.m12 * a.m20 - a.m02 * a.m11 * a.m20 + a.m02 * a.m10 * a.m21 - a.m00 * a.m12 * a.m21 - a.m01 * a.m10 * a.m22 + a.m00 * a.m11 * a.m22) / d;
         return m;
     }
 }

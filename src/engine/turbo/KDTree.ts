@@ -1,7 +1,7 @@
 import {PrimitiveList} from "../core/PrimitiveList";
 import {BoundingBox} from "../math/BoundingBox";
 import {Color} from "../math/Color";
-import {IntArray} from "../../system/utils/IntArray";
+import {IntArray} from "../utils/IntArray";
 import {Float} from "../../utils/BrowserPlatform";
 import {assert} from "../../utils/assert";
 /**

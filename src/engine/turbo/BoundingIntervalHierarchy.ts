@@ -1,7 +1,7 @@
 import {AccelerationStructure} from "../core/AccelerationStructure";
 import {PrimitiveList} from "../core/PrimitiveList";
 import {BoundingBox} from "../math/BoundingBox";
-import {IntArray} from "../../system/utils/IntArray";
+import {IntArray} from "../utils/IntArray";
 import {Float} from "../../utils/BrowserPlatform";
 /**
  * Created by Nidin Vinayakan on 21/1/2016.

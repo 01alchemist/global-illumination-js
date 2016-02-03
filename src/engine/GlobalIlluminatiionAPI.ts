@@ -3,6 +3,11 @@ import {BucketRenderer} from "./renderer/BucketRenderer";
 import {ProgressiveRenderer} from "./renderer/ProgressiveRenderer";
 import {ParameterList} from "./core/ParameterList";
 import {RenderObjectMap} from "./renderer/utils/RenderObjectMap";
+import {Color} from "./math/Color";
+import {Point3} from "./math/Point3";
+import {InterpolationType} from "./core/ParameterList";
+import {Vector3} from "./math/Vector3";
+import {Matrix4} from "./math/Matrix4";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -50,58 +55,58 @@ export class GlobalIlluminationAPI {
         return name;
     }
 
-    parameter(name:string, value:string) {
+    stringParameter(name:string, value:string) {
         this.parameterList.addString(name, value);
     }
 
-    parameter(name:string, value:boolean) {
+    booleanParameter(name:string, value:boolean) {
         this.parameterList.addBoolean(name, value);
     }
 
-    parameter(name:string, value:number) {
+    intParameter(name:string, value:int) {
         this.parameterList.addInteger(name, value);
     }
 
-    parameter(name:string, value:number) {
+    floatParameter(name:string, value:float) {
         this.parameterList.addFloat(name, value);
     }
 
-    parameter(name:string, value:Color) {
+    colorParameter(name:string, value:Color) {
         this.parameterList.addColor(name, value);
     }
 
-    parameter(name:string, value:Point3) {
+    pointParameter(name:string, value:Point3) {
         this.parameterList.addPoints(name, InterpolationType.NONE, [
             value.x,
             value.y,
             value.z]);
     }
 
-    parameter(name:string, value:Vector3) {
+    vectorParameter(name:string, value:Vector3) {
         this.parameterList.addVectors(name, InterpolationType.NONE, [
             value.x,
             value.y,
             value.z]);
     }
 
-    parameter(name:string, value:Matrix4) {
+    matrixParameter(name:string, value:Matrix4) {
         this.parameterList.addMatrices(name, InterpolationType.NONE, value.asRowMajor());
     }
 
-    parameter(name:string, value:number[]) {
+    integerArrayParameter(name:string, value:Int32Array) {
         this.parameterList.addIntegerArray(name, value);
     }
 
-    parameter(name:string, value:string[]) {
+    stringArrayParameter(name:string, value:string[]) {
         this.parameterList.addStringArray(name, value);
     }
 
     parameter(name:string, type:string, interpolation:string, data:number[]) {
         let interp:InterpolationType;
         try {
-            interp = InterpolationType.valueOf(interpolation.toUpperCase());
+            interp = InterpolationType[interpolation.toUpperCase()];
         }
-        catch (e /*:IllegalArgumentException*/) {
+        catch (e) {
             console.error("Unknown interpolation type:" + interpolation + " -- ignoring parameter " + name);
         }
 

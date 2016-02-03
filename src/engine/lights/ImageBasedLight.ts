@@ -7,7 +7,7 @@ import {LightSource} from "../core/LightSource";
 import {PrimitiveList} from "../core/PrimitiveList";
 import {ParameterList} from "../core/ParameterList";
 import {GlobalIlluminationAPI} from "../GlobalIlluminatiionAPI";
-import {FloatArray} from "../../system/utils/FloatArray";
+import {FloatArray} from "../utils/FloatArray";
 import {Bitmap} from "../image/Bitmap";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.

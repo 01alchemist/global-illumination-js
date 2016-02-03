@@ -17,12 +17,10 @@ import {QuadraticAttenuation} from "../src/engine/scene/materials/Attenuation";
 import {TransparentMaterial} from "../src/engine/scene/materials/TransparentMaterial";
 import {Box} from "../src/engine/scene/shapes/Box";
 import {DiffuseMaterial} from "../src/engine/scene/materials/DiffuseMaterial";
-import {LinearAttenuation} from "../src/engine/scene/materials/Attenuation";
-import {ClearMaterial} from "../src/engine/scene/materials/ClearMaterial";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
-export class Test extends CanvasDisplay {
+export class PorscheCayman extends CanvasDisplay {
 
     private renderer:Renderer;
     private pixels:Uint8ClampedArray;
@@ -35,27 +33,21 @@ export class Test extends CanvasDisplay {
     onInit() {
 
         var scene:SharedScene = new SharedScene();
+        //scene.color = new Color(1,0,1);
+        //scene.add(Sphere.newSphere(new Vector3(-4, 7, 3), 2, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
+        //scene.add(Cube.newCube(new Vector3(-30, -1, -30), new Vector3(30, 0, 30), wall));
+        //scene.add(Cube.newCube(new Vector3(-30, -10, -30), new Vector3(30, 0.376662, 30), wall));
+        //scene.add(Sphere.newSphere(new Vector3(0.1, 0.1, 0.5), 0.1, new LightMaterial(new Color(1, 0, 0), 1, new QuadraticAttenuation(3))));
 
-        var white = new DiffuseMaterial(new Color(0.740, 0.742, 0.734));
-        var red = new DiffuseMaterial(new Color(0.366, 0.037, 0.042));
-        var green = new DiffuseMaterial(new Color(0.163, 0.409, 0.083));
-        var blue = new DiffuseMaterial(new Color(0, 0, 0.783));
-        var light = new LightMaterial(new Color(1, 1, 1), 1, new QuadraticAttenuation(0.01));
-        var n = 10.0;
-        scene.add(Cube.newCube(new Vector3(-n, -11, -n), new Vector3(n, -10, n), white));
-        scene.add(Cube.newCube(new Vector3(-n, 10, -n), new Vector3(n, 11, n), white));
-        scene.add(Cube.newCube(new Vector3(-n, -n, 10), new Vector3(n, n, 11), blue));
-        scene.add(Cube.newCube(new Vector3(-11, -n, -n), new Vector3(-10, n, n), red));
-        scene.add(Cube.newCube(new Vector3(10, -n, -n), new Vector3(11, n, n), green));
-
-        scene.add(Sphere.newSphere(new Vector3(-5, 1, -10), 0.1, light));
+        //var floor = new GlossyMaterial(new Color(1,1,1), 1.2, MathUtils.radians(20));
+        var floor = new DiffuseMaterial(Color.hexColor(0x665349));
+        scene.add(Cube.newCube(new Vector3(-1000, -1000, -1000), new Vector3(1000, 0, 1000), floor));
+        scene.add(Sphere.newSphere(new Vector3(0, 10, 0), 1, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
 
         var loader:OBJLoader = new OBJLoader();
-        //var glass = new ClearMaterial(1.05, MathUtils.radians(1));
-        //glass.transparent = true;
-        //loader.parentMaterial = glass;
-        //loader.parentMaterial = new TransparentMaterial(Color.hexColor(0xFFFFFF), 2, MathUtils.radians(0), 0);
-        loader.parentMaterial = new SpecularMaterial(new Color(0,0,0), 2);
+        //loader.parentMaterial = new TransparentMaterial(Color.hexColor(0xFFFFFF), 2, MathUtils.radians(20), 0);
+        //loader.parentMaterial = new GlossyMaterial(new Color(0,0,0),1.5, MathUtils.radians(30));
+        loader.parentMaterial = new SpecularMaterial(new Color(0,0,0), 1.3);
 
         var self = this;
         var mesh;
@@ -64,24 +56,20 @@ export class Test extends CanvasDisplay {
         this.i_height = 1440 / 2;
         //this.i_width = 1280;
         //this.i_height = 720;
-        var cameraSamples:number = 1;
-        var hitSamples:number = 1;
-        var bounces:number = 1;
+        var cameraSamples:number = 16;
+        var hitSamples:number = 16;
+        var bounces:number = 5;
         //var camera:Camera = Camera.lookAt(new Vector3(-3, 2, -1), new Vector3(0, 0.5, 0), new Vector3(0, 1, 0), 35);
-        //var camera:Camera = Camera.lookAt(new Vector3(0.5, 0.5, 1), new Vector3(0, -10, 0), new Vector3(0, 1, 0), 35);
-        var camera = Camera.lookAt(new Vector3(0, -5, -20), new Vector3(0, -7, 0), new Vector3(0, 1, 0), 45); //car
-        //var camera = Camera.lookAt(new Vector3(0, -2, -20), new Vector3(0, -5, 0), new Vector3(0, 1, 0), 45);
+        var camera:Camera = Camera.lookAt(new Vector3(1, 0.5, 2), new Vector3(0, 0, 0), new Vector3(0, 1, 0), 35);
 
-        loader.load("models/porsche-cayman-vray.obj", function (_mesh) {
+        loader.load("models/porsche-cayman.obj", function (_mesh) {
             if (!_mesh) {
                 console.log("LoadOBJ error:");
             } else {
                 console.log("Obj file loaded");
                 mesh = _mesh;
                 mesh.smoothNormals();
-
-                //mesh.fitInside(new Box(new Vector3(-5, -10, -7), new Vector3(5, 0, 7)), new Vector3(0, 0, 0)); //glass.obj
-                mesh.fitInside(new Box(new Vector3(-5, -10, -7), new Vector3(5, 10, 7)), new Vector3(0, 0, 0));
+                mesh.fitInside(new Box(new Vector3(-1, 0, -1), new Vector3(1, 2, 1)), new Vector3(0.5, 0, 0.5));
                 scene.add(mesh);
 
                 //console.time("compile");
@@ -106,12 +94,12 @@ export class Test extends CanvasDisplay {
     }
 
     render() {
-        if (!this.paused && this.renderer.initialized) {
+        if (!this.paused) {
             this.renderer.iterateParallel();
             this.updatePixels(this.pixels, this.renderer.iterations);
+            requestAnimationFrame(this.render.bind(this));
         }
-        requestAnimationFrame(this.render.bind(this));
     }
 
 }
-new Test();
+new PorscheCayman();

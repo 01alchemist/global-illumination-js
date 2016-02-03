@@ -2,7 +2,7 @@ import {Vector3} from "./Vector3";
 import {ByteArrayBase} from "../../pointer/ByteArrayBase";
 import {DirectMemory} from "../../pointer/DirectMemory";
 import {RGBSpace} from "../image/RGBSpace";
-import {MathUtils} from "../../system/utils/MathUtils";
+import {MathUtils} from "../utils/MathUtils";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
