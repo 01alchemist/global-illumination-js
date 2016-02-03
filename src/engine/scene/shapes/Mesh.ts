@@ -6,7 +6,7 @@ import {Ray} from "../../math/Ray";
 import {Shape} from "./Shape";
 import {Color} from "../../math/Color";
 import {Material} from "../materials/Material";
-import {append} from "../../utils/ArrayUtils";
+import {append} from "../../../system/utils/ArrayUtils";
 import {Tree} from "../tree/Tree";
 import {Box} from "./Box";
 import {ShapeType} from "./Shape";

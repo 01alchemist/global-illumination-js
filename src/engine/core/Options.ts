@@ -1,4 +1,4 @@
-import {FastHashMap} from "../utils/FastHashMap";
+import {FastHashMap} from "../../system/utils/FastHashMap";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */

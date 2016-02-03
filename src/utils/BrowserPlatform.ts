@@ -26,7 +26,7 @@ export class BrowserPlatform {
         event.initMouseEvent("click", true, false, null, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
         save_link.dispatchEvent(event);
     }
-    static getAvailableProcessors():number|Promise{
+    static getAvailableProcessors():number|Promise<number>{
         var numProcessors:number = navigator["hardwareConcurrency"];
         if(!numProcessors){
             return CoreEstimator.estimate();

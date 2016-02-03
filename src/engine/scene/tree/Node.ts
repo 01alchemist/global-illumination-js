@@ -3,10 +3,10 @@ import {Shape} from "../shapes/Shape";
 import {Ray} from "../../math/Ray";
 import {Hit} from "../../math/Hit";
 import {NoHit} from "../../math/Hit";
-import {append} from "../../utils/ArrayUtils";
+import {append} from "../../../system/utils/ArrayUtils";
 import {Box} from "../shapes/Box";
-import {sortAscending} from "../../utils/ArrayUtils";
-import {MathUtils} from "../../utils/MathUtils";
+import {sortAscending} from "../../../system/utils/ArrayUtils";
+import {MathUtils} from "../../../system/utils/MathUtils";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */

@@ -1,6 +1,6 @@
 import {Hair} from "../../primitive/Hair";
 import {Parser} from "angular2/src/core/change_detection/parser/parser";
-import {IntArray} from "../../utils/IntArray";
+import {IntArray} from "../../../system/utils/IntArray";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */

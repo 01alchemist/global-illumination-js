@@ -1,4 +1,4 @@
-import {FastHashMap} from "../utils/FastHashMap";
+import {FastHashMap} from "../../system/utils/FastHashMap";
 import {Point3} from "../math/Point3";
 import {Vector3} from "../math/Vector3";
 import {Matrix4} from "../math/Matrix4";

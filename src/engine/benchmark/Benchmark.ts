@@ -1,7 +1,7 @@
 import {Matrix4} from "../math/Matrix4";
 import {Teapot} from "../tesselatable/Teapot";
 import {Display} from "../core/Display";
-import {BenchmarkTest} from "../system/BenchmarkTest";
+import {BenchmarkTest} from "../../system/BenchmarkTest";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */

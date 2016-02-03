@@ -14,7 +14,7 @@ import {DiffuseMaterial} from "../src/engine/scene/materials/DiffuseMaterial";
 import {LinearAttenuation} from "../src/engine/scene/materials/Attenuation";
 import {SharedScene} from "../src/engine/scene/SharedScene";
 import {ClearMaterial} from "../src/engine/scene/materials/ClearMaterial";
-import {MathUtils} from "../src/engine/utils/MathUtils";
+import {MathUtils} from "../src/system/utils/MathUtils";
 import {GlossyMaterial} from "../src/engine/scene/materials/GlossyMaterial";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.

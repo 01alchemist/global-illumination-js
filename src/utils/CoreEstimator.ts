@@ -52,8 +52,8 @@ export class CoreEstimator {
         // Set up performance testing function
         var performance = window.performance || Date;
         if (!performance.now) {
-            if (performance.webkitNow) {
-                performance.now = performance.webkitNow;
+            if (performance["webkitNow"]) {
+                performance.now = performance["webkitNow"];
             } else {
                 performance.now = function () {
                     return +new Date;
@@ -90,7 +90,7 @@ export class CoreEstimator {
      *
      * @expose
      **/
-    getHardwareConcurrency(callback, options?) {
+    getHardwareConcurrency(callback, options?):void {
         options = options || {};
         if (!('use_cache' in options)) {
             options.use_cache = true;
@@ -389,16 +389,16 @@ export class CoreEstimator {
     accept(tscore, freedom) {
         var keys = Object.keys(CoreEstimator.table);
 
-        var key_low = keys.reduce(function (p, c) {
+        var key_low:number = parseInt(keys.reduce(function (p, c) {
             if (freedom < c) return p;
             return c;
-        });
-        var key_high = keys.reduce(function (p, c) {
+        }));
+        var key_high:number = parseInt(keys.reduce(function (p, c) {
             if (freedom > c) return p;
             return c;
-        });
+        }));
 
-        var span = key_high - key_low;
+        var span:number = key_high - key_low;
         var critical = CoreEstimator.linear(CoreEstimator.table[key_low], CoreEstimator.table[key_high], (freedom - key_low) / span);
 
         return tscore < critical;

@@ -11,7 +11,7 @@ import {NoAttenuation} from "../src/engine/scene/materials/Attenuation";
 import {OBJLoader} from "../src/engine/data/OBJLoader";
 import {CanvasDisplay} from "./CanvasDisplay";
 import {GlossyMaterial} from "../src/engine/scene/materials/GlossyMaterial";
-import {MathUtils} from "../src/engine/utils/MathUtils";
+import {MathUtils} from "../src/system/utils/MathUtils";
 import {SharedScene} from "../src/engine/scene/SharedScene";
 import {TransparentMaterial} from "../src/engine/scene/materials/TransparentMaterial";
 /**

@@ -6,7 +6,7 @@ import {RGBA} from "../math/Color";
 import {Ray} from "../math/Ray";
 import {TraceWorkerManager} from "./worker/TraceWorkerManager";
 import {SharedScene} from "../scene/SharedScene";
-import {MathUtils} from "../utils/MathUtils";
+import {MathUtils} from "../../system/utils/MathUtils";
 import {IBucketOrder} from "./bucket/IBucketOrder";
 import {IFilter} from "./../core/IFilter";
 import {QMC} from "../math/QMC";

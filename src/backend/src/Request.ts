@@ -1,4 +1,4 @@
-export function status(response:Response) {
+export function status(response:Response):any {
     if (parseInt(response.status) >= 200 && parseInt(response.status) < 300) {
         return Promise.resolve(response);
     }

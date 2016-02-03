@@ -1,4 +1,4 @@
-import {sortAscending} from "../engine/utils/ArrayUtils";
+import {sortAscending} from "../system/utils/ArrayUtils";
 /**
  * Created by Nidin Vinayakan on 24-01-2016.
  */

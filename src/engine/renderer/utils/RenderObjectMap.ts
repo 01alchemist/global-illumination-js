@@ -1,4 +1,4 @@
-import {FastHashMap} from "../../utils/FastHashMap";
+import {FastHashMap} from "../../../system/utils/FastHashMap";
 import {Shader} from "../../core/Shader";
 import {Instance} from "../../core/Instance";
 import {Modifier} from "../../core/Modifier";
