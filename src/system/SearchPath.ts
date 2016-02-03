@@ -1,3 +1,4 @@
+import {HttpFile} from "../backend/src/HttpFile";
 /**
  * Created by Nidin Vinayakan on 3/2/2016.
  */
@@ -12,36 +13,20 @@ export class SearchPath {
     }
 
     resetSearchPath() {
-        this.searchPath.clear();
+        this.searchPath = [];
     }
 
     addSearchPath(path:string) {
+
         var f:HttpFile = new HttpFile(path, true);
-
-        f.exists().then(function () {
-
-        }).catch(function (e) {
-            console.error("Invalid " + type + " search path specification: \"" + path + "\" - invalid directory");
-        })
-
-        if (&&
-        f.isDirectory()
-    )
-        {
-            try {
-
-                if (this.searchPath.indexOf(path) == -1) {
-                    console.log("Adding " + type + " search path: \"" + path + "\"");
-                    this.searchPath.push(path);
-                }
-
-            } catch (e) {
-                console.error("Invalid " + type + " search path specification: \"" + path + "\"");
-                console.log(e);
+        f.exists().then(() => {
+            if (this.searchPath.indexOf(path) == -1) {
+                console.log("Adding " + this.type + " search path: \"" + path + "\"");
+                this.searchPath.push(path);
             }
-        }
-    else
-
+        }).catch((e) => {
+            console.error("Invalid " + this.type + " search path specification: \"" + path + "\"");
+        });
     }
 
     resolvePath(filename:string):string {
@@ -49,16 +34,16 @@ export class SearchPath {
         if (filename.startsWith("//")) {
             filename = filename.substring(2);
         }
-        console.log("Resolving " + type + " path \"" + filename + "\" ...");
+        console.log("Resolving " + this.type + " path \"" + filename + "\" ...");
         var f:HttpFile = new HttpFile(filename);
         if (!f.isAbsolute()) {
 
-            searchPath.forEach(function (prefix:string) {
+            this.searchPath.forEach(function (prefix:string) {
                 console.log("  * searching: \"" + prefix + "\" ...");
-                if (prefix.endsWith(File.separator) || filename.startsWith(File.separator))
+                if (prefix.endsWith("/") || filename.startsWith("/"))
                     f = new HttpFile(prefix + filename);
                 else
-                    f = new HttpFile(prefix + File.separator + filename);
+                    f = new HttpFile(prefix + "/" + filename);
                 if (f.exists()) {
                     // suggested path exists - try it
                     return f.getAbsolutePath();

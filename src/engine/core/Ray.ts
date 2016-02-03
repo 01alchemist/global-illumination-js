@@ -1,6 +1,7 @@
 import {Vector3} from "../math/Vector3";
 import {Point3} from "../math/Point3";
 import {Matrix4} from "../math/Matrix4";
+import {Float} from "../../utils/BrowserPlatform";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -16,24 +17,20 @@ export class Ray {
     private tMax:float;
     private static EPSILON:float = 0;//  0.01f;
 
-    constructor ();
-    constructor (o:Point3, d:Vector3);
-    constructor (a:Point3, b:Point3);
-    constructor (ox:float=0, oy:float=0, oz:float=0, dx:float=0, dy:float=0, dz:float=0) {
+    constructor (ox:float|Point3=0, oy:float|Vector3|Point3=0, oz:float=0, dx:float=0, dy:float=0, dz:float=0) {
 
         let arg = arguments;
-        let tMax = Infinity;
+        let tMax = Float.POSITIVE_INFINITY;;
         let _in:float;
 
         if(arg.length == 6){
-            this.ox = ox;
-            this.oy = oy;
+            this.ox = <float>ox;
+            this.oy = <float>oy;
             this.oz = oz;
             this.dx = dx;
             this.dy = dy;
             this.dz = dz;
             _in = 1 /Math.sqrt(((this.dx * this.dx) + ((this.dy * this.dy) + (this.dz * this.dz))));
-            epsilon = Ray.EPSILON;
         }else if(arg.length == 2){
             this.ox = arg[0].x;
             this.oy = arg[0].y;
@@ -56,7 +53,7 @@ export class Ray {
         this.dy *= _in;
         this.dz *= _in;
         this.tMin = Ray.EPSILON;
-        this.tMax = tMax;//Float.POSITIVE_INFINITY;
+        this.tMax = tMax;
     }
 
     transform(m:Matrix4):Ray {

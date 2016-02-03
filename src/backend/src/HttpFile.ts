@@ -4,7 +4,7 @@
 export class HttpFile {
 
     private _path:string;
-    private _isDirectory:string;
+    private _isDirectory:boolean;
 
     get path():string{
         return this._path;
@@ -18,9 +18,9 @@ export class HttpFile {
         this._isDirectory = isDirectory;
     }
     isAbsolute():boolean{
-        return _path.indexOf("http") > -1;
+        return this._path.indexOf("http") > -1;
     }
-    exist():Promise<boolean>{
+    exists():Promise<boolean>{
         return new Promise(function(resolve, reject){
 
         });
@@ -29,5 +29,9 @@ export class HttpFile {
         return new Promise(function(resolve, reject){
 
         });
+    }
+
+    getAbsolutePath():string {
+        return this._path;
     }
 }

@@ -4,9 +4,12 @@ import {HitInfo} from "./HitInfo";
 /**
  * Created by Nidin Vinayakan on 10-01-2016.
  */
+/**
+ * @deprecated
+ */
 export class Ray {
 
-    constructor(origin:Vector3 = new Vector3(), direction:Vector3 = new Vector3()) {
+    constructor(public origin:Vector3 = new Vector3(), public direction:Vector3 = new Vector3()) {
 
     }
 

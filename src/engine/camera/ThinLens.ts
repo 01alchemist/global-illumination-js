@@ -1,26 +1,21 @@
 import {CameraLens} from "./../core/CameraLens";
 import {Ray} from "../math/Ray";
+import {ParameterList} from "../core/ParameterList";
+import {GlobalIlluminationAPI} from "../GlobalIlluminatiionAPI";
+import {MathUtils} from "../utils/MathUtils";
 /**
  * Created by Nidin Vinayakan on 21/1/2016.
  */
 export class ThinLens implements CameraLens {
 
     private au:float;
-
     private av:float;
-
     private aspect:float;
-
     private fov:float;
-
     private focusDistance:float;
-
     private lensRadius:float;
-
     private lensSides:int;
-
     private lensRotation:float;
-
     private lensRotationRadians:float;
 
     constructor() {
@@ -43,63 +38,46 @@ export class ThinLens implements CameraLens {
         this.lensRadius = pl.getFloat("lens.radius", this.lensRadius);
         this.lensSides = pl.getInt("lens.sides", this.lensSides);
         this.lensRotation = pl.getFloat("lens.rotation", this.lensRotation);
-        this.update();
+        this._update();
         return true;
     }
 
-    private update() {
-        this.au = ((<float>(Math.tan(Math.toRadians((this.fov * 0.5))))) * this.focusDistance);
+    private _update() {
+        this.au = ((<float>(Math.tan(MathUtils.radians((this.fov * 0.5))))) * this.focusDistance);
         this.av = (this.au / this.aspect);
-        this.lensRotationRadians = (<float>(Math.toRadians(this.lensRotation)));
+        this.lensRotationRadians = (<float>(MathUtils.radians(this.lensRotation)));
     }
 
     getRay(x:float, y:float, imageWidth:int, imageHeight:int, lensX:double, lensY:double, time:double):Ray {
-        let du:float = ((this.au * -1)
-        + ((2
-        * (this.au * x))
-        / (imageWidth - 1)));
-        let dv:float = ((this.av * -1)
-        + ((2
-        * (this.av * y))
-        / (imageHeight - 1)));
+        let du:float = (this.au * -1) + ((2 * this.au * x) / (imageWidth - 1));
+        let dv:float = (this.av * -1) + ((2 * this.av * y) / (imageHeight - 1));
         let eyeY:float;
         let eyeX:float;
-        if ((this.lensSides < 3)) {
+        if (this.lensSides < 3) {
             let r:float;
             let angle:float;
             //  concentric map sampling
-            let r1:float = ((2 * lensX)
-            - 1);
-            let r2:float = ((2 * lensY)
-            - 1);
-            if ((r1
-                > (r2 * -1))) {
-                if ((r1 > r2)) {
+            let r1:float = (2 * lensX) - 1;
+            let r2:float = (2 * lensY) - 1;
+            if (r1 > (r2 * -1)) {
+                if (r1 > r2) {
                     r = r1;
-                    angle = (0.25
-                    * (Math.PI
-                    * (r2 / r1)));
+                    angle = 0.25 * Math.PI * (r2 / r1);
                 }
                 else {
                     r = r2;
-                    angle = (0.25
-                    * (Math.PI * (2
-                    - (r1 / r2))));
+                    angle = 0.25 * Math.PI * (2 - (r1 / r2));
                 }
 
             }
-            else if ((r1 < r2)) {
-                r = (r1 * -1);
-                angle = (0.25
-                * (Math.PI * (4
-                + (r2 / r1))));
+            else if (r1 < r2) {
+                r = -r1;
+                angle = 0.25 * Math.PI * (4 + (r2 / r1));
             }
             else {
-                r = (r2 * -1);
-                if ((r2 != 0)) {
-                    angle = (0.25
-                    * (Math.PI * (6
-                    - (r1 / r2))));
+                r = -r2;
+                if (r2 != 0) {
+                    angle = 0.25 * Math.PI * (6 - (r1 / r2));
                 }
                 else {
                     angle = 0;
@@ -107,16 +85,16 @@ export class ThinLens implements CameraLens {
 
             }
 
-            r = (r * this.lensRadius);
+            r = r * this.lensRadius;
             //  point on the lens
-            eyeX = (<float>((Math.cos(angle) * r)));
-            eyeY = (<float>((Math.sin(angle) * r)));
+            eyeX = <float>(Math.cos(angle) * r);
+            eyeY = <float>(Math.sin(angle) * r);
         }
         else {
             //  sample N-gon
             //  FIXME:this could use concentric sampling
-            lensY = (lensY * this.lensSides);
-            let side:float = (<int>(lensY));
+            lensY = lensY * this.lensSides;
+            let side:float = <int>lensY;
             let offs:float = ((<float>(lensY)) - side);
             let dist:float = (<float>(Math.sqrt(lensX)));
             let a0:float = (<float>(((side

@@ -32,6 +32,7 @@ interface Response {
 declare function fetch(url:string, options:any):Promise<Response>;
 interface String {
     startsWith(value:string):boolean;
+    endsWith(value:string):boolean;
 }
 declare function postMessage(arg:any);
 

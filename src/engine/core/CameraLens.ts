@@ -1,4 +1,5 @@
-import {Ray} from "../math/Ray";
+import {Ray} from "./Ray";
+import {RenderObject} from "./RenderObject";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  * Represents a mapping from the 3D scene onto the final image. A camera lens is

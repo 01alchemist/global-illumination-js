@@ -21,6 +21,45 @@ export class Entry<K, V> {
         return this.v;
     }
 }
+export class EntryIterator implements Iterator<Entry<K, V>> {
+
+    private index:number;
+
+    constructor () {
+        this.index = 0;
+        if (!this.readable()) {
+            this.inc();
+        }
+
+    }
+
+    private readable():boolean {
+        return !((this.entries[this.index] == null) || this.entries[this.index].isRemoved());
+    }
+
+    private inc() {
+        do {
+            this.index++;
+        } while (this.hasNext() && !this.readable());
+    }
+
+    hasNext():boolean {
+        return (this.index < this.entries.length);
+    }
+
+    next():Entry<K, V> {
+        try {
+            return this.entries[this.index];
+        }
+        finally {
+            this.inc();
+        }
+    }
+
+    remove() {
+        throw "UnsupportedOperationException";
+    }
+}
 export class FastHashMap<K, V> implements Iterable<Entry<K, V>> {
 
     private static MIN_SIZE:number = 4;
@@ -33,7 +72,7 @@ export class FastHashMap<K, V> implements Iterable<Entry<K, V>> {
 
     clear() {
         this.size = 0;
-        this.entries = this.alloc(MIN_SIZE);
+        this.entries = this.alloc(FastHashMap.MIN_SIZE);
     }
 
     put(k:K, v:V):V {
@@ -190,57 +229,11 @@ export class FastHashMap<K, V> implements Iterable<Entry<K, V>> {
         this.entries = newEntries;
     }
 
-    @SuppressWarnings("unchecked")
     private alloc(size:number):Entry<K, V>[] {
         return new Entry(this.size);
     }
 
     iterator():Iterator<Entry<K, V>> {
         return new EntryIterator();
-    }
-}
-class EntryIterator implements Iterator<Entry<K, V>> {
-
-    private index:number;
-
-    private constructor () {
-        this.index = 0;
-        if (!this.readable()) {
-            this.inc();
-        }
-
-    }
-
-    private readable():boolean {
-        return !((entries[this.index] == null)
-        || entries[this.index].isRemoved());
-    }
-
-    private inc() {
-        for (
-            ; (this.hasNext()
-        && !this.readable());
-        ) {
-            this.index++;
-        }
-
-    }
-
-    hasNext():boolean {
-        return (this.index < entries.length);
-    }
-
-    next():Entry<K, V> {
-        try {
-            return entries[this.index];
-        }
-        finally {
-            this.inc();
-        }
-
-    }
-
-    remove() {
-        throw "UnsupportedOperationException";
     }
 }

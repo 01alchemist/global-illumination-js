@@ -8,6 +8,7 @@ import {Point3} from "./math/Point3";
 import {InterpolationType} from "./core/ParameterList";
 import {Vector3} from "./math/Vector3";
 import {Matrix4} from "./math/Matrix4";
+import {SearchPath} from "../system/SearchPath";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -50,7 +51,7 @@ export class GlobalIlluminationAPI {
         do {
             name = prefix + "_" + counter;
             counter++;
-        } while (renderObjects.has(name));
+        } while (this.renderObjects.has(name));
 
         return name;
     }

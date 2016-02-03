@@ -4,6 +4,7 @@ import {Vector3} from "../math/Vector3";
 import {Matrix4} from "../math/Matrix4";
 import {Color} from "../math/Color";
 import {Point2} from "../math/Point2";
+import {Entry} from "../utils/FastHashMap";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
@@ -45,11 +46,12 @@ export class ParameterList {
 
     clear(showUnused:boolean) {
         if (showUnused) {
-            for (let e:FastHashMap.Entry<string, Parameter> in this.list) {
-                if (!e.getValue().checked) {
-                    console.warn(Module.API, "Unused parameter:%s - %s", e.getKey(), e.getValue());
+
+            this.list.forEach(function(entry:Entry<string, Parameter>){
+                if (!entry.getValue().checked) {
+                    console.warn("Unused parameter:" + entry.getKey() + " - " + entry.getValue());
                 }
-            }
+            });
         }
 
         this.list.clear();
@@ -112,7 +114,7 @@ export class ParameterList {
 
     addFloats(name:string, interp:InterpolationType, data:number[]) {
         if ((data == null)) {
-            console.error(Module.API, "Cannot create float parameter %s -- invalid data length", name);
+            console.error("Cannot create float parameter " + name + " -- invalid data length");
             return;
         }
 
@@ -123,7 +125,7 @@ export class ParameterList {
         if (((data == null)
             || ((data.length % 3)
             != 0))) {
-            console.error(Module.API, "Cannot create point parameter %s -- invalid data length", name);
+            console.error("Cannot create point parameter " + name + " -- invalid data length");
             return;
         }
 
@@ -134,7 +136,7 @@ export class ParameterList {
         if (((data == null)
             || ((data.length % 3)
             != 0))) {
-            console.error(Module.API, "Cannot create vector parameter %s -- invalid data length", name);
+            console.error("Cannot create vector parameter " + name + " -- invalid data length");
             return;
         }
 
@@ -142,21 +144,17 @@ export class ParameterList {
     }
 
     addTexCoords(name:string, interp:InterpolationType, data:number[]) {
-        if (((data == null)
-            || ((data.length % 2)
-            != 0))) {
-            console.error(Module.API, "Cannot create texcoord parameter %s -- invalid data length", name);
+        if (data == null || data.length % 2 != 0) {
+            console.error("Cannot create texcoord parameter " + name + " -- invalid data length");
             return;
         }
 
         this.add(name, new Parameter(ParameterType.TEXCOORD, interp, data));
     }
 
-    addMatrices(name:string, interp:InterpolationType, data:number[]) {
-        if (((data == null)
-            || ((data.length % 16)
-            != 0))) {
-            console.error(Module.API, "Cannot create matrix parameter %s -- invalid data length", name);
+    addMatrices(name:string, interp:InterpolationType, data:Float32Array) {
+        if (data == null || data.length % 16 != 0) {
+            console.error("Cannot create matrix parameter " + name + " -- invalid data length");
             return;
         }
 
@@ -165,10 +163,10 @@ export class ParameterList {
 
     private add(name:string, param:Parameter) {
         if ((name == null)) {
-            console.error(Module.API, "Cannot declare parameter with null name");
+            console.error("Cannot declare parameter with null name");
         }
         else if ((this.list.put(name, param) != null)) {
-            console.warn(Module.API, "Parameter %s was already defined -- overwriting", name);
+            console.warn("Parameter " + name + " was already defined -- overwriting");
         }
 
     }
@@ -298,18 +296,18 @@ export class ParameterList {
         }
 
         if ((p.type != type)) {
-            console.warn(Module.API, "Parameter %s requested as a %s - declared as %s", name, type.name().toLowerCase(), p.type.name().toLowerCase());
+            console.warn("Parameter %s requested as a %s - declared as %s", name, type.name().toLowerCase(), p.type.name().toLowerCase());
             return false;
         }
 
         if ((p.interp != interp)) {
-            console.warn(Module.API, "Parameter %s requested as a %s - declared as %s", name, interp.name().toLowerCase(), p.interp.name().toLowerCase());
+            console.warn("Parameter %s requested as a %s - declared as %s", name, interp.name().toLowerCase(), p.interp.name().toLowerCase());
             return false;
         }
 
         if (((requestedSize > 0)
             && (p.size() != requestedSize))) {
-            console.warn(Module.API, "Parameter %s requires %d %s - declared with %d", name, requestedSize, (requestedSize == 1));
+            console.warn("Parameter %s requires %d %s - declared with %d", name, requestedSize, (requestedSize == 1));
             // TODO:Warning!!!, inline IF is not supported ?
             return false;
         }
@@ -367,7 +365,7 @@ class Parameter {
     private obj:any|any[];
     private checked:boolean;
 
-    private constructor(value:any, private type:ParameterType, private interp:InterpolationType = InterpolationType.NONE) {
+    constructor(private type:ParameterType, private interp:InterpolationType = InterpolationType.NONE, value:any = null) {
 
         if (value instanceof Array) {
             this.obj = value;
