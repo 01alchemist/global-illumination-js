@@ -112,7 +112,7 @@ export class ParameterList {
         this.add(name, new Parameter(array));
     }
 
-    addFloats(name:string, interp:InterpolationType, data:number[]) {
+    addFloats(name:string, interp:InterpolationType, data:Float32Array) {
         if ((data == null)) {
             console.error("Cannot create float parameter " + name + " -- invalid data length");
             return;
@@ -121,7 +121,7 @@ export class ParameterList {
         this.add(name, new Parameter(ParameterType.FLOAT, interp, data));
     }
 
-    addPoints(name:string, interp:InterpolationType, data:number[]) {
+    addPoints(name:string, interp:InterpolationType, data:Float32Array) {
         if (((data == null)
             || ((data.length % 3)
             != 0))) {
@@ -132,7 +132,7 @@ export class ParameterList {
         this.add(name, new Parameter(ParameterType.POINT, interp, data));
     }
 
-    addVectors(name:string, interp:InterpolationType, data:number[]) {
+    addVectors(name:string, interp:InterpolationType, data:Float32Array) {
         if (((data == null)
             || ((data.length % 3)
             != 0))) {
@@ -143,7 +143,7 @@ export class ParameterList {
         this.add(name, new Parameter(ParameterType.VECTOR, interp, data));
     }
 
-    addTexCoords(name:string, interp:InterpolationType, data:number[]) {
+    addTexCoords(name:string, interp:InterpolationType, data:Float32Array) {
         if (data == null || data.length % 2 != 0) {
             console.error("Cannot create texcoord parameter " + name + " -- invalid data length");
             return;
@@ -198,12 +198,11 @@ export class ParameterList {
         return defaultValue;
     }
 
-    getIntArray(name:string):number[] {
+    getIntArray(name:string):Int32Array {
         let p:Parameter = this.list.get(name);
         if (this.isValidParameter(name, ParameterType.INT, InterpolationType.NONE, -1, p)) {
             return p.getInts();
         }
-
         return null;
     }
 
@@ -432,7 +431,7 @@ class Parameter {
         return this.obj[0];
     }
 
-    private getInts():number[] {
+    private getInts():Int32Array {
         return this.obj;
     }
 
@@ -440,7 +439,7 @@ class Parameter {
         return this.obj;
     }
 
-    private getFloatValue():number {
+    private getFloatValue():float {
         return this.obj;
     }
 
@@ -449,22 +448,22 @@ class Parameter {
     }
 
     private getPoint():Point3 {
-        let floats:float[] = this.obj;
+        let floats:Float32Array = this.obj;
         return new Point3(floats[0], floats[1], floats[2]);
     }
 
     private getVector():Vector3 {
-        let floats:float[] = this.obj;
+        let floats:Float32Array = this.obj;
         return new Vector3(floats[0], floats[1], floats[2]);
     }
 
     private getTexCoord():Point2 {
-        let floats:float[] = this.obj;
+        let floats:Float32Array = this.obj;
         return new Point2(floats[0], floats[1]);
     }
 
     private getMatrix():Matrix4 {
-        let floats:float[] = this.obj;
+        let floats:Float32Array = this.obj;
         return new Matrix4(floats, true);
     }
 

@@ -102,7 +102,7 @@ export class GlobalIlluminationAPI {
         this.parameterList.addStringArray(name, value);
     }
 
-    parameter(name:string, type:string, interpolation:string, data:number[]) {
+    parameter(name:string, type:string, interpolation:string, data:Float32Array) {
         let interp:InterpolationType;
         try {
             interp = InterpolationType[interpolation.toUpperCase()];

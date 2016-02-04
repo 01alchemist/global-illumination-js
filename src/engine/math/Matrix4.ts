@@ -38,12 +38,52 @@ export class Matrix4 {
                 public m20:float = 0, public m21:float = 0, public m22:float = 0, public m23:float = 0,
                 public m30:float = 0, public m31:float = 0, public m32:float = 0, public m33:float = 0) {
 
-        this.m = new Float32Array([
-            m00, m01, m02, m03,
-            m10, m11, m12, m13,
-            m20, m21, m22, m23,
-            m30, m31, m32, m33
-        ]);
+        if(arguments.length == 2){
+            this.m = arguments[0];
+            let rowMajor = arguments[1];
+            if (rowMajor) {
+                m00 = m[0];
+                m01 = m[1];
+                m02 = m[2];
+                m03 = m[3];
+                m10 = m[4];
+                m11 = m[5];
+                m12 = m[6];
+                m13 = m[7];
+                m20 = m[8];
+                m21 = m[9];
+                m22 = m[10];
+                m23 = m[11];
+                m30 = m[12];
+                m31 = m[13];
+                m32 = m[14];
+                m33 = m[15];
+            } else {
+                m00 = m[0];
+                m01 = m[4];
+                m02 = m[8];
+                m03 = m[12];
+                m10 = m[1];
+                m11 = m[5];
+                m12 = m[9];
+                m13 = m[13];
+                m20 = m[2];
+                m21 = m[6];
+                m22 = m[10];
+                m23 = m[14];
+                m30 = m[3];
+                m31 = m[7];
+                m32 = m[11];
+                m33 = m[15];
+            }
+        }else {
+            this.m = new Float32Array([
+                m00, m01, m02, m03,
+                m10, m11, m12, m13,
+                m20, m21, m22, m23,
+                m30, m31, m32, m33
+            ]);
+        }
     }
 
     directRead(memory:Float32Array, offset:number):number {
