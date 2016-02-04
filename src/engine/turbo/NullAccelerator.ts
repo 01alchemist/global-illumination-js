@@ -1,3 +1,7 @@
+import {PrimitiveList} from "../core/PrimitiveList";
+import {AccelerationStructure} from "../core/AccelerationStructure";
+import {Ray} from "../core/Ray";
+import {IntersectionState} from "../core/IntersectionState";
 /**
  * Created by Nidin Vinayakan on 21/1/2016.
  */
@@ -13,7 +17,7 @@ export class NullAccelerator implements AccelerationStructure {
     }
 
     build(primitives:PrimitiveList) {
-        this.primitives = this.primitives;
+        this.primitives = primitives;
         this.n = this.primitives.getNumPrimitives();
     }
 

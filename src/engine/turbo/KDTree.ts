@@ -4,6 +4,7 @@ import {Color} from "../math/Color";
 import {IntArray} from "../utils/IntArray";
 import {Float} from "../../utils/BrowserPlatform";
 import {assert} from "../../utils/assert";
+import {AccelerationStructure} from "../core/AccelerationStructure";
 /**
  * Created by Nidin Vinayakan on 21/1/2016.
  */
@@ -111,14 +112,14 @@ class BuildTask {
         this.leftRightTable = [];//new long(((this.numObjects + 3) / 4));
     }
 
-    constructor (numObjects:number, parent:BuildTask) {
+    constructor (numObjects:number, parent:BuildTask=null) {
         this.splits = [];//new long[]((6 * this.numObjects));
         this.numObjects = numObjects;
         this.n = 0;
-        this.leftRightTable = parent.leftRightTable;
+        this.leftRightTable = parent?parent.leftRightTable:[];
     }
 }
-export class KDTree implements IAccelerationStructure {
+export class KDTree implements AccelerationStructure {
 
     private tree:number[];
     private primitives:number[];

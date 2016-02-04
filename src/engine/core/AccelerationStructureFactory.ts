@@ -3,13 +3,14 @@ import {UniformGrid} from "../turbo/UniformGrid";
 import {BoundingIntervalHierarchy} from "../turbo/BoundingIntervalHierarchy";
 import {KDTree} from "../turbo/KDTree";
 import {NullAccelerator} from "../turbo/NullAccelerator";
+import {AccelerationTypes} from "./AccelerationTypes";
 /**
  * Created by Nidin Vinayakan on 22/1/2016.
  */
 class AccelerationStructureFactory {
 
     static create(name:string, n:int, primitives:boolean):AccelerationStructure {
-        if (name == null || name == "auto") {
+        if (name == null || name == AccelerationTypes.AUTO) {
             if (primitives) {
                 if (n > 20000000) {
                     return new UniformGrid();
@@ -25,7 +26,7 @@ class AccelerationStructureFactory {
                 }
 
             }
-            else if ((n > 2)) {
+            else if (n > 2) {
                 return new BoundingIntervalHierarchy();
             }
             else {
@@ -33,16 +34,16 @@ class AccelerationStructureFactory {
             }
 
         }
-        else if (name = "uniformgrid" ) {
+        else if (name == AccelerationTypes.UNIFORM_GRID) {
             return new UniformGrid();
         }
-        else if (name = "null" ) {
+        else if (name == AccelerationTypes.NULL) {
             return new NullAccelerator();
         }
-        else if (name = "kdtree" ) {
+        else if (name == AccelerationTypes.KD_TREE) {
             return new KDTree();
         }
-        else if (name = "bih" ) {
+        else if (name == AccelerationTypes.BIH) {
             return new BoundingIntervalHierarchy();
         }
         else {

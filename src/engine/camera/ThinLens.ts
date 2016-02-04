@@ -1,5 +1,5 @@
 import {CameraLens} from "./../core/CameraLens";
-import {Ray} from "../math/Ray";
+import {Ray} from "../core/Ray";
 import {ParameterList} from "../core/ParameterList";
 import {GlobalIlluminationAPI} from "../GlobalIlluminatiionAPI";
 import {MathUtils} from "../utils/MathUtils";
