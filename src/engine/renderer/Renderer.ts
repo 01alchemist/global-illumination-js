@@ -14,6 +14,9 @@ export class Renderer {
     static DEBUG:boolean = false;
 
     workerManager:TraceWorkerManager;
+    get initialized():boolean{
+        return this.workerManager.initialized;
+    }
 
     constructor(private userWorker:boolean = false) {
         if (this.userWorker) {

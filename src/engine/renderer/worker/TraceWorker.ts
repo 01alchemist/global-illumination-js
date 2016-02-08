@@ -53,7 +53,7 @@ export class TraceWorker {
 
                 TraceWorker.id = e.data.id;
 
-                console.time("WOKER_INIT:" + TraceWorker.id);
+                //console.time("WOKER_INIT:" + TraceWorker.id);
                 self.command = null;
                 self.pixelMemory = new Uint8ClampedArray(e.data.pixelBuffer);
                 self.sceneMemory = new DirectMemory(e.data.sceneBuffer);
@@ -74,18 +74,25 @@ export class TraceWorker {
                 self.hitSamples = e.data.hitSamples;
                 self.bounces = e.data.bounces;
 
+                /*self.init(
+                    e.data.width,
+                    e.data.height,
+                    e.data.xoffset,
+                    e.data.yoffset
+                );*/
+
+                //console.timeEnd("WOKER_INIT:" + TraceWorker.id);
+                postMessage(TraceWorker.INITED);
+
+            } else if (self.command == TraceWorker.TRACE) {
+                console.log("TRACE");
+                self.command = null;
                 self.init(
                     e.data.width,
                     e.data.height,
                     e.data.xoffset,
                     e.data.yoffset
                 );
-
-                console.timeEnd("WOKER_INIT:" + TraceWorker.id);
-                postMessage(TraceWorker.INITED);
-
-            } else if (self.command == TraceWorker.TRACE) {
-                self.command = null;
                 self.run();
                 postMessage(TraceWorker.TRACED);
             }
@@ -97,7 +104,7 @@ export class TraceWorker {
         this.height = height;
         this.xoffset = xoffset;
         this.yoffset = yoffset;
-
+        this.iterations = 1;
         this.samples = [];
         this.absCameraSamples = Math.round(Math.abs(this.cameraSamples));
     }

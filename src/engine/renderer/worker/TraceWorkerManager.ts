@@ -15,6 +15,11 @@ export class TraceWorkerManager {
     private jobs:Array<TraceJob>;
     iterations:number = 0;
 
+    private _initialized:boolean;
+    get initialized():boolean{
+        return this._initialized;
+    }
+
     constructor() {
     }
 
@@ -76,20 +81,20 @@ export class TraceWorkerManager {
             this.jobs.push(
                 new TraceJob(
                     {
-                        pixelBuffer: this.pixelMemory.buffer,
-                        sceneBuffer: this.sceneMemory.buffer,
-                        camera: param.camera,
-                        cameraSamples: param.cameraSamples,
-                        hitSamples: param.hitSamples,
-                        bounces: param.bounces,
-                        full_width: width,
-                        full_height: height,
-                        width: width,
-                        height: height,
-                        xoffset: 0,
-                        yoffset: 0,
-                        id: 0
-                    }
+                pixelBuffer: this.pixelMemory.buffer,
+                    sceneBuffer: this.sceneMemory.buffer,
+                    camera: param.camera,
+                    cameraSamples: param.cameraSamples,
+                    hitSamples: param.hitSamples,
+                    bounces: param.bounces,
+                    full_width: width,
+                    full_height: height,
+                    width: width,
+                    height: height,
+                    xoffset: 0,
+                    yoffset: 0,
+                    id: 0
+            }
                 ));
         }
 
@@ -105,6 +110,7 @@ export class TraceWorkerManager {
     }
 
     init():void {
+        console.time("init");
         this.initNext();
     }
 
@@ -112,15 +118,17 @@ export class TraceWorkerManager {
     private totalThreads:number = 0;
 
     initNext() {
-        console.time("initNext");
+        //console.time("initNext");
         //console.log("initCount:" + this.initCount + ", totalThreads:" + this.totalThreads);
         var self = this;
         if (this.initCount == this.totalThreads) {
+            this._initialized = true;
+            console.timeEnd("init");
             return;
         }
         this.jobs[this.initCount++].init(function () {
             self.initNext.bind(self)();
-            console.timeEnd("initNext");
+            //console.timeEnd("initNext");
         });
     }
 

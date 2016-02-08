@@ -12,7 +12,7 @@ export class Thread {
     initialized:boolean;
     isTracing:boolean;
 
-    constructor(name:string) {
+    constructor(name:string, public id:number) {
 
         //console.log("Thread:"+name);
 
@@ -25,21 +25,30 @@ export class Thread {
                 self.initialized = true;
                 self.isTracing = false;
                 if (self.onInitComplete) {
-                    self.onInitComplete();
+                    self.onInitComplete(self);
                 }
             }
             if (event.data == TraceWorker.TRACED) {
                 self.isTracing = false;
                 if (self.onTraceComplete) {
-                    self.onTraceComplete();
+                    self.onTraceComplete(self);
                 }
             }
         }
     }
 
-    trace():void {
+    init(param:any, transferable:any[], onInit:Function) {
+        this.onInitComplete = onInit;
+        this.sendCommand(TraceWorker.INIT);
+        param.id = this.id;
+        this.sendData(param, transferable);
+    }
+
+    trace(param:any, onComplete:Function):void {
+        this.onTraceComplete = onComplete;
         this.isTracing = true;
-        this.instance.postMessage(TraceWorker.TRACE);
+        this.sendCommand(TraceWorker.TRACE);
+        this.sendData(param);
     }
 
     sendCommand(message:string):void {

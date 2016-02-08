@@ -17,6 +17,7 @@ declare module UIL {
 export class GUI {
 
     isSupported:boolean;
+    info:UIL.Title;
 
     rendererList:string[] = [
         "Simple Renderer",
@@ -58,6 +59,15 @@ export class GUI {
             id: "v1.0",
             size: 400,
             pos: {left: '10px', top: '10px'},
+            simple: false
+        });
+
+        this.info = new UIL.Title({
+            target: document.body,
+            name: 'Info:',
+            id: "!",
+            size: 400,
+            pos: {left: '10px', bottom: '10px'},
             simple: false
         });
 
