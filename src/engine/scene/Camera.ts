@@ -61,14 +61,7 @@ export class Camera {
             p = p.add(c.v.mulScalar(Math.sin(angle) * radius));
             d = focalPoint.sub(p).normalize()
         }
-        if (Camera.debug) {
-            Camera.debug = false;
-            console.log("debug ray");
-            return new Ray(p, new Vector3(5783340439686658, -0.01693718617190925, 0.8156242181982015));
-            //expected hit 118.08336873081376 128.73575558111293
-        } else {
 
-            return new Ray(p, d);
-        }
+        return new Ray(p, d);
     }
 }

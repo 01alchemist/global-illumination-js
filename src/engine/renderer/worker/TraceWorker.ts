@@ -26,6 +26,7 @@ export class TraceWorker {
 
     command:any;
     pixelMemory:Uint8ClampedArray;
+    sampleMemory:Float32Array;
     sceneMemory:DirectMemory;
     camera:Camera;
     scene:Scene;
@@ -56,6 +57,7 @@ export class TraceWorker {
                 //console.time("WOKER_INIT:" + TraceWorker.id);
                 self.command = null;
                 self.pixelMemory = new Uint8ClampedArray(e.data.pixelBuffer);
+                self.sampleMemory = new Float32Array(e.data.sampleBuffer);
                 self.sceneMemory = new DirectMemory(e.data.sceneBuffer);
 
                 if (!self.camera) {
@@ -85,7 +87,7 @@ export class TraceWorker {
                 postMessage(TraceWorker.INITED);
 
             } else if (self.command == TraceWorker.TRACE) {
-                console.log("TRACE");
+                //console.log("TRACE");
                 self.command = null;
                 self.init(
                     e.data.width,
@@ -93,6 +95,7 @@ export class TraceWorker {
                     e.data.xoffset,
                     e.data.yoffset
                 );
+                self.iterations = e.data.init_iterations;
                 if (e.data.iterations) {
                     for (var i = 0; i < e.data.iterations; i++) {
                         self.run();
@@ -122,6 +125,7 @@ export class TraceWorker {
 
             for (var x:number = this.xoffset; x < this.xoffset + this.width; x++) {
 
+                var screen_index:number = (y * (this.full_width * 3)) + (x * 3);
                 var _x:number = x - this.xoffset;
                 var _y:number = y - this.yoffset;
 
@@ -152,18 +156,8 @@ export class TraceWorker {
                 }
                 c = c.pow(1 / 2.2);
 
-                var ci:number = (_y * this.width) + _x;
+                this.updatePixel(c, screen_index);
 
-                if (!this.samples[ci]) {
-                    this.samples[ci] = c;
-                } else {
-                    this.samples[ci] = this.samples[ci].add(c);
-                }
-
-                var avg_rgba:RGBA = this.samples[ci].divScalar(this.iterations).RGBA();
-
-                var screen_index:number = (y * (this.full_width * 3)) + (x * 3);
-                this.drawColor(screen_index, avg_rgba);
                 if (Renderer.DEBUG && x == this.xoffset || Renderer.DEBUG && y == this.yoffset) {
                     this.drawPixelInt(screen_index, 0xFFFF00F);
                 }
@@ -171,6 +165,18 @@ export class TraceWorker {
         }
         this.iterations++;
         //console.timeEnd("render");
+    }
+
+    updatePixel(color:Color, si:number):void {
+
+        this.sampleMemory[si] += color.r;
+        this.sampleMemory[si + 1] += color.g;
+        this.sampleMemory[si + 2] += color.b;
+
+        this.pixelMemory[si] = Math.max(0, Math.min(255, (this.sampleMemory[si] / this.iterations) * 255));
+        this.pixelMemory[si + 1] = Math.max(0, Math.min(255, (this.sampleMemory[si + 1] / this.iterations) * 255));
+        this.pixelMemory[si + 2] = Math.max(0, Math.min(255, (this.sampleMemory[si + 2] / this.iterations) * 255));
+
     }
 
     drawColor(i:number, rgba:RGBA):void {

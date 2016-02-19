@@ -15,18 +15,17 @@ import {LinearAttenuation} from "../src/engine/scene/materials/Attenuation";
 import {SharedScene} from "../src/engine/scene/SharedScene";
 import {GlossyMaterial} from "../src/engine/scene/materials/GlossyMaterial";
 import {MathUtils} from "../src/engine/utils/MathUtils";
+import {SmartBucketRenderer} from "../src/engine/renderer/SmartBucketRenderer";
+import {RenderBase} from "./RenderBase";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
-export class Example2 extends CanvasDisplay {
+export class Example2 extends RenderBase {
 
-    private renderer:Renderer;
-    private pixels:Uint8ClampedArray;
     public paused:boolean = false;
 
     constructor() {
-        super();
-        console.info("Example1");
+        super(2560 / 2, 1440 / 2);
     }
 
     onInit() {
@@ -46,29 +45,12 @@ export class Example2 extends CanvasDisplay {
 
         var camera:Camera = Camera.lookAt(new Vector3(0, 4, -8), new Vector3(0, 0, -2), new Vector3(0, 1, 0), 45);
         
-        
-        this.renderer = new Renderer();
-        this.i_width = 2560 / 2;
-        this.i_height = 1440 / 2;
         var cameraSamples:number = 2;
         var hitSamples:number = 4;
         var bounces:number = 5;
+        var iterations:number = 1;
 
-        this.pixels = this.renderer.initParallelRender(
-            scene, camera, this.i_width, this.i_height, cameraSamples, hitSamples, bounces
-        );
-        this.drawPixels(this.pixels, {x: 0, y: 0, width: this.i_width, height: this.i_height});
-
-        requestAnimationFrame(this.render.bind(this));
-
-    }
-
-    render() {
-        if (!this.paused) {
-            this.renderer.iterateParallel();
-            this.updatePixels(this.pixels, this.renderer.iterations);
-            requestAnimationFrame(this.render.bind(this));
-        }
+        this.render(scene, camera, cameraSamples, hitSamples, bounces, iterations);
     }
 
 }

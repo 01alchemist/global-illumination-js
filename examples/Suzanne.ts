@@ -15,17 +15,16 @@ import {MathUtils} from "../src/engine/utils/MathUtils";
 import {SharedScene} from "../src/engine/scene/SharedScene";
 import {DiffuseMaterial} from "../src/engine/scene/materials/DiffuseMaterial";
 import {ClearMaterial} from "../src/engine/scene/materials/ClearMaterial";
+import {RenderBase} from "./RenderBase";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
-export class Suzanne extends CanvasDisplay {
+export class Suzanne extends RenderBase {
 
-    private renderer:Renderer;
-    private pixels:Uint8ClampedArray;
     public paused:boolean = false;
 
     constructor() {
-        super();
+        super(2560 / 2, 1440 / 2);
     }
 
     onInit() {
@@ -43,14 +42,11 @@ export class Suzanne extends CanvasDisplay {
 
         var self = this;
         var mesh;
-        this.renderer = new Renderer();
-        this.i_width = 2560 / 2;
-        this.i_height = 1440 / 2;
-        //this.i_width = 1280;
-        //this.i_height = 720;
         var cameraSamples:number = 1;
         var hitSamples:number = 1;
         var bounces:number = 3;
+        var iterations:number = 1;
+
         var camera:Camera = Camera.lookAt(new Vector3(1, -0.45, 4), new Vector3(1, -0.6, 0.4), new Vector3(0, 1, 0), 45);
 
         loader.load("suzanne.obj", function (_mesh) {
@@ -61,22 +57,9 @@ export class Suzanne extends CanvasDisplay {
                 mesh = _mesh;
                 scene.add(mesh);
 
-                self.pixels = self.renderer.initParallelRender(
-                    scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples, bounces
-                );
-                self.drawPixels(self.pixels, {x: 0, y: 0, width: self.i_width, height: self.i_height});
-
-                requestAnimationFrame(self.render.bind(self));
+                self.render(scene, camera, cameraSamples, hitSamples, bounces, iterations);
             }
         });
-    }
-
-    render() {
-        if (!this.paused) {
-            this.renderer.iterateParallel();
-            this.updatePixels(this.pixels, this.renderer.iterations);
-            requestAnimationFrame(this.render.bind(this));
-        }
     }
 
 }

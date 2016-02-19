@@ -19,13 +19,13 @@ import {Box} from "../src/engine/scene/shapes/Box";
 import {DiffuseMaterial} from "../src/engine/scene/materials/DiffuseMaterial";
 import {LinearAttenuation} from "../src/engine/scene/materials/Attenuation";
 import {ClearMaterial} from "../src/engine/scene/materials/ClearMaterial";
-import {LiteBucketRenderer} from "../src/engine/renderer/LiteBucketRenderer";
+import {SmartBucketRenderer} from "../src/engine/renderer/SmartBucketRenderer";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
 export class Test extends CanvasDisplay {
 
-    private renderer:LiteBucketRenderer;
+    private renderer:SmartBucketRenderer;
     private pixels:Uint8ClampedArray;
     public paused:boolean = false;
 
@@ -53,29 +53,29 @@ export class Test extends CanvasDisplay {
 
         var loader:OBJLoader = new OBJLoader();
 
-        var glass = new ClearMaterial(1.3, MathUtils.radians(1));
-        glass.transparent = true;
-        loader.parentMaterial = glass;
+        //var glass = new ClearMaterial(1.3, MathUtils.radians(1));
+        //glass.transparent = true;
+        //loader.parentMaterial = glass;
         //loader.parentMaterial = new TransparentMaterial(Color.hexColor(0xFFFFFF), 2, MathUtils.radians(0), 0);
-        //loader.parentMaterial = new SpecularMaterial(new Color(1,1,1), 2);
+        loader.parentMaterial = new SpecularMaterial(new Color(1,1,1), 2);
         //loader.parentMaterial = new DiffuseMaterial(new Color(1,1,1));
 
         var self = this;
         var mesh;
-        this.renderer = new LiteBucketRenderer();
+        this.renderer = new SmartBucketRenderer();
 
-        var cameraSamples:number = 4;
-        var hitSamples:number = 4;
+        var cameraSamples:number = 1;
+        var hitSamples:number = 1;
         var bounces:number = 4;
-        var iterations:number = 4;
+        var iterations:number = 1;
         //var camera:Camera = Camera.lookAt(new Vector3(-3, 2, -1), new Vector3(0, 0.5, 0), new Vector3(0, 1, 0), 35);
         //var camera:Camera = Camera.lookAt(new Vector3(0.5, 0.5, 1), new Vector3(0, -10, 0), new Vector3(0, 1, 0), 35);
         //var camera = Camera.lookAt(new Vector3(0, -5, -20), new Vector3(0, -7, 0), new Vector3(0, 1, 0), 45); //car
         var camera = Camera.lookAt(new Vector3(0, -5, -20), new Vector3(0, -10, 0), new Vector3(0, 1, 0), 45); //dragon
         //var camera = Camera.lookAt(new Vector3(0, -2, -20), new Vector3(0, -5, 0), new Vector3(0, 1, 0), 45);
 
-        //loader.load("models/stanford-dragon.obj", function (_mesh) {
-        loader.load("teapot.obj", function (_mesh) {
+        loader.load("models/stanford-dragon.obj", function (_mesh) {
+        //loader.load("teapot.obj", function (_mesh) {
             if (!_mesh) {
                 console.log("LoadOBJ error:");
             } else {

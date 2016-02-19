@@ -126,29 +126,29 @@ export class TraceWorkerManager {
             console.timeEnd("init");
             return;
         }
-        this.jobs[this.initCount++].init(function () {
+        /*this.jobs[this.initCount++].init(function () {
             self.initNext.bind(self)();
             //console.timeEnd("initNext");
-        });
+        });*/
     }
 
     render():void {
-        var self = this;
+        /*var self = this;
         if (this.workersFinished()) {
             self.iterations++;
             this.jobs.forEach(function (w:TraceJob) {
                 w.run(self.iterations);
             });
-        }
+        }*/
     }
 
     workersFinished():boolean {
-        var isAllFinished:boolean = true;
+        /*var isAllFinished:boolean = true;
         for (var i = 0; i < this.jobs.length; i++) {
             if (!this.jobs[i].thread.initialized || !this.jobs[i].finished) {
                 isAllFinished = false;
             }
         }
-        return isAllFinished;
+        return isAllFinished;*/
     }
 }
