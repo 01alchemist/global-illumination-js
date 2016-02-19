@@ -32,7 +32,7 @@ export class LiteBucketRenderer {
         return this.traceManager.iterations;
     }
 
-    render(scene:SharedScene, camera:Camera, width:number, height:number, cameraSamples:number, hitSamples:number, bounces:number, onUpdate:Function):Uint8ClampedArray {
+    render(scene:SharedScene, camera:Camera, width:number, height:number, cameraSamples:number, hitSamples:number, bounces:number, iterations:number = 1, onUpdate:Function):Uint8ClampedArray {
         if (!this.traceManager) {
             this.traceManager = new TraceJobManager();
         }
@@ -56,6 +56,7 @@ export class LiteBucketRenderer {
                 this.traceManager.add(
                     new TraceJob({
                         id: j + "_" + i,
+                        iterations: iterations,
                         width: this.bucketSize,
                         height: this.bucketSize,
                         xoffset: i * this.bucketSize,

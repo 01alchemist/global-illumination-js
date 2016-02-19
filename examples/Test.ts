@@ -64,9 +64,10 @@ export class Test extends CanvasDisplay {
         var mesh;
         this.renderer = new LiteBucketRenderer();
 
-        var cameraSamples:number = 1;
-        var hitSamples:number = 1;
-        var bounces:number = 5;
+        var cameraSamples:number = 4;
+        var hitSamples:number = 4;
+        var bounces:number = 4;
+        var iterations:number = 4;
         //var camera:Camera = Camera.lookAt(new Vector3(-3, 2, -1), new Vector3(0, 0.5, 0), new Vector3(0, 1, 0), 35);
         //var camera:Camera = Camera.lookAt(new Vector3(0.5, 0.5, 1), new Vector3(0, -10, 0), new Vector3(0, 1, 0), 35);
         //var camera = Camera.lookAt(new Vector3(0, -5, -20), new Vector3(0, -7, 0), new Vector3(0, 1, 0), 45); //car
@@ -92,7 +93,7 @@ export class Test extends CanvasDisplay {
                 //console.timeEnd("compile");
 
                 self.pixels = self.renderer.render(
-                    scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples, bounces,
+                    scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples, bounces, iterations,
                     function(rect){
                         self.updatePixelsRect(rect, self.pixels);
                     }

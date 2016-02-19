@@ -75,11 +75,11 @@ export class TraceWorker {
                 self.bounces = e.data.bounces;
 
                 /*self.init(
-                    e.data.width,
-                    e.data.height,
-                    e.data.xoffset,
-                    e.data.yoffset
-                );*/
+                 e.data.width,
+                 e.data.height,
+                 e.data.xoffset,
+                 e.data.yoffset
+                 );*/
 
                 //console.timeEnd("WOKER_INIT:" + TraceWorker.id);
                 postMessage(TraceWorker.INITED);
@@ -93,7 +93,13 @@ export class TraceWorker {
                     e.data.xoffset,
                     e.data.yoffset
                 );
-                self.run();
+                if (e.data.iterations) {
+                    for (var i = 0; i < e.data.iterations; i++) {
+                        self.run();
+                    }
+                } else {
+                    self.run();
+                }
                 postMessage(TraceWorker.TRACED);
             }
         }, false);
