@@ -18,7 +18,7 @@ import {SharedTree} from "./tree/SharedTree";
  */
 export class Scene {
 
-    get estimatedMemory():number{
+    get estimatedMemory():number {
         var size:number = Color.SIZE + 1;// 1 for shape length;
         this.shapes.forEach(function (shape:Shape) {
             size += shape.memorySize;
@@ -31,7 +31,7 @@ export class Scene {
     constructor(public color:Color = new Color(),
                 public shapes:Shape[] = [],
                 public lights:Shape[] = [],
-                public tree:Tree|SharedTree=null,
+                public tree:Tree|SharedTree = null,
                 public rays:number = 0) {
 
     }
@@ -41,8 +41,8 @@ export class Scene {
             Color.fromJson(scene.color)
         );
 
-        scene.shapes.forEach(function(shape:Shape){
-            switch(shape.type){
+        scene.shapes.forEach(function (shape:Shape) {
+            switch (shape.type) {
                 case ShapeType.CUBE:
                     _scene.add(Cube.fromJson(<Cube>shape));
                     break;
@@ -64,7 +64,7 @@ export class Scene {
         return _scene;
     }
 
-    compile():Scene{
+    compile():Scene {
         this.shapes.forEach(function (shape:Shape) {
             shape.compile();
         });
@@ -105,23 +105,45 @@ export class Scene {
         var color = new Color();
         var self = this;
 
-        this.lights.forEach(function (light:Shape) {
+        var i:number = 0;
+        var light;
+
+        for (; i < this.lights.length; i++) {
+            light = this.lights[i];
             var p = light.getRandomPoint();
             var d = p.sub(n.origin);
             var lr = new Ray(n.origin, d.normalize());
             var diffuse = lr.direction.dot(n.direction);
             if (diffuse <= 0) {
-                return
+                continue
             }
             var distance = d.length();
             if (self.shadow(lr, light, distance)) {
-                return;
+                continue;
             }
             var material = light.getMaterial(p);
             var emittance = material.emittance;
             var attenuation = material.attenuation.compute(distance);
             color = color.add(light.getColor(p).mulScalar(diffuse * emittance * attenuation));
-        });
+        }
+
+        /*this.lights.forEach(function (light:Shape) {
+         var p = light.getRandomPoint();
+         var d = p.sub(n.origin);
+         var lr = new Ray(n.origin, d.normalize());
+         var diffuse = lr.direction.dot(n.direction);
+         if (diffuse <= 0) {
+         return
+         }
+         var distance = d.length();
+         if (self.shadow(lr, light, distance)) {
+         return;
+         }
+         var material = light.getMaterial(p);
+         var emittance = material.emittance;
+         var attenuation = material.attenuation.compute(distance);
+         color = color.add(light.getColor(p).mulScalar(diffuse * emittance * attenuation));
+         });*/
 
         return color.divScalar(this.lights.length);
     }
@@ -130,7 +152,7 @@ export class Scene {
 
     sample(r:Ray, emission:boolean, samples:number, depth:number):Color {
         if (depth < 0) {
-            return new Color(0,0,0);
+            return new Color(0, 0, 0);
         }
         var hit = this.intersect(r);
         if (!hit.ok()) {
@@ -165,9 +187,9 @@ export class Scene {
         }
 
         /*if(Scene.interval % 10 == 0){
-            console.log(result);
-            Scene.interval++;
-        }*/
+         console.log(result);
+         Scene.interval++;
+         }*/
 
         return result.divScalar(n * n);
     }

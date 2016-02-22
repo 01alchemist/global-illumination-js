@@ -20,7 +20,7 @@ export class TraceJobManager {
     private traceParameters:any;
     private threads:Thread[];
     private initCount:number = 0;
-    private maxLoop:number = 4;
+    public maxLoop:number = 1;
     private currentLoop:number = 0;
     private totalThreads:number = 0;
     private _initialized:boolean;
@@ -84,7 +84,7 @@ export class TraceJobManager {
             console.timeEnd("init");
             if (callback) {
                 callback();
-            }else{
+            } else {
                 this.start();
             }
             return;
@@ -114,6 +114,18 @@ export class TraceJobManager {
         }
     }
 
+    private isAllThreadsFree() {
+
+        var thread:Thread;
+        for (var i:number = 0; i < this.threads.length; i++) {
+            thread = this.threads[i];
+            if (thread.isTracing) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private processQueue(job:TraceJob, thread:Thread) {
         if (this.updatePixels) {
             this.updatePixels(job.param);
@@ -131,26 +143,39 @@ export class TraceJobManager {
             });
 
         } else {
-            this._finished = true;
-            console.timeEnd('trace::start');
-            this.initDeferredQueue();
+            if (this.isAllThreadsFree()) {
+                this._finished = true;
+                console.timeEnd('trace::start');
+                this.initDeferredQueue();
+            }
         }
     }
 
     private initDeferredQueue() {
 
-        if(this.currentLoop >= this.maxLoop){
+        if (this.currentLoop >= this.maxLoop) {
             console.log("Rendering finished");
             return;
         }
 
-        this.maxLoop++;
+        this.currentLoop++;
         this._finished = false;
         var self = this;
         self.deferredQueue.sort(function (a, b) {
             return b.time - a.time;
         });
-        self.queue = self.deferredQueue;
+        console.log("Trace time");
+        console.log("   min:" + self.deferredQueue[self.deferredQueue.length - 1].time);
+        console.log("   max:" + self.deferredQueue[0].time);
+
+        if(this.currentLoop > 1){
+            self.queue = self.deferredQueue.filter(function (a) {
+                return a.time > 10;
+            });
+        }else {
+            self.queue = self.deferredQueue;
+        }
+
         self.deferredQueue = [];
 
         console.time('trace::start');
@@ -165,25 +190,4 @@ export class TraceJobManager {
             });
         }
     }
-    /*private processDeferredQueue(job:TraceJob, thread:Thread) {
-        if (this.updatePixels) {
-            this.updatePixels(job.param);
-        }
-        if (this._finished) {
-            return;
-        }
-        var self = this;
-        if (this.queue.length > 0) {
-
-            var job = self.queue.shift();
-            self.deferredQueue.push(job);
-            job.start(thread, function (t) {
-                self.processQueue.call(self, job, t);
-            });
-
-        } else {
-            this._finished = true;
-            console.timeEnd('deferredTrace::start');
-        }
-    }*/
 }

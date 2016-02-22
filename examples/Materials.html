@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Materials</title>
+    <script src="uil.js"></script>
+    <script src="../node_modules/systemjs/dist/system.src.js"></script>
+    <script>
+        System.config({
+            packages: {
+                "../": {
+                    format: 'register',
+                    defaultExtension: 'js'
+                }
+            }
+        });
+        System.import('../examples/Materials').then(null, console.error.bind(console));
+    </script>
+</head>
+<body>
+<div id="viewport"></div>
+</body>
+</html>

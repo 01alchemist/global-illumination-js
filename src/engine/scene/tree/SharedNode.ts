@@ -71,7 +71,6 @@ export class SharedNode {
         this._right = value;
     }
 
-
     readRoot(memory:ByteArrayBase|DirectMemory):number {
         this.memory = memory;
         this.thisPtr = memory.position;
@@ -230,15 +229,15 @@ export class SharedNode {
                 return this.intersectShapes(node, r);
             case Axis.AxisX:
                 tsplit = (node.point - r.origin.x) / r.direction.x;
-                leftFirst = (r.origin.x < node.point) || (r.origin.x == node.point && r.direction.x <= 0)
+                leftFirst = (r.origin.x < node.point) || (r.origin.x == node.point && r.direction.x <= 0);
                 break;
             case Axis.AxisY:
                 tsplit = (node.point - r.origin.y) / r.direction.y;
-                leftFirst = (r.origin.y < node.point) || (r.origin.y == node.point && r.direction.y <= 0)
+                leftFirst = (r.origin.y < node.point) || (r.origin.y == node.point && r.direction.y <= 0);
                 break;
             case Axis.AxisZ:
                 tsplit = (node.point - r.origin.z) / r.direction.z;
-                leftFirst = (r.origin.z < node.point) || (r.origin.z == node.point && r.direction.z <= 0)
+                leftFirst = (r.origin.z < node.point) || (r.origin.z == node.point && r.direction.z <= 0);
                 break;
         }
         var first:SharedNode;
@@ -251,10 +250,10 @@ export class SharedNode {
             second = node.left;
         }
 
-        if (!first || !second) {
-            console.log("node:", node);
-            console.log("null nodes found");
-        }
+        /*if (!first || !second) {
+         console.log("node:", node);
+         console.log("null nodes found");
+         }*/
 
         if (tsplit > tmax || tsplit <= 0) {
             return this.intersectNode(first, r, tmin, tmax);
@@ -279,16 +278,32 @@ export class SharedNode {
         var self = this;
         if (!node.resolved && !node.shapeIndices) {
             node.read(this.memory);
-        } else if (!node.shapeIndices) {
+        }/* else if (!node.shapeIndices) {
             console.log("something wrong:", node.thisPtr, this.memory.position + ", axis:" + node.axis + ", pt:" + node.point);
+        }*/
+
+        var i = 0;
+        var shapeIndex;
+        var shape:Shape;
+        var h;
+
+        for (; i < node.shapeIndices.length; i++) {
+            shapeIndex = node.shapeIndices[i];
+            shape = self.shapes[shapeIndex];
+            h = shape.intersect(r);
+            if (h.T < hit.T) {
+                hit = h;
+            }
         }
-        node.shapeIndices.forEach(function (shapeIndex:number) {
+
+        /*node.shapeIndices.forEach(function (shapeIndex:number) {
             var shape:Shape = self.shapes[shapeIndex];
             var h = shape.intersect(r);
             if (h.T < hit.T) {
                 hit = h;
             }
-        });
+        });*/
+
         return hit;
     }
 

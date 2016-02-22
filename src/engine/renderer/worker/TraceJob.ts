@@ -8,30 +8,56 @@ export class TraceJob {
 
     private id:number;
     private _time:number;
-    private _runCount:number=0;
+    private _runCount:number = 0;
 
-    public get time():number{
+    public get time():number {
         return this._time;
     }
-    public get runCount():number{
+
+    public get runCount():number {
         return this._runCount;
     }
 
-    constructor(public param) {
+    constructor(public param, public extra = {}) {
         this.id = param.id;
         this.finished = false;
     }
 
     start(thread:Thread, onComplete:Function) {
-        this._runCount++;
+
         this._time = performance.now();
         var self = this;
-        this.param.init_iterations = this._runCount;
-        thread.trace(this.param, function (thread:Thread) {
+        var _param = this.getTraceParam();
+        thread.trace(_param, function (thread:Thread) {
             self._time = performance.now() - self._time;
             if (onComplete) {
                 onComplete(thread);
             }
         });
+
+        this._runCount++;
+    }
+
+    getTraceParam() {
+        this.param.init_iterations = (this._runCount * this.param.blockIterations) - (this._runCount > 0 ? (this.param.blockIterations - 1) : 0);
+        var _param = {};
+        var extraCount = 0;
+        for (key in this.extra) {
+            if (this.extra.hasOwnProperty(key)) {
+                _param[key] = this.extra[key];
+                delete this.extra[key];
+                extraCount++;
+            }
+        }
+        if (extraCount > 0) {
+            for (var key in this.param) {
+                if (this.param.hasOwnProperty(key)) {
+                    _param[key] = this.param[key];
+                }
+            }
+        } else {
+            return this.param;
+        }
+        return _param;
     }
 }

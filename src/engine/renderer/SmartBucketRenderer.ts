@@ -20,7 +20,7 @@ export class SmartBucketRenderer {
         return this.traceManager.initialized;
     }
 
-    bucketSize:number = 32;
+    bucketSize:number = 64;
 
     constructor() {
         this.traceManager = new TraceJobManager();
@@ -32,11 +32,23 @@ export class SmartBucketRenderer {
         return this.traceManager.iterations;
     }
 
-    render(scene:SharedScene, camera:Camera, width:number, height:number, cameraSamples:number, hitSamples:number, bounces:number, iterations:number = 1, onUpdate:Function):Uint8ClampedArray {
+    updateCameraSamples(newValue:number){
+        this.traceManager.queue.forEach(function(job){
+            job.extra.cameraSamples = newValue;
+        })
+    }
+    updateHitSamples(newValue:number){
+        this.traceManager.queue.forEach(function(job){
+            job.extra.hitSamples = newValue;
+        })
+    }
+
+    render(scene:SharedScene, camera:Camera, width:number, height:number, cameraSamples:number, hitSamples:number,
+           bounces:number, iterations:number = 1, blockIterations:number = 1, onUpdate:Function):Uint8ClampedArray {
         if (!this.traceManager) {
             this.traceManager = new TraceJobManager();
         }
-
+        this.traceManager.maxLoop = iterations-1;
         this.traceManager.configure({
                 camera: camera,
                 width: width,
@@ -56,7 +68,7 @@ export class SmartBucketRenderer {
                 this.traceManager.add(
                     new TraceJob({
                         id: j + "_" + i,
-                        iterations: 1,
+                        blockIterations: blockIterations,
                         width: this.bucketSize,
                         height: this.bucketSize,
                         xoffset: i * this.bucketSize,

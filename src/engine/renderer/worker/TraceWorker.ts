@@ -95,9 +95,16 @@ export class TraceWorker {
                     e.data.xoffset,
                     e.data.yoffset
                 );
+
+                self.cameraSamples = e.data.cameraSamples || self.cameraSamples;
+                self.hitSamples = e.data.hitSamples || self.hitSamples;
+
+                //should not change bounce
+                //self.bounces = e.data.bounces || self.bounces;
+
                 self.iterations = e.data.init_iterations;
-                if (e.data.iterations) {
-                    for (var i = 0; i < e.data.iterations; i++) {
+                if (self.iterations > 0 && e.data.blockIterations) {
+                    for (var i = 0; i < e.data.blockIterations; i++) {
                         self.run();
                     }
                 } else {
@@ -120,6 +127,14 @@ export class TraceWorker {
 
     run():void {
 
+        this.iterations++;
+        var hitSamples = this.hitSamples;
+        var cameraSamples = this.cameraSamples;
+        if (this.iterations == 1) {
+            hitSamples = 1;
+            cameraSamples = 1;
+        }
+
         //console.time("render");
         for (var y:number = this.yoffset; y < this.yoffset + this.width; y++) {
 
@@ -129,7 +144,6 @@ export class TraceWorker {
                 var _x:number = x - this.xoffset;
                 var _y:number = y - this.yoffset;
 
-
                 var c:Color = new Color();
 
                 if (this.cameraSamples <= 0) {
@@ -138,7 +152,7 @@ export class TraceWorker {
                         var fu = Math.random();
                         var fv = Math.random();
                         var ray = this.camera.castRay(x, y, this.full_width, this.full_height, fu, fv);
-                        c = c.add(this.scene.sample(ray, true, this.hitSamples, this.bounces))
+                        c = c.add(this.scene.sample(ray, true, hitSamples, this.bounces))
                     }
                     c = c.divScalar(this.absCameraSamples)
                 } else {
@@ -149,7 +163,7 @@ export class TraceWorker {
                             var fu = (u + 0.5) / n;
                             var fv = (v + 0.5) / n;
                             var ray:Ray = this.camera.castRay(x, y, this.full_width, this.full_height, fu, fv);
-                            c = c.add(this.scene.sample(ray, true, this.hitSamples, this.bounces));
+                            c = c.add(this.scene.sample(ray, true, hitSamples, this.bounces));
                         }
                     }
                     c = c.divScalar(n * n);
@@ -163,7 +177,6 @@ export class TraceWorker {
                 }
             }
         }
-        this.iterations++;
         //console.timeEnd("render");
     }
 

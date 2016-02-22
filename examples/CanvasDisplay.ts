@@ -14,8 +14,6 @@ export abstract class CanvasDisplay extends GUI {
     delta:number = 0;
     iterations:number = 0;
 
-    abstract onInit();
-
     constructor(public i_width:number = 640, public i_height:number = 480) {
         super();
         var self = this;
@@ -55,9 +53,6 @@ export abstract class CanvasDisplay extends GUI {
             this.imageData = this.ctx.getImageData(0, 0, this.i_width, this.i_height);
             this.data = this.imageData.data;
 
-            if (this.onInit) {
-                this.onInit();
-            }
         }
     }
 
@@ -82,7 +77,7 @@ export abstract class CanvasDisplay extends GUI {
         //this.info.innerHTML = "Initializing workers...";
     }
 
-    updatePixels(pixels:Uint8ClampedArray, iterations:number):void {
+    updatePixels(pixels:Uint8ClampedArray, iterations?:number):void {
 
         for (var y = 0; y < this.i_height; y++) {
             for (var x = 0; x < this.i_width; x++) {
@@ -97,13 +92,13 @@ export abstract class CanvasDisplay extends GUI {
         this.ctx.putImageData(this.imageData, 0, 0);
 
 
-        if (this.iterations < iterations) {
+        /*if (this.iterations < iterations) {
             var _time = this.time;
             this.time = performance.now();
             this.delta = Math.round(this.time - _time) / 1000;
             this.totalTime += this.delta;
             this.iterations = iterations;
-        }
+        }*/
         //this.info.innerHTML = "Iterations:" + iterations + ", time/iteration:" + this.delta + " sec, total time:" + this.totalTime.toFixed(2) + " sec";
     }
 

@@ -23,12 +23,24 @@ export class Triangle implements Shape {
     memorySize:number = Triangle.SIZE;
     index:number;
 
+    private data:Float32Array;
+
     constructor(public material:Material = null,
                 public box:Box = new Box(),
                 public v1:Vector3 = new Vector3(), public v2:Vector3 = new Vector3(), public v3:Vector3 = new Vector3(),
                 public n1:Vector3 = new Vector3(), public n2:Vector3 = new Vector3(), public n3:Vector3 = new Vector3(),
                 public t1:Vector3 = new Vector3(), public t2:Vector3 = new Vector3(), public t3:Vector3 = new Vector3()) {
-
+        /*this.data = new Float32Array([
+            v1.x, v1.y, v1.z,
+            v2.x, v2.y, v2.z,
+            v3.x, v3.y, v3.z,
+            n1.x, n1.y, n1.z,
+            n2.x, n2.y, n2.z,
+            n3.x, n3.y, n3.z,
+            t1.x, t1.y, t1.z,
+            t2.x, t2.y, t2.z,
+            t3.x, t3.y, t3.z
+        ])*/
     }
 
     directRead(memory:Float32Array, offset:number):number {
@@ -119,13 +131,13 @@ export class Triangle implements Shape {
         this.t2.read(memory);
         this.t3.read(memory);
 
-        if(this.t1.isNullVector()){
+        if (this.t1.isNullVector()) {
             this.t1 = null;
         }
-        if(this.t2.isNullVector()){
+        if (this.t2.isNullVector()) {
             this.t2 = null;
         }
-        if(this.t3.isNullVector()){
+        if (this.t3.isNullVector()) {
             this.t3 = null;
         }
 
@@ -134,7 +146,7 @@ export class Triangle implements Shape {
         return memory.position;
     }
 
-    write(memory:ByteArrayBase|DirectMemory):number{
+    write(memory:ByteArrayBase|DirectMemory):number {
         memory.writeByte(this.type);
         memory.writeInt(this.material.index);
         memory.writeInt(this.index);
@@ -213,14 +225,60 @@ export class Triangle implements Shape {
     }
 
     intersect(r:Ray):Hit {
+        /*"use asm"
+        var f4 = SIMD.Float32x4;
+         var f4add = f4.add;
+         var f4sub = f4.sub;
+         var f4mul = f4.mul;
+         //var f4div = f4.div;
 
-        var t = this;
-        var e1x:number = t.v2.x - t.v1.x;
-        var e1y:number = t.v2.y - t.v1.y;
-        var e1z:number = t.v2.z - t.v1.z;
-        var e2x:number = t.v3.x - t.v1.x;
-        var e2y:number = t.v3.y - t.v1.y;
-        var e2z:number = t.v3.z - t.v1.z;
+         //SIMD method
+         var tmp = new Float32Array(9);
+
+         var v1 = f4.load3(this.data, 0);
+         var v2 = f4.load3(this.data, 3);
+         var v3 = f4.load3(this.data, 6);
+
+         var e1 = f4sub(v2, v1);
+         var e2 = f4sub(v3, v1);
+
+         f4.store3(tmp, 0, e1);
+         f4.store3(tmp, 3, e2);
+
+        var px:number = r.direction.y * tmp[5] - r.direction.z * tmp[4];
+        var py:number = r.direction.z * tmp[3] - r.direction.x * tmp[5];
+        var pz:number = r.direction.x * tmp[4] - r.direction.y * tmp[3];
+
+        var det:number = tmp[0] * px + tmp[1] * py + tmp[2] * pz;
+        if (det > -EPS && det < EPS) {
+            return NoHit;
+        }
+        var inv:number = 1 / det;
+        var tx:number = r.origin.x - this.v1.x;
+        var ty:number = r.origin.y - this.v1.y;
+        var tz:number = r.origin.z - this.v1.z;
+        var u:number = (tx * px + ty * py + tz * pz) * inv;
+        if (u < 0 || u > 1) {
+            return NoHit;
+        }
+        var qx:number = ty * tmp[2] - tz * tmp[1];
+        var qy:number = tz * tmp[0] - tx * tmp[2];
+        var qz:number = tx * tmp[1] - ty * tmp[0];
+        var v:number = (r.direction.x * qx + r.direction.y * qy + r.direction.z * qz) * inv;
+        if (v < 0 || u + v > 1) {
+            return NoHit;
+        }
+        var d:number = (tmp[3] * qx + tmp[4] * qy + tmp[5] * qz) * inv;
+        if (d < EPS) {
+            return NoHit
+        }*/
+
+        var e1x:number = this.v2.x - this.v1.x;
+        var e1y:number = this.v2.y - this.v1.y;
+        var e1z:number = this.v2.z - this.v1.z;
+        var e2x:number = this.v3.x - this.v1.x;
+        var e2y:number = this.v3.y - this.v1.y;
+        var e2z:number = this.v3.z - this.v1.z;
         var px:number = r.direction.y * e2z - r.direction.z * e2y;
         var py:number = r.direction.z * e2x - r.direction.x * e2z;
         var pz:number = r.direction.x * e2y - r.direction.y * e2x;
@@ -229,9 +287,9 @@ export class Triangle implements Shape {
             return NoHit;
         }
         var inv:number = 1 / det;
-        var tx:number = r.origin.x - t.v1.x;
-        var ty:number = r.origin.y - t.v1.y;
-        var tz:number = r.origin.z - t.v1.z;
+        var tx:number = r.origin.x - this.v1.x;
+        var ty:number = r.origin.y - this.v1.y;
+        var tz:number = r.origin.z - this.v1.z;
         var u:number = (tx * px + ty * py + tz * pz) * inv;
         if (u < 0 || u > 1) {
             return NoHit;
@@ -247,7 +305,8 @@ export class Triangle implements Shape {
         if (d < EPS) {
             return NoHit
         }
-        return new Hit(t, d);
+
+        return new Hit(this, d);
     }
 
     getColor(p:Vector3):Color {

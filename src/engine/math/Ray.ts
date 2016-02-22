@@ -6,8 +6,13 @@ import {HitInfo} from "./HitInfo";
  */
 export class Ray {
 
-    constructor(public origin:Vector3 = new Vector3(), public direction:Vector3 = new Vector3()) {
+    public data:Float32Array;
 
+    constructor(public origin:Vector3 = new Vector3(), public direction:Vector3 = new Vector3()) {
+        this.data = new Float32Array([
+            origin.x, origin.y, origin.z,
+            direction.x, direction.y, direction.z
+        ])
     }
 
     position(t:number):Vector3 {
