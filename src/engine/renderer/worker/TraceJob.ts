@@ -40,12 +40,12 @@ export class TraceJob {
 
     getTraceParam() {
 
-        var _param = {};
+        var _param = {init_iterations: 0};
         var extraCount = 0;
         for (key in this.extra) {
             if (this.extra.hasOwnProperty(key)) {
                 _param[key] = this.extra[key];
-                if(key === "camera"){
+                if (key === "camera") {
                     this._runCount = 0;
                 }
 
@@ -60,11 +60,10 @@ export class TraceJob {
                 }
             }
         } else {
-            this.param.init_iterations = (this._runCount * this.param.blockIterations) - (this._runCount > 0 ? (this.param.blockIterations - 1) : 0);
-            return this.param;
+            _param = this.param;
         }
 
-        this.param.init_iterations = (this._runCount * this.param.blockIterations) - (this._runCount > 0 ? (this.param.blockIterations - 1) : 0);
+        _param.init_iterations = (this._runCount * this.param.blockIterations) - (this._runCount > 0 ? (this.param.blockIterations - 1) : 0);
         return _param;
     }
 }

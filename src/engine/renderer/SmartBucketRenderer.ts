@@ -43,7 +43,6 @@ export class SmartBucketRenderer {
         })
     }
     updateCamera(newValue:any){
-        this.traceManager.stop();
         this.traceManager.clear();
         this.traceManager.queue.forEach(function(job){
             job.extra.camera = newValue;

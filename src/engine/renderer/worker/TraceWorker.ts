@@ -23,10 +23,8 @@ export class TraceWorker {
     static TRACE:string = "TRACE";
     static TRACED:string = "TRACED";
     static TERMINATE:string = "TERMINATE";
-    static id:number;
 
-    command:any;
-    paused:boolean;
+    id:number;
     flags:Uint8Array;
     pixelMemory:Uint8ClampedArray;
     sampleMemory:Float32Array;
@@ -51,90 +49,69 @@ export class TraceWorker {
 
         addEventListener('message', (e:any) => {
 
-            if (self.command == null) {
-                self.command = e.data;
+            var data = e.data;
 
-                if (self.command === TraceWorker.TERMINATE) {
-                    self.paused = true;
-                    self.command = null;
-                }
+            switch (data.command){
 
-            } else if (self.command == TraceWorker.INIT) {
+                case TraceWorker.INIT:
 
-                TraceWorker.id = e.data.id;
+                    self.id = e.data.id;
+                    self.pixelMemory = new Uint8ClampedArray(e.data.pixelBuffer);
+                    self.sampleMemory = new Float32Array(e.data.sampleBuffer);
+                    self.sceneMemory = new DirectMemory(e.data.sceneBuffer);
 
-                //console.time("WOKER_INIT:" + TraceWorker.id);
-                self.command = null;
-                self.pixelMemory = new Uint8ClampedArray(e.data.pixelBuffer);
-                self.sampleMemory = new Float32Array(e.data.sampleBuffer);
-                self.sceneMemory = new DirectMemory(e.data.sceneBuffer);
+                    if (!self.camera) {
+                        self.camera = Camera.fromJson(e.data.camera);
+                    }
+                    if (!self.scene) {
+                        self.flags = new Uint8Array(self.sceneMemory.data.buffer, 0, 3);
+                        self.scene = SharedScene.getScene(self.sceneMemory);
+                    }
 
-                if (!self.camera) {
-                    self.camera = Camera.fromJson(e.data.camera);
-                }
-                if (!self.scene) {
-                    self.flags = new Uint8Array(self.sceneMemory.data.buffer, 0, 3);
-                    self.scene = SharedScene.getScene(self.sceneMemory);
-                    /*self.scene.compile();*/
-                }
-                //this.scene.add(Sphere.newSphere(new Vector3(-1, 4, -1), 0.5, new LightMaterial(new Color(1, 1, 1), 3, new LinearAttenuation(1))));
-                //self.scene.rays = 0;
+                    self.full_width = e.data.full_width;
+                    self.full_height = e.data.full_height;
+                    self.cameraSamples = e.data.cameraSamples;
+                    self.hitSamples = e.data.hitSamples;
+                    self.bounces = e.data.bounces;
 
-                self.full_width = e.data.full_width;
-                self.full_height = e.data.full_height;
-                self.cameraSamples = e.data.cameraSamples;
-                self.hitSamples = e.data.hitSamples;
-                self.bounces = e.data.bounces;
+                    postMessage(TraceWorker.INITED);
+                    break;
 
-                /*self.init(
-                 e.data.width,
-                 e.data.height,
-                 e.data.xoffset,
-                 e.data.yoffset
-                 );*/
+                case TraceWorker.TRACE:
 
-                //console.timeEnd("WOKER_INIT:" + TraceWorker.id);
-                postMessage(TraceWorker.INITED);
+                    self.init(
+                        e.data.width,
+                        e.data.height,
+                        e.data.xoffset,
+                        e.data.yoffset
+                    );
 
-            } else if (self.command == TraceWorker.TRACE) {
-                //console.log("TRACE");
-                self.command = null;
-                self.paused = false;
-                self.init(
-                    e.data.width,
-                    e.data.height,
-                    e.data.xoffset,
-                    e.data.yoffset
-                );
+                    self.cameraSamples = e.data.cameraSamples || self.cameraSamples;
+                    self.hitSamples = e.data.hitSamples || self.hitSamples;
 
-                self.cameraSamples = e.data.cameraSamples || self.cameraSamples;
-                self.hitSamples = e.data.hitSamples || self.hitSamples;
+                    if (e.data.camera) {
+                        self.camera.updateFromJson(e.data.camera);
+                    }
 
-                if (e.data.camera) {
-                    self.camera.updateFromJson(e.data.camera);
-                    //console.log("init_iterations:" + e.data.init_iterations);
-                    //self.clearSamples();
-                }
+                    self.iterations = e.data.init_iterations || 0;
 
-                //should not change bounce
-                //self.bounces = e.data.bounces || self.bounces;
-
-                self.iterations = e.data.init_iterations;
-                if (self.iterations > 0 && e.data.blockIterations) {
-                    for (var i = 0; i < e.data.blockIterations; i++) {
+                    if (self.iterations > 0 && e.data.blockIterations) {
+                        for (var i = 0; i < e.data.blockIterations; i++) {
+                            if (this.flags[0] === 1) {//pixels are locked
+                                return;
+                            }
+                            self.run();
+                        }
+                    } else {
                         self.run();
                     }
-                } else {
-                    self.run();
-                }
-                if (this.paused) {
-                    return;
-                }
-                if (this.flags[0] === 1) {//pixels are locked
-                    return;
-                }
-                postMessage(TraceWorker.TRACED);
+                    if (this.flags[0] === 1) {//pixels are locked
+                        return;
+                    }
+                    postMessage(TraceWorker.TRACED);
+                    break;
             }
+
         }, false);
     }
 
@@ -143,19 +120,14 @@ export class TraceWorker {
         this.height = height;
         this.xoffset = xoffset;
         this.yoffset = yoffset;
-        this.iterations = 1;
-        this.samples = [];
         this.absCameraSamples = Math.round(Math.abs(this.cameraSamples));
     }
 
     run():void {
-        /*if (this.paused) {
-         return;
-         }*/
         if (this.flags[0] === 1) {//pixels are locked
-            console.log("pixels are locked");
             return;
         }
+
         this.iterations++;
         var hitSamples = this.hitSamples;
         var cameraSamples = this.cameraSamples;
@@ -171,9 +143,6 @@ export class TraceWorker {
 
             for (var x:number = this.xoffset; x < this.xoffset + this.width; x++) {
 
-                if (this.paused) {
-                    return;
-                }
                 if (this.flags[0] === 1) {//pixels are locked
                     return;
                 }
@@ -188,9 +157,6 @@ export class TraceWorker {
                     // random subsampling
                     for (let i = 0; i < absCameraSamples; i++) {
 
-                        if (this.paused) {
-                            return;
-                        }
                         if (this.flags[0] === 1) {//pixels are locked
                             return;
                         }
@@ -207,9 +173,6 @@ export class TraceWorker {
                     for (var u = 0; u < n; u++) {
                         for (var v = 0; v < n; v++) {
 
-                            if (this.paused) {
-                                return;
-                            }
                             if (this.flags[0] === 1) {//pixels are locked
                                 return;
                             }
@@ -236,9 +199,6 @@ export class TraceWorker {
 
     updatePixel(color:Color, si:number):void {
 
-        if (this.paused) {
-            return;
-        }
         if (this.flags[0] === 1) {//pixels are locked
             return;
         }

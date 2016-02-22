@@ -46,7 +46,7 @@ export class Dragon extends RenderBase {
         var hitSamples:number = 4;
         var bounces:number = 4;
         var iterations:number = 100;
-        var blockIterations:number = 4;
+        var blockIterations:number = 1;
 
         var camera:Camera = Camera.lookAt(new Vector3(-3, 2, -5), new Vector3(0, 0.5, 0), new Vector3(0, 1, 0), 35);
 

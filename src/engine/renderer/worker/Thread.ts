@@ -39,27 +39,22 @@ export class Thread {
 
     init(param:any, transferable:any[], onInit:Function) {
         this.onInitComplete = onInit;
-        this.sendCommand(TraceWorker.INIT);
+        param.command = TraceWorker.INIT;
         param.id = this.id;
-        this.sendData(param, transferable);
+        this.send(param, transferable);
     }
 
     trace(param:any, onComplete:Function):void {
         this.onTraceComplete = onComplete;
         this.isTracing = true;
-        this.sendCommand(TraceWorker.TRACE);
-        this.sendData(param);
+        param.command = TraceWorker.TRACE;
+        this.send(param);
     }
-
-    sendCommand(message:string):void {
-        this.instance.postMessage(message);
-    }
-
-    sendData(data:any, buffers?):void {
+    send(data:any, buffers?):void {
         this.instance.postMessage(data, buffers);
     }
 
     terminate():void {
-        this.sendCommand(TraceWorker.TERMINATE);
+        this.send(TraceWorker.TERMINATE);
     }
 }

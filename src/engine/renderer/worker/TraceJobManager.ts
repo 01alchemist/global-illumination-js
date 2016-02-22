@@ -76,27 +76,6 @@ export class TraceJobManager {
         this.queue.push(job);
     }
 
-    clear() {
-        for (var y:number = 0; y < this.height; y++) {
-            for (var x:number = 0; x < this.width; x++) {
-                var si:number = (y * (this.width * 3)) + (x * 3);
-                this.pixelMemory[si] = this.sampleMemory[si] = 0;
-                this.pixelMemory[si + 1] = this.sampleMemory[si + 1] = 0;
-                this.pixelMemory[si + 2] = this.sampleMemory[si + 2] = 0;
-            }
-        }
-
-        if (this.updatePixels) {
-            this.updatePixels({
-                xoffset: 0,
-                yoffset: 0,
-                width: this.width,
-                height: this.height,
-                pixels: this.pixelMemory
-            });
-        }
-    }
-
     init(callback?):void {
         console.time("init");
         this.threads = ThreadPool.getThreads();
@@ -143,6 +122,31 @@ export class TraceJobManager {
         for (var i:number = 0; i < this.threads.length; i++) {
             thread = this.threads[i];
             thread.terminate();
+        }
+    }
+
+    clear() {
+
+        this.flags[0] = 1;
+        this._await = true;
+
+        for (var y:number = 0; y < this.height; y++) {
+            for (var x:number = 0; x < this.width; x++) {
+                var si:number = (y * (this.width * 3)) + (x * 3);
+                this.pixelMemory[si] = this.sampleMemory[si] = 0;
+                this.pixelMemory[si + 1] = this.sampleMemory[si + 1] = 0;
+                this.pixelMemory[si + 2] = this.sampleMemory[si + 2] = 0;
+            }
+        }
+
+        if (this.updatePixels) {
+            this.updatePixels({
+                xoffset: 0,
+                yoffset: 0,
+                width: this.width,
+                height: this.height,
+                pixels: this.pixelMemory
+            });
         }
     }
 
