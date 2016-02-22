@@ -22,9 +22,12 @@ export class TraceWorker {
     static INITED:string = "INITED";
     static TRACE:string = "TRACE";
     static TRACED:string = "TRACED";
+    static TERMINATE:string = "TERMINATE";
     static id:number;
 
     command:any;
+    paused:boolean;
+    flags:Uint8Array;
     pixelMemory:Uint8ClampedArray;
     sampleMemory:Float32Array;
     sceneMemory:DirectMemory;
@@ -50,6 +53,12 @@ export class TraceWorker {
 
             if (self.command == null) {
                 self.command = e.data;
+
+                if (self.command === TraceWorker.TERMINATE) {
+                    self.paused = true;
+                    self.command = null;
+                }
+
             } else if (self.command == TraceWorker.INIT) {
 
                 TraceWorker.id = e.data.id;
@@ -64,6 +73,7 @@ export class TraceWorker {
                     self.camera = Camera.fromJson(e.data.camera);
                 }
                 if (!self.scene) {
+                    self.flags = new Uint8Array(self.sceneMemory.data.buffer, 0, 3);
                     self.scene = SharedScene.getScene(self.sceneMemory);
                     /*self.scene.compile();*/
                 }
@@ -89,6 +99,7 @@ export class TraceWorker {
             } else if (self.command == TraceWorker.TRACE) {
                 //console.log("TRACE");
                 self.command = null;
+                self.paused = false;
                 self.init(
                     e.data.width,
                     e.data.height,
@@ -98,6 +109,12 @@ export class TraceWorker {
 
                 self.cameraSamples = e.data.cameraSamples || self.cameraSamples;
                 self.hitSamples = e.data.hitSamples || self.hitSamples;
+
+                if (e.data.camera) {
+                    self.camera.updateFromJson(e.data.camera);
+                    //console.log("init_iterations:" + e.data.init_iterations);
+                    //self.clearSamples();
+                }
 
                 //should not change bounce
                 //self.bounces = e.data.bounces || self.bounces;
@@ -109,6 +126,12 @@ export class TraceWorker {
                     }
                 } else {
                     self.run();
+                }
+                if (this.paused) {
+                    return;
+                }
+                if (this.flags[0] === 1) {//pixels are locked
+                    return;
                 }
                 postMessage(TraceWorker.TRACED);
             }
@@ -126,19 +149,34 @@ export class TraceWorker {
     }
 
     run():void {
-
+        /*if (this.paused) {
+         return;
+         }*/
+        if (this.flags[0] === 1) {//pixels are locked
+            console.log("pixels are locked");
+            return;
+        }
         this.iterations++;
         var hitSamples = this.hitSamples;
         var cameraSamples = this.cameraSamples;
+        var absCameraSamples = this.absCameraSamples;
         if (this.iterations == 1) {
             hitSamples = 1;
-            cameraSamples = 1;
+            cameraSamples = -1;
+            absCameraSamples = Math.round(Math.abs(cameraSamples));
         }
 
         //console.time("render");
-        for (var y:number = this.yoffset; y < this.yoffset + this.width; y++) {
+        for (var y:number = this.yoffset; y < this.yoffset + this.height; y++) {
 
             for (var x:number = this.xoffset; x < this.xoffset + this.width; x++) {
+
+                if (this.paused) {
+                    return;
+                }
+                if (this.flags[0] === 1) {//pixels are locked
+                    return;
+                }
 
                 var screen_index:number = (y * (this.full_width * 3)) + (x * 3);
                 var _x:number = x - this.xoffset;
@@ -146,20 +184,36 @@ export class TraceWorker {
 
                 var c:Color = new Color();
 
-                if (this.cameraSamples <= 0) {
+                if (cameraSamples <= 0) {
                     // random subsampling
-                    for (let i = 0; i < this.absCameraSamples; i++) {
+                    for (let i = 0; i < absCameraSamples; i++) {
+
+                        if (this.paused) {
+                            return;
+                        }
+                        if (this.flags[0] === 1) {//pixels are locked
+                            return;
+                        }
+
                         var fu = Math.random();
                         var fv = Math.random();
                         var ray = this.camera.castRay(x, y, this.full_width, this.full_height, fu, fv);
                         c = c.add(this.scene.sample(ray, true, hitSamples, this.bounces))
                     }
-                    c = c.divScalar(this.absCameraSamples)
+                    c = c.divScalar(absCameraSamples);
                 } else {
                     // stratified subsampling
-                    var n:number = Math.round(Math.sqrt(this.cameraSamples));
+                    var n:number = Math.round(Math.sqrt(cameraSamples));
                     for (var u = 0; u < n; u++) {
                         for (var v = 0; v < n; v++) {
+
+                            if (this.paused) {
+                                return;
+                            }
+                            if (this.flags[0] === 1) {//pixels are locked
+                                return;
+                            }
+
                             var fu = (u + 0.5) / n;
                             var fv = (v + 0.5) / n;
                             var ray:Ray = this.camera.castRay(x, y, this.full_width, this.full_height, fu, fv);
@@ -182,6 +236,12 @@ export class TraceWorker {
 
     updatePixel(color:Color, si:number):void {
 
+        if (this.paused) {
+            return;
+        }
+        if (this.flags[0] === 1) {//pixels are locked
+            return;
+        }
         this.sampleMemory[si] += color.r;
         this.sampleMemory[si + 1] += color.g;
         this.sampleMemory[si + 2] += color.b;
@@ -190,6 +250,17 @@ export class TraceWorker {
         this.pixelMemory[si + 1] = Math.max(0, Math.min(255, (this.sampleMemory[si + 1] / this.iterations) * 255));
         this.pixelMemory[si + 2] = Math.max(0, Math.min(255, (this.sampleMemory[si + 2] / this.iterations) * 255));
 
+    }
+
+    clearSamples() {
+        for (var y:number = this.yoffset; y < this.yoffset + this.height; y++) {
+            for (var x:number = this.xoffset; x < this.xoffset + this.width; x++) {
+                var si:number = (y * (this.full_width * 3)) + (x * 3);
+                this.sampleMemory[si] = 0;
+                this.sampleMemory[si + 1] = 0;
+                this.sampleMemory[si + 2] = 0;
+            }
+        }
     }
 
     drawColor(i:number, rgba:RGBA):void {

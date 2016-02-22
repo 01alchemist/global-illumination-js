@@ -31,7 +31,7 @@ export class TraceJob {
         thread.trace(_param, function (thread:Thread) {
             self._time = performance.now() - self._time;
             if (onComplete) {
-                onComplete(thread);
+                onComplete(self, thread);
             }
         });
 
@@ -39,12 +39,16 @@ export class TraceJob {
     }
 
     getTraceParam() {
-        this.param.init_iterations = (this._runCount * this.param.blockIterations) - (this._runCount > 0 ? (this.param.blockIterations - 1) : 0);
+
         var _param = {};
         var extraCount = 0;
         for (key in this.extra) {
             if (this.extra.hasOwnProperty(key)) {
                 _param[key] = this.extra[key];
+                if(key === "camera"){
+                    this._runCount = 0;
+                }
+
                 delete this.extra[key];
                 extraCount++;
             }
@@ -56,8 +60,11 @@ export class TraceJob {
                 }
             }
         } else {
+            this.param.init_iterations = (this._runCount * this.param.blockIterations) - (this._runCount > 0 ? (this.param.blockIterations - 1) : 0);
             return this.param;
         }
+
+        this.param.init_iterations = (this._runCount * this.param.blockIterations) - (this._runCount > 0 ? (this.param.blockIterations - 1) : 0);
         return _param;
     }
 }

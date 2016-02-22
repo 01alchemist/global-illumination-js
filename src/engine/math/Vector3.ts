@@ -22,6 +22,18 @@ export class Vector3 {
         }
     }
 
+    setFromArray(a){
+        this.x = a[0];
+        this.y = a[1];
+        this.z = a[2];
+    }
+
+    setFromJson(a):void {
+        this.x = a.x;
+        this.y = a.y;
+        this.z = a.z;
+    }
+
     length() {
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z)
     }

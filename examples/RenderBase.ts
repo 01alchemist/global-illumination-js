@@ -12,45 +12,55 @@ export abstract class RenderBase extends CanvasDisplay {
         super(i_width, i_height);
     }
 
-    onRendererChange(newValue:string){
+    onRendererChange(newValue:string) {
         console.log(newValue);
     }
 
-    onEngineChange(newValue:string){
+    onEngineChange(newValue:string) {
         console.log(newValue);
     }
 
-    onBucketSizeChange(newValue:number){
+    onBucketSizeChange(newValue:number) {
         console.log(newValue);
     }
 
-    onIterationsChange(newValue:number){
+    onIterationsChange(newValue:number) {
         console.log(newValue);
     }
 
-    onBlockIterationsChange(newValue:number){
+    onBlockIterationsChange(newValue:number) {
         console.log(newValue);
     }
 
-    onCameraSamplesChange(newValue:number){
-        if(this.cameraSamples != newValue){
+    onCameraSamplesChange(newValue:number) {
+        if (this.cameraSamples != newValue) {
             this.cameraSamples = newValue;
             this.renderer.updateCameraSamples(newValue);
         }
     }
 
-    onHitSamplesChange(newValue:number){
-        if(this.hitSamples != newValue){
+    onHitSamplesChange(newValue:number) {
+        if (this.hitSamples != newValue) {
             this.hitSamples = newValue;
             this.renderer.updateHitSamples(newValue);
         }
     }
 
-    onOutputChange(newValue:number){
+    onOutputChange(newValue:number) {
         console.log(newValue);
     }
 
-    onThreadsChange(newValue:number){
+    onEyeChange(newValue:number[]) {
+        this.camera.updateFromArray(this._eye.value, this._lookAt.value, this._up.value, this._fov.value);
+        this.renderer.updateCamera(this.camera.toJSON());
+    }
+
+    onLookAtChange(newValue:number[]) {
+        this.camera.updateFromArray(this._eye.value, this._lookAt.value, this._up.value, this._fov.value);
+        this.renderer.updateCamera(this.camera.toJSON());
+    }
+
+    onThreadsChange(newValue:number) {
         console.log(newValue);
     }
 
@@ -64,9 +74,12 @@ export abstract class RenderBase extends CanvasDisplay {
         console.info("      Iterations          :   " + iterations);
         console.info("      Block-Iterations    :   " + blockIterations);
 
+        this.camera = camera;
         this.cameraSamples = cameraSamples;
         this.hitSamples = hitSamples;
         this.bounces = bounces;
+
+        this._eye.value = [-3, 2, -7];
 
         if (!this.renderer) {
             this.renderer = new SmartBucketRenderer();

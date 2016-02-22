@@ -1,4 +1,4 @@
-/**   _   _____ _   _
+/**   _   _____ _   _   
 *    | | |_   _| |_| |
 *    | |_ _| | |  _  |
 *    |___|_|_| |_| |_| 2016
@@ -41,14 +41,22 @@ var UMC = UMC || ( function () {
 
         UMC.purge( dom );
 
-        while ( dom.children.length ){
+        while (dom.firstChild) {
+
+            if ( dom.firstChild.firstChild ) UMC.clear( dom.firstChild );
+
+            dom.removeChild( dom.firstChild ); 
+            
+        }
+
+        /*while ( dom.children.length ){
 
             if( dom.lastChild.children.length ) UMC.clear( dom.lastChild );
 
             //if( dom.lastChild.children.length ){ while ( dom.lastChild.children.length ) dom.lastChild.removeChild( dom.lastChild.lastChild ); }
             dom.removeChild( dom.lastChild );
 
-        }
+        }*/
 
     };
 
@@ -64,8 +72,8 @@ var UMC = UMC || ( function () {
         a = dom.childNodes;
         if (a) {
             i = a.length;
-            while(i--){
-                UMC.purge(dom.childNodes[i]);
+            while(i--){ 
+                UMC.purge(dom.childNodes[i]); 
             }
         }
     };
@@ -82,7 +90,7 @@ var UMC = UMC || ( function () {
             if( dom === undefined ) dom = doc.createElementNS( svgns, 'svg' );
 
             UMC.add( dom, type, obj, id );
-
+            
         } else { // is html element
 
             if( dom === undefined ) dom = doc.createElementNS( htmls, type );//doc.createElement( type );
@@ -90,7 +98,7 @@ var UMC = UMC || ( function () {
         }
 
         if( Class ) dom.setAttribute( 'class', Class );
-        if( css ) dom.style.cssText = css;
+        if( css ) dom.style.cssText = css; 
 
         if( id === undefined ) return dom;
         else return dom.childNodes[ id || 0 ];
@@ -102,7 +110,7 @@ var UMC = UMC || ( function () {
     UMC.cc = function ( name, rules, noAdd ) {
 
         var adds = noAdd === undefined ? '.' : '';
-
+        
         if( name === '*' ) adds = '';
 
         var style = doc.createElement( 'style' );
@@ -123,9 +131,9 @@ var UMC = UMC || ( function () {
 
     UMC.clone = function ( dom, deep ){
 
-        if(deep===undefined) deep = true;
+        if(deep===undefined) deep = true; 
         return dom.cloneNode(deep);
-
+    
     };
 
     UMC.add = function( dom, type, o, id ){ // add attributes
@@ -147,7 +155,7 @@ var UMC = UMC || ( function () {
             if( att === 'txt' ) g.textContent = o[ att ];
             g.setAttributeNS( null, att, o[ att ] );
         }
-
+        
     };
 
     UMC.get = function( dom, id ){
@@ -164,7 +172,7 @@ var UMC = UMC || ( function () {
     return UMC;
 
 })();
-/**   _   _____ _   _
+/**   _   _____ _   _   
 *    | | |_   _| |_| |
 *    | |_ _| | |  _  |
 *    |___|_|_| |_| |_| 2016
@@ -181,12 +189,13 @@ var UIL = ( function () {
 
     UIL = function () {};
 
-    UIL.REVISION = 0.95;
+    UIL.REVISION = 0.96;
     UIL.main = null;
     UIL.DEF = false;
     UIL.WIDTH = 300;
-    UIL.BW = 190;
-    UIL.AW = 100;
+    //UIL.BW = 190;
+    //UIL.AW = 100;
+    UIL.P = 30;
 
     UIL.UNS = '-o-user-select:none; -ms-user-select:none; -khtml-user-select:none; -webkit-user-select:none; -moz-user-select:none;';
     //UIL.US = '-o-user-select:text; -ms-user-select:text; -khtml-user-select:text; -webkit-user-select:text; -moz-user-select:text;';
@@ -194,10 +203,8 @@ var UIL = ( function () {
 
     UIL.DOM = UMC.dom;
     UIL.CC = UMC.cc;
-
-    UIL.setSvg = UMC.setSvg;
-    //UIL.clone = UMC.clone;
     UIL.clear = UMC.clear;
+    UIL.setSvg = UMC.setSvg;
 
     UIL.listens = [];
 
@@ -215,7 +222,7 @@ var UIL = ( function () {
     UIL.SlideBG = UIL.PNG + 'UAAAAFAQMAAAC3obSmAAAABlBMVEVMaXH///+a4ocPAAAAAnRSTlMAM8lDrC4AAAASSURBVHicY3BgaGDgYBBgUAAABkIA+fbHMRYAAAAASUVORK5CYII=)';
 
     UIL.classDefine = function(){
-
+            
         UIL.CC('UIL', UIL.UNS + ' position:absolute; pointer-events:none; box-sizing:border-box; margin:0; padding:0; border:none; overflow:hidden; background:none;');
 
         UIL.CC('UIL.content', ' display:block; width:300px; height:auto; top:0; right:10px; transition:height 0.1s ease-out;');
@@ -226,7 +233,7 @@ var UIL = ( function () {
 
         UIL.CC('UIL.text', UIL.TXT );
         UIL.CC('UIL.number', UIL.TXT + 'letter-spacing:-1px; padding:2px 5px;' );
-        UIL.CC('UIL.textSelect', UIL.TXT + 'pointer-events:auto; padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px dashed ' + UIL.Border+';' );
+        UIL.CC('UIL.textSelect', UIL.TXT + 'pointer-events:auto; padding:2px 5px; outline:none; -webkit-appearance:none; -moz-appearance:none; border:1px dashed ' + UIL.Border+'; -ms-user-select:element;' );
 
         UIL.CC('UIL.slidebg', 'border:1px solid '+UIL.Border+'; left:100px; top:1px; pointer-events:auto; cursor:w-resize; background:rgba(0,0,0,0.3); ' );
 
@@ -246,7 +253,7 @@ var UIL = ( function () {
         //UIL.DEF = true;
     };
 
-
+    
 
     UIL.classDefine();
 
@@ -277,7 +284,7 @@ UIL.add = function(){
 
     var type, o, ref=false;
 
-    if( typeof a[0] === 'string' ){
+    if( typeof a[0] === 'string' ){ 
 
         type = a[0][0].toUpperCase() + a[0].slice(1);
         o = a[1] || {};
@@ -362,20 +369,20 @@ UIL.ColorLuma = function ( hex, lum ) {
 
 };
 
-UIL.findDeepInver = function( rgb ){
+UIL.findDeepInver = function( rgb ){ 
 
     return (rgb[0] * 0.3 + rgb[1] * .59 + rgb[2] * .11) <= 0.6;
-
+    
 };
 
 
-UIL.hexToHtml = function(v){
+UIL.hexToHtml = function(v){ 
     v = v === undefined ? 0x000000 : v;
     return "#" + ("000000" + v.toString(16)).substr(-6);
-
+    
 };
 
-UIL.htmlToHex = function(v){
+UIL.htmlToHex = function(v){ 
 
     return v.toUpperCase().replace("#", "0x");
 
@@ -453,6 +460,8 @@ UIL.Gui = function( o ){
 
     this.height = o.height || 20;
 
+    if( o.Tpercent !== undefined ) UIL.P = o.Tpercent;
+
     this.width = UIL.WIDTH;
     this.h = this.height;
     this.prevY = -1;
@@ -462,7 +471,7 @@ UIL.Gui = function( o ){
     this.callback = o.callback  === undefined ? null : o.callback;
 
     this.color = o.color || UIL.COLOR;
-
+    
     this.isCenter = o.center || false;
     this.lockwheel = false;
     this.isOpen = true;
@@ -490,7 +499,7 @@ UIL.Gui = function( o ){
     this.content.appendChild(this.bottom);
     this.bottom.textContent = 'close';
     this.bottom.name = 'bottom';
-
+    
     this.isDown = false;
     this.isScroll = false;
 
@@ -501,7 +510,7 @@ UIL.Gui = function( o ){
     this.content.addEventListener( 'mouseover', this, false );
 
     document.addEventListener( 'mousewheel', this, false );
-
+    
     window.addEventListener("resize", function(e){this.resize(e)}.bind(this), false );
 
     this.setWidth( o.size || 240 );
@@ -551,7 +560,7 @@ UIL.Gui.prototype = {
             this.isOpen = this.isOpen ? false : true;
             this.show();
         }
-
+        
     },
 
     move: function( e ){
@@ -562,7 +571,7 @@ UIL.Gui.prototype = {
 
     },
 
-
+    
 
     out: function( e ){
 
@@ -623,12 +632,12 @@ UIL.Gui.prototype = {
 
         var a = arguments;
 
-        if( typeof a[1] === 'object' ){
-            a[1].isUI = true;
+        if( typeof a[1] === 'object' ){ 
+            a[1].isUI = true; 
         } else if( typeof a[1] === 'string' ){
             if( a[2] === undefined ) [].push.call(a, { isUI:true });
             else a[2].isUI = true;
-        }
+        } 
 
 
         var n = UIL.add.apply( this, a );
@@ -652,12 +661,12 @@ UIL.Gui.prototype = {
 
     // remove one node
 
-    remove: function ( n ) {
+    remove: function ( n ) { 
 
-        var i = this.uis.indexOf( n );
-        if ( i !== -1 ) {
+        var i = this.uis.indexOf( n ); 
+        if ( i !== -1 ) { 
             this.uis[i].clear();
-            this.uis.splice( i, 1 );
+            this.uis.splice( i, 1 ); 
         }
 
     },
@@ -687,7 +696,7 @@ UIL.Gui.prototype = {
         y = y < 0 ? 0 :y;
         y = y > this.range ? this.range : y;
 
-        this.inner.style.top = -( ~~(y / this.ratio) ) + 'px';
+        this.inner.style.top = -( ~~ ( y / this.ratio ) ) + 'px';
         this.scroll.style.top = ( ~~ y ) + 'px';
 
         this.py = y;
@@ -699,7 +708,7 @@ UIL.Gui.prototype = {
         this.isScroll = true;
 
         this.total = this.h;
-        this.maxView = this.maxHeight-this.height;
+        this.maxView = this.maxHeight - this.height;
 
         this.ratio = this.maxView / this.total;
         this.sh = this.maxView * this.ratio;
@@ -737,7 +746,12 @@ UIL.Gui.prototype = {
         if( y !== undefined ) this.h += y;
         else this.h = this.inner.offsetHeight;
 
-        clearTimeout(this.tmp);
+        /*var i = this.uis.length;
+        while(i--){
+            if( this.uis[i].isGroup ) this.uis[i].calc();
+        }*/
+        
+        clearTimeout( this.tmp );
         this.tmp = setTimeout( this.testHeight.bind(this), 10);
 
     },
@@ -762,28 +776,21 @@ UIL.Gui.prototype = {
 
     setWidth:function( size ) {
 
-        if( size ){
-            UIL.WIDTH = ~~ size;
-            var s = UIL.WIDTH / 3;
-            UIL.BW = ~~ ((s*2)-10);
-            UIL.AW = ~~ s;
-        }
+        if( size ) UIL.WIDTH = ~~ size;
 
         this.width = UIL.WIDTH;
         this.content.style.width = this.width + 'px';
 
         if( this.isCenter ) this.content.style.marginLeft = -(~~ (UIL.WIDTH*0.5)) + 'px';
 
-        var l = this.uis.length
+        var l = this.uis.length;
         var i = l;
         while(i--){
             this.uis[i].setSize();
-            //this.uis[i].rSize();
         }
 
         i = l;
         while(i--){
-            //this.uis[i].setSize();
             this.uis[i].rSize();
         }
 
@@ -803,13 +810,13 @@ UIL.Gui.prototype = {
             this.content.style.height = this.height + 'px';
             this.tmp = setTimeout( this.endHide.bind(this), 100 );
         }
-
+        
     },
 
     endHide: function(){
 
         if( this.tmp ) clearTimeout(this.tmp);
-        this.inner.style.display = 'none';
+        this.inner.style.display = 'none'; 
         this.bottom.textContent = 'open';
 
     }
@@ -821,8 +828,13 @@ UIL.Proto = function( o ){
 
     //this.type = '';
 
+    this.p = o.Tpercent || 0;
+
     // if need resize width
     this.autoWidth = true;
+
+    this.isGroup = false;
+    this.parentGroup = null;
 
     // if height can change
     this.autoHeight = false;
@@ -833,10 +845,10 @@ UIL.Proto = function( o ){
     // only for number
     this.isNumber = false;
 
-    // only most simple
+    // only most simple 
     this.mono = false;
 
-    // no title
+    // no title 
     this.simple = o.simple || false;
 
     // define obj size
@@ -854,7 +866,7 @@ UIL.Proto = function( o ){
     if( this.isUI ) h = UIL.main.height;
     this.h = o.height || h;
     this.h = this.h < 11 ? 11 : this.h;
-
+    
     this.bgcolor = UIL.COLOR || o.bgcolor;
 
 
@@ -863,7 +875,7 @@ UIL.Proto = function( o ){
     this.titleColor = o.titleColor || UIL.BASECOLOR;
     this.fontColor = o.fontColor || UIL.BASECOLOR;
     this.colorPlus = UIL.ColorLuma(this.fontColor, 0.3);
-
+    
 
     this.txt = o.name || 'Proto';
     this.target = o.target || null;
@@ -880,9 +892,9 @@ UIL.Proto = function( o ){
     this.c[0] = UIL.DOM('UIL base');
 
     if( this.isUI ) this.c[0].style.marginBottom = '1px';
+    
 
-
-    if( !this.simple ){
+    if( !this.simple ){ 
         this.c[1] = UIL.DOM('UIL text');
         this.c[1].textContent = this.txt;
         this.c[1].style.color = this.titleColor;
@@ -917,7 +929,7 @@ UIL.Proto.prototype = {
 
         for( var i = 0; i < this.c.length; i++ ){
             if( i === 0 ){
-                if( this.target !== null ){
+                if( this.target !== null ){ 
                     this.target.appendChild( this.c[0] );
                 } else {
                     if( this.isUI ) UIL.main.inner.appendChild( this.c[0] );
@@ -951,7 +963,7 @@ UIL.Proto.prototype = {
     },
 
     update: function( ) {
-
+        
     },
 
     // update every change
@@ -988,16 +1000,16 @@ UIL.Proto.prototype = {
 
     },
 
-
+    
 
     // clear node
-
+    
     clear:function(){
 
         this.clearEvent();
         UIL.clear( this.c[0] );
 
-        if( this.target !== null ){
+        if( this.target !== null ){ 
             this.target.removeChild( this.c[0] );
         } else {
             if( this.isUI ) UIL.main.inner.removeChild( this.c[0] );
@@ -1010,19 +1022,22 @@ UIL.Proto.prototype = {
 
     },
 
-    // change size
+    // change size 
 
-    setSize:function(sx){
+    setSize:function( sx ){
 
         if( !this.autoWidth ) return;
 
         this.size = sx || UIL.WIDTH;
+        if( !this.p ) this.p = UIL.P;
+
         if( this.simple ){
-            this.sa = 1;
-            this.sb = sx-2;
+            this.sa = 0;
+            this.sb = this.size;
         }else{
-            this.sa = ~~ (this.size/3);
-            this.sb = ~~ ((this.sa*2)-10);
+            var pp = this.size * ( this.p / 100 );
+            this.sa = ~~ pp;
+            this.sb = ~~ this.size - pp - 10;
         }
 
     },
@@ -1033,7 +1048,7 @@ UIL.Proto.prototype = {
 
         this.c[0].style.width = this.size + 'px';
         if( !this.simple ) this.c[1].style.width = this.sa + 'px';
-
+    
     },
 
     // for numeric value
@@ -1067,7 +1082,7 @@ UIL.Proto.prototype = {
         this.range = this.max - this.min;
 
         this.value = this.numValue( this.value );
-
+        
     },
 
     numValue:function( n ){
@@ -1111,7 +1126,7 @@ UIL.Proto.prototype = {
     },
 
     handleEvent: function( e ) {
-
+        
     },
 
     // ----------------------
@@ -1132,6 +1147,7 @@ UIL.Group = function( o ){
     UIL.Proto.call( this, o );
 
     this.autoHeight = true;
+    this.isGroup = true;
 
     //this.h = 25;
     this.baseH = this.h;
@@ -1185,18 +1201,21 @@ UIL.Group.prototype.add = function( ){
 
     var a = arguments;
 
-    if( typeof a[1] === 'object' ){
+    if( typeof a[1] === 'object' ){ 
         a[1].isUI = this.isUI;
         a[1].target = this.c[2];
     } else if( typeof arguments[1] === 'string' ){
         if( a[2] === undefined ) [].push.call(a, { isUI:true, target:this.c[2] });
-        else{
+        else{ 
             a[2].isUI = true;
             a[2].target = this.c[2];
         }
     }
 
-    return UIL.Gui.prototype.add.apply( this, a );
+    var n = UIL.Gui.prototype.add.apply( this, a );
+    n.parentGroup = this;
+
+    return n;
 
 };
 
@@ -1206,7 +1225,7 @@ UIL.Group.prototype.open = function(){
     UIL.setSvg( this.c[4], 'd','M 12 6 L 8 10 4 6');
     this.rSizeContent();
 
-    if( this.isUI ) UIL.main.calc( this.h -this.baseH );
+    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
 
 };
 
@@ -1241,13 +1260,17 @@ UIL.Group.prototype.clearGroup = function(){
 
 };
 
-UIL.Group.prototype.calc = function(){
+UIL.Group.prototype.calc = function( y ){
 
     if( !this.isOpen ) return;
-    this.h = this.baseH;
 
-    var total = this.c[2].offsetHeight;
-    this.h += total;
+    //this.h = this.baseH;
+
+    if( y !== undefined ){ this.h += y; }
+    else this.h = this.c[2].offsetHeight + this.baseH;
+
+    //var total = this.c[2].offsetHeight;
+    //this.h += total;
 
     this.c[0].style.height = this.h + 'px';
 
@@ -1276,7 +1299,7 @@ UIL.Group.prototype.rSize = function(){
 
 };
 UIL.Title = function( o ){
-
+    
     UIL.Proto.call( this, o );
 
     //this.type = 'title';
@@ -1296,7 +1319,7 @@ UIL.Title = function( o ){
         this.c[2].style.top = 8 + 'px';
 
     }
-
+    
     var idt = id || 0;
     if(id<10) idt = '0'+id;
 
@@ -1337,7 +1360,7 @@ UIL.String = function( o ){
     this.value = o.value || '';
     this.allway = o.allway || false;
 
-    this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px;' );
+    this.c[2] = UIL.DOM( 'UIL textSelect', 'div', 'height:'+(this.h-4)+'px; line-height:'+(this.h-8)+'px; ' );
     this.c[2].name = 'input';
     this.c[2].style.color = this.fontColor;
     this.c[2].textContent = this.value;
@@ -1385,10 +1408,10 @@ UIL.String.prototype.focus = function( e ){
 };
 
 UIL.String.prototype.keydown = function( e ){
-
+    
     e.stopPropagation();
 
-    if( e.keyCode === 13 ){
+    if( e.keyCode === 13 ){ 
         e.preventDefault();
         this.value = e.target.textContent;
         e.target.blur();
@@ -1398,12 +1421,12 @@ UIL.String.prototype.keydown = function( e ){
 };
 
 UIL.String.prototype.keyup = function( e ){
-
+    
     e.stopPropagation();
 
     this.value = e.target.textContent;
     if( this.allway ) this.send();
-
+    
 };
 
 UIL.String.prototype.rSize = function(){
@@ -1435,7 +1458,7 @@ UIL.Number = function( o ){
     if( o.value !== undefined ){
         if(!isNaN(o.value)){ this.value = [o.value];}
         else if(o.value instanceof Array ){ this.value = o.value; this.isNumber=false;}
-        else if(o.value instanceof Object ){
+        else if(o.value instanceof Object ){ 
             this.value = [];
             if(o.value.x) this.value[0] = o.value.x;
             if(o.value.y) this.value[1] = o.value.y;
@@ -1454,7 +1477,7 @@ UIL.Number = function( o ){
 
     this.w = ((UIL.BW+5)/(this.length))-5;
     this.current = undefined;
-
+    
     var i = this.length;
     while(i--){
         if(this.isAngle) this.value[i] = (this.value[i] * 180 / Math.PI).toFixed( this.precision );
@@ -1466,7 +1489,7 @@ UIL.Number = function( o ){
         this.c[2+i].textContent = this.value[i];
         this.c[2+i].style.color = this.fontColor;
         //this.c[2+i].contentEditable = true;
-        this.c[2+i].events = [ 'keydown', 'keyup', 'mousedown', 'blur', 'focus' ]; //'click',
+        this.c[2+i].events = [ 'keydown', 'keyup', 'mousedown', 'blur', 'focus' ]; //'click', 
 
     }
 
@@ -1512,10 +1535,10 @@ UIL.Number.prototype.keydown = function( e ){
 };
 
 UIL.Number.prototype.keyup = function( e ){
-
+    
     e.stopPropagation();
 
-    if( this.allway ){
+    if( this.allway ){ 
         this.testValue( parseFloat(e.target.name) );
         this.validate();
     }
@@ -1538,7 +1561,7 @@ UIL.Number.prototype.focus = function( e ){
     this.isSelect = true;
     this.current = undefined;
     e.target.style.borderColor = UIL.BorderSelect;
-
+    
     //e.target.style.border = '1px solid ' + UIL.BorderSelect;
     if(this.isDrag) e.target.style.cursor = 'auto';
 
@@ -1550,7 +1573,7 @@ UIL.Number.prototype.down = function( e ){
 
     e.preventDefault();
 
-
+    
 
     //e.target.style.border = '1px solid rgba(255,255,255,0.2)';
     this.current = parseFloat(e.target.name);
@@ -1575,9 +1598,9 @@ UIL.Number.prototype.up = function( e ){
     document.removeEventListener( 'mouseup', this, false );
     if(this.isDrag) document.removeEventListener( 'mousemove', this, false );
 
-    if(this.current !== undefined){
+    if(this.current !== undefined){ 
 
-        if( this.current === parseFloat(e.target.name) ){
+        if( this.current === parseFloat(e.target.name) ){ 
             e.target.contentEditable = true;
             e.target.focus();
         }
@@ -1588,7 +1611,7 @@ UIL.Number.prototype.up = function( e ){
         //this.c[2+this.current].style.cursor = 'move';
     }
 
-
+    
 
 };
 
@@ -1617,7 +1640,7 @@ UIL.Number.prototype.move = function( e ){
 
 UIL.Number.prototype.testValue = function( n ){
 
-    if(!isNaN( this.c[2+n].textContent )){
+    if(!isNaN( this.c[2+n].textContent )){ 
         var nx = this.numValue( this.c[2+n].textContent );
         this.c[2+n].textContent = nx;
         this.value[n] = nx;
@@ -1650,7 +1673,7 @@ UIL.Number.prototype.rSize = function(){
 
 };
 UIL.Color = function( o ){
-
+    
     UIL.Proto.call( this, o );
 
     this.autoHeight = true;
@@ -1662,19 +1685,19 @@ UIL.Color = function( o ){
     // color up or down
     this.side = o.side || 'down';
     this.holdTop = 0;
-
+    
     this.wheelWidth = this.width*0.1;
     this.decal = this.h + 2;
-
+    
     this.radius = (this.width - this.wheelWidth) * 0.5 - 1;
     this.square = Math.floor((this.radius - this.wheelWidth * 0.5) * 0.7) - 1;
     this.mid = Math.floor(this.width * 0.5 );
     this.markerSize = this.wheelWidth * 0.3;
 
-    this.oldh = this.h;
+    this.baseH = this.h;
 
     this.c[2] = UIL.DOM('UIL text', 'div',  'height:'+(this.h-4)+'px;' + 'border-radius:6px; pointer-events:auto; cursor:pointer; border:1px solid '+ UIL.Border + '; line-height:'+(this.h-8)+'px;' );
-
+ 
 
     if(this.side === 'up'){
         this.decal = 5;
@@ -1797,10 +1820,10 @@ UIL.Color.prototype.show = function(){
 
     if(this.oldWidth!==this.width) this.redraw();
     this.isShow = true;
-    this.h = this.width + this.oldh + 10;
+    this.h = this.width + this.baseH + 10;
     this.c[0].style.height = this.h+'px';
 
-    if(this.side=='up'){
+    if(this.side=='up'){ 
         this.holdTop = this.c[0].style.top.substring(0,this.c[0].style.top.length-2) * 1 || 'auto';
         if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop-(this.h-20))+'px';
         setTimeout(function(){this.c[5].style.pointerEvents = 'auto';}.bind(this), 100);
@@ -1810,16 +1833,19 @@ UIL.Color.prototype.show = function(){
     this.c[4].style.display = 'block';
     this.c[5].style.display = 'block';
 
-    if( this.isUI ) UIL.main.calc( this.h-this.oldh );
+    if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
+    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
 
 };
 
 UIL.Color.prototype.hide = function(){
 
-    if( this.isUI ) UIL.main.calc( -(this.h-this.oldh) );
+    if( this.parentGroup !== null ){ this.parentGroup.calc( -(this.h-this.baseH) );}
+    if( this.isUI ) UIL.main.calc( -(this.h-this.baseH) );
+
     this.isShow = false;
-    this.h = this.oldh;
-    if(this.side === 'up'){
+    this.h = this.baseH;
+    if(this.side === 'up'){ 
         if(!isNaN(this.holdTop)) this.c[0].style.top = (this.holdTop)+'px';
         this.c[5].style.pointerEvents = 'none';
     }
@@ -1827,17 +1853,15 @@ UIL.Color.prototype.hide = function(){
     this.c[3].style.display = 'none';
     this.c[4].style.display = 'none';
     this.c[5].style.display = 'none';
-
+    
 };
 
 UIL.Color.prototype.update = function( up ){
 
-
-
     this.c[3].style.background = UIL.rgbToHex( UIL.hslToRgb([this.hsl[0], 1, 0.5]) );
 
     this.drawMarkers();
-
+    
     this.value = this.bcolor;
 
     this.c[2].style.background = this.bcolor;
@@ -1933,7 +1957,7 @@ UIL.Color.prototype.drawCircle = function(){
             m.quadraticCurveTo(xm, ym, ar[2], ar[3]);
             m.stroke();
         }
-        a1 = a2 - nudge;
+        a1 = a2 - nudge; 
         color1 = color2;
         d1 = d2;
     }
@@ -1945,7 +1969,7 @@ UIL.Color.prototype.drawMarkers = function(){
     var m = this.markerSize, ra=this.radius, sz = this.width, lw = Math.ceil(m/ 4), r = m - lw + 1, c1 = this.invert ? '#fff' : '#000', c2 = this.invert ? '#000' : '#fff';
     var angle = this.hsl[0] * 6.28;
     var ar = [Math.sin(angle) * ra, -Math.cos(angle) * ra, 2 * this.square * (.5 - this.hsl[1]), 2 * this.square * (.5 - this.hsl[2]) ];
-
+  
     var circles = [
         { x: ar[2], y: ar[3], r: m, c: c1,     lw: lw },
         { x: ar[2], y: ar[3], r: r, c: c2,     lw: lw + 1 },
@@ -1996,7 +2020,7 @@ UIL.Color.prototype.rSize = function(){
     this.ctxMask.translate(this.mid, this.mid);
     this.ctxOverlay.translate(this.mid, this.mid);
 
-    if( this.isShow ){
+    if( this.isShow ){ 
         this.redraw();
         this.h = this.width+30;
         this.c[0].height = this.h + 'px';
@@ -2083,7 +2107,7 @@ UIL.Slide.prototype.up = function( e ){
     else this.mode(0);
 
     this.sendEnd();
-
+    
 };
 
 UIL.Slide.prototype.down = function( e ){
@@ -2103,7 +2127,7 @@ UIL.Slide.prototype.move = function( e ){
 
     if( this.isDown ){
         var n = ((( e.clientX - this.left - 3 ) / this.w ) * this.range + this.min ) - this.old;
-        if(n >= this.step || n <= this.step){
+        if(n >= this.step || n <= this.step){ 
             n = ~~ ( n / this.step );
             this.value = this.numValue( this.old + ( n * this.step ) );
             this.update( true );
@@ -2182,10 +2206,10 @@ UIL.List = function( o ){
     this.itemHeight = o.itemHeight || (this.h-3);
     this.length = this.list.length;
 
-    // force full list
+    // force full list 
     this.full = o.full || false;
     if(this.full) this.maxItem = this.length;
-
+    
     this.maxHeight = this.maxItem * (this.itemHeight+1);
     this.max = this.length * (this.itemHeight+1);
     //this.range = this.max - this.maxHeight;
@@ -2218,7 +2242,7 @@ UIL.List = function( o ){
 
     }
 
-    if( this.max > this.maxHeight ){
+    if( this.max > this.maxHeight ){ 
         this.w = this.sb-20;
         this.scroll = true;
     }
@@ -2240,7 +2264,7 @@ UIL.List = function( o ){
     }
 
     this.c[5].textContent = this.value;
-
+    
 
     this.init();
 
@@ -2352,8 +2376,6 @@ UIL.List.prototype.listwheel = function( e ){
 
     this.py += delta;
 
-
-
     this.update(this.py);
 
 };
@@ -2384,7 +2406,7 @@ UIL.List.prototype.listShow = function(){
         this.h = this.baseH + 10 + this.max;
         this.c[6].style.display = 'none';
         this.c[2].removeEventListener( 'mousewheel', this, false );
-        this.c[2].removeEventListener( 'mousemove',  this, false );
+        this.c[2].removeEventListener( 'mousemove',  this, false ); 
     } else {
         this.c[6].style.display = 'block';
     }
@@ -2395,12 +2417,14 @@ UIL.List.prototype.listShow = function(){
 
     this.rSizeContent();
 
-    if( this.isUI ) UIL.main.calc(this.h-this.baseH);
+    if( this.parentGroup !== null ){ this.parentGroup.calc( this.h - this.baseH );}
+    if( this.isUI ) UIL.main.calc( this.h - this.baseH );
 
 };
 
 UIL.List.prototype.listHide = function(){
 
+    if( this.parentGroup !== null ){ this.parentGroup.calc( -(this.h-this.baseH) );}
     if( this.isUI ) UIL.main.calc(-(this.h-this.baseH));
 
     this.show = false;
@@ -2408,7 +2432,7 @@ UIL.List.prototype.listHide = function(){
     this.c[0].style.height = this.h + 'px';
     this.c[2].style.display = 'none';
     UIL.setSvg( this.c[4], 'd','M 6 4 L 10 8 6 12');
-
+    
 };
 
 // -----
@@ -2430,16 +2454,16 @@ UIL.List.prototype.rSize = function(){
 
     UIL.Proto.prototype.rSize.call( this );
 
-    this.c[2].style.width = this.sb+'px';
+    this.c[2].style.width = this.sb + 'px';
     this.c[2].style.left = this.sa - 20 +'px';
 
-    this.c[3].style.width = this.sb+'px';
-    this.c[3].style.left = this.sa+'px';
+    this.c[3].style.width = this.sb + 'px';
+    this.c[3].style.left = this.sa + 'px';
 
-    this.c[4].style.left = this.sa + this.sb - 17 +'px';
+    this.c[4].style.left = this.sa + this.sb - 17 + 'px';
 
-    this.c[5].style.width = this.sb+'px';
-    this.c[5].style.left = this.sa+'px';
+    this.c[5].style.width = this.sb + 'px';
+    this.c[5].style.left = this.sa + 'px';
 
     this.w = this.sb;
     if(this.max > this.maxHeight) this.w = this.sb-20;
@@ -2456,7 +2480,7 @@ UIL.Bool = function( o ){
     var t = ~~ (this.h*0.5)-8;
 
     this.c[2] = UIL.DOM('UIL button', 'div', 'background:'+UIL.Border+'; height:18px; width:36px; top:'+t+'px; border-radius:8px; ' );
-
+    
     this.c[3] = UIL.DOM('UIL svgbox', 'path','width:17px; pointer-events:none; top:'+(t+1)+'px;',{ width:17, height:17, d:'M 4 9 L 6 12 14 4', 'stroke-width':2, stroke:'#000', fill:'none', 'stroke-linecap':'butt' });
     this.c[4] = UIL.DOM('UIL', 'div', 'height:16px; width:16px; top:'+(t+1)+'px; border-radius:8px; background:'+UIL.bgcolor(UIL.COLOR,1)+'; transition:margin 0.1s ease-out;' );
 
@@ -2607,7 +2631,7 @@ UIL.Circular = function( o ){
     this.setTypeNumber( o );
 
     this.radius = o.radius || 15;
-
+    
     this.size = (this.radius*2)+20;
 
     if(o.size !== undefined){
@@ -2734,7 +2758,7 @@ UIL.Circular.prototype.move = function( e ){
     this.r = Math.atan2( y, x ) - (Math.PI * 0.5);
     this.r = (((this.r%this.twoPi)+this.twoPi)%this.twoPi);
 
-    if( this.oldr !== null ){
+    if( this.oldr !== null ){ 
 
         var dif = this.r - this.oldr;
         this.r = Math.abs(dif) > Math.PI ? this.oldr : this.r;
@@ -2749,7 +2773,7 @@ UIL.Circular.prototype.move = function( e ){
 
     var n = ( ( this.range * value ) + this.min ) - this.old;
 
-    if(n >= this.step || n <= this.step){
+    if(n >= this.step || n <= this.step){ 
         n = ~~ ( n / this.step );
         this.value = this.numValue( this.old + ( n * this.step ) );
         this.update( true );
@@ -2780,7 +2804,7 @@ UIL.Circular.prototype.update = function( up ){
     this.percent = ( this.value - this.min ) / this.range;
     UIL.setSvg( this.c[4], 'd', this.makePath() );
     if( up ) this.send();
-
+    
 };
 UIL.Knob = function( o ){
 
@@ -2796,7 +2820,7 @@ UIL.Knob = function( o ){
     this.cirRange = this.mPI * 2;
 
     this.radius = o.radius || 15;
-
+    
     this.size = (this.radius*2)+20;
 
     if(o.size !== undefined){
@@ -2825,7 +2849,7 @@ UIL.Knob = function( o ){
     this.c[3] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; cursor:pointer;', { cx:this.radius, cy:this.radius, r:this.radius-4, fill:'rgba(0,0,0,0.3)' });
     this.c[4] = UIL.DOM('UIL svgbox', 'circle', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { cx:this.radius, cy:this.radius*0.5, r:3, fill:this.fontColor });
     this.c[5] = UIL.DOM('UIL svgbox', 'path', 'left:10px; top:'+this.top+'px; width:'+this.w+'px; height:'+this.height+'px; pointer-events:none;', { d:this.makeGrad(), 'stroke-width':1, stroke:UIL.SVGC });
-
+    
     UIL.DOM( null, 'circle', null, { cx:this.radius, cy:this.radius, r:this.radius*0.7, fill:UIL.bgcolor(UIL.COLOR, 1), 'stroke-width':1, stroke:UIL.SVGC }, this.c[3] );
 
     this.c[3].events = [ 'mouseover', 'mousedown', 'mouseout' ];
@@ -2859,7 +2883,7 @@ UIL.Knob.prototype.move = function( e ){
 
     var n = ( ( this.range * value ) + this.min ) - this.old;
 
-    if(n >= this.step || n <= this.step){
+    if(n >= this.step || n <= this.step){ 
         n = ~~ ( n / this.step );
         this.value = this.numValue( this.old + ( n * this.step ) );
         this.update( true );
@@ -2908,7 +2932,7 @@ UIL.Knob.prototype.update = function( up ){
     UIL.setSvg( this.c[4], 'transform', 'rotate('+ r +' '+this.radius+' '+this.radius+')' );
 
     if( up ) this.send();
-
+    
 };
 UIL.Joystick = function( o ){
 
@@ -3071,13 +3095,13 @@ UIL.Joystick.prototype.up = function( e ){
 
     if(this.isOver) this.mode(1);
     else this.mode(0);
-
+    
 
 };
 
 UIL.Joystick.prototype.down = function( e ){
 
-
+  
 
     this.isDown = true;
     document.addEventListener( 'mouseup', this, false );
@@ -3125,7 +3149,7 @@ UIL.Joystick.prototype.update = function(up){
         }
 
         if ( this.x.toFixed(2) === this.oldx.toFixed(2) && this.y.toFixed(2) === this.oldy.toFixed(2)){
-
+            
             this.x = 0;
             this.y = 0;
         }

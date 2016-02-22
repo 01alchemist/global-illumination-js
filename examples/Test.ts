@@ -20,17 +20,16 @@ import {DiffuseMaterial} from "../src/engine/scene/materials/DiffuseMaterial";
 import {LinearAttenuation} from "../src/engine/scene/materials/Attenuation";
 import {ClearMaterial} from "../src/engine/scene/materials/ClearMaterial";
 import {SmartBucketRenderer} from "../src/engine/renderer/SmartBucketRenderer";
+import {RenderBase} from "./RenderBase";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
  */
-export class Test extends CanvasDisplay {
+export class Test extends RenderBase {
 
-    private renderer:SmartBucketRenderer;
-    private pixels:Uint8ClampedArray;
     public paused:boolean = false;
 
     constructor() {
-        super(2560 / 4, 1440 / 4);
+        super(2560 / 2, 1440 / 2);
     }
 
     onInit() {
@@ -46,8 +45,8 @@ export class Test extends CanvasDisplay {
         scene.add(Cube.newCube(new Vector3(-n, -11, -n), new Vector3(n, -10, n), white));
         scene.add(Cube.newCube(new Vector3(-n, 10, -n), new Vector3(n, 11, n), white));
         scene.add(Cube.newCube(new Vector3(-n, -n, 10), new Vector3(n, n, 11), red));
-        scene.add(Cube.newCube(new Vector3(-n, -n, -10), new Vector3(n, n, -11), mirror));
-        scene.add(Cube.newCube(new Vector3(-11, -n, -n), new Vector3(-10, n, n), mirror));
+        //scene.add(Cube.newCube(new Vector3(-n, -n, -10), new Vector3(n, n, -11), white));
+        scene.add(Cube.newCube(new Vector3(-11, -n, -n), new Vector3(-10, n, n), white));
         scene.add(Cube.newCube(new Vector3(10, -n, -n), new Vector3(11, n, n), green));
 
         var light = new LightMaterial(new Color(1, 1, 1), 1, new QuadraticAttenuation(0.01));
@@ -55,31 +54,31 @@ export class Test extends CanvasDisplay {
 
         var loader:OBJLoader = new OBJLoader();
 
-        //var glass = new ClearMaterial(1.3, MathUtils.radians(1));
-        //glass.transparent = true;
-        //loader.parentMaterial = glass;
+        var glass = new ClearMaterial(2, MathUtils.radians(0));
+        glass.transparent = true;
+        loader.parentMaterial = glass;
         //loader.parentMaterial = new TransparentMaterial(Color.hexColor(0xFFFFFF), 2, MathUtils.radians(0), 0);
         //loader.parentMaterial = new SpecularMaterial(new Color(1,1,1), 2);
-        loader.parentMaterial = new DiffuseMaterial(new Color(1,1,1));
+        //loader.parentMaterial = new DiffuseMaterial(new Color(1,1,1));
 
         var self = this;
         var mesh;
-        this.renderer = new SmartBucketRenderer();
 
-        var cameraSamples:number = 1;
-        var hitSamples:number = 1;
-        var bounces:number = 5;
-        var iterations:number = 50;
+        var cameraSamples:number = -1;
+        var hitSamples:number = 16;
+        var bounces:number = 6;
+        var iterations:number = 10000;
         var blockIterations:number = 4;
         //var camera:Camera = Camera.lookAt(new Vector3(-3, 2, -1), new Vector3(0, 0.5, 0), new Vector3(0, 1, 0), 35);
         //var camera:Camera = Camera.lookAt(new Vector3(0.5, 0.5, 1), new Vector3(0, -10, 0), new Vector3(0, 1, 0), 35);
         //var camera = Camera.lookAt(new Vector3(0, -5, -20), new Vector3(0, -7, 0), new Vector3(0, 1, 0), 45); //car
-        //var camera = Camera.lookAt(new Vector3(0, -5, -20), new Vector3(0, -10, 0), new Vector3(0, 1, 0), 45); //dragon
-        var camera = Camera.lookAt(new Vector3(0, -5, 10), new Vector3(0, -7, 0), new Vector3(0, 1, 0), 45); //suzanne
+        var camera = Camera.lookAt(new Vector3(0, -5, -20), new Vector3(0, -10, 0), new Vector3(0, 1, 0), 45); //dragon
+        //var camera = Camera.lookAt(new Vector3(0, -5, 10), new Vector3(0, -7, 0), new Vector3(0, 1, 0), 45); //suzanne
+        //var camera = Camera.lookAt(new Vector3(5, 0, -20), new Vector3(0, -7, 0), new Vector3(0, 1, 0), 45); //glass
         //var camera = Camera.lookAt(new Vector3(0, -2, -20), new Vector3(0, -5, 0), new Vector3(0, 1, 0), 45);
 
-        //loader.load("models/stanford-dragon.obj", function (_mesh) {
-        loader.load("suzanne.obj", function (_mesh) {
+        loader.load("models/stanford-dragon.obj", function (_mesh) {
+        //loader.load("models/glass.obj", function (_mesh) {
             if (!_mesh) {
                 console.log("LoadOBJ error:");
             } else {
@@ -88,7 +87,7 @@ export class Test extends CanvasDisplay {
                 mesh.smoothNormals();
 
                 //mesh.fitInside(new Box(new Vector3(-5, -10, -7), new Vector3(5, 0, 7)), new Vector3(0, 0, 0)); //glass.obj
-                mesh.fitInside(new Box(new Vector3(-5, -10, -7), new Vector3(5, 10, 7)), new Vector3(0, 0, 0));
+                mesh.fitInside(new Box(new Vector3(-5, -10, -5), new Vector3(5, 0, 5)), new Vector3(0, 0, 0));
                 //mesh.fitInside(new Box(new Vector3(-5, -10, -7), new Vector3(5, 20, 7)), new Vector3(0, 0, 0));//dragon
                 scene.add(mesh);
 
@@ -96,34 +95,12 @@ export class Test extends CanvasDisplay {
                 //mesh.compile();
                 //console.timeEnd("compile");
 
-                self.pixels = self.renderer.render(
-                    scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples,
-                    bounces, iterations, blockIterations,
-                    function(rect){
-                        self.updatePixelsRect(rect, self.pixels);
-                    }
-                );
-                //self.drawPixels(self.pixels, {x: 0, y: 0, width: self.i_width, height: self.i_height});
-
-                //requestAnimationFrame(self.render.bind(self));
+                self.render(scene, camera, cameraSamples, hitSamples, bounces, iterations, blockIterations);
             }
         });
-
-        /*self.pixels = self.renderer.initParallelRender(
-            scene, camera, self.i_width, self.i_height, cameraSamples, hitSamples, bounces
-        );
-        self.drawPixels(self.pixels, {x: 0, y: 0, width: self.i_width, height: self.i_height});
-
-        requestAnimationFrame(self.render.bind(self));*/
     }
-
-    /*render() {
-        if (!this.paused && this.renderer.initialized) {
-            this.renderer.render();
-            this.updatePixels(this.pixels, this.renderer.iterations);
-        }
-        requestAnimationFrame(this.render.bind(this));
-    }*/
-
+    onSceneChange(newValue){
+        console.log(newValue);
+    }
 }
 new Test();

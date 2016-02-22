@@ -58,4 +58,8 @@ export class Thread {
     sendData(data:any, buffers?):void {
         this.instance.postMessage(data, buffers);
     }
+
+    terminate():void {
+        this.sendCommand(TraceWorker.TERMINATE);
+    }
 }

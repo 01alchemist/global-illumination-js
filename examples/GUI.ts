@@ -1,3 +1,5 @@
+import {SharedScene} from "../src/engine/scene/SharedScene";
+import {Camera} from "../src/engine/scene/Camera";
 /**
  * Created by Nidin Vinayakan on 20-01-2016.
  */
@@ -22,10 +24,14 @@ export abstract class GUI {
 
     isSupported:boolean;
     info:UIL.Title;
-    private _iterations:any;
-    private _blockIterations:any;
-    private _cameraSamples:any;
-    private _hitSamples:any;
+    protected _iterations:any;
+    protected _blockIterations:any;
+    protected _cameraSamples:any;
+    protected _hitSamples:any;
+    protected _eye:any;
+    protected _lookAt:any;
+    protected _up:any;
+    protected _fov:any;
 
     abstract onInit();
     abstract onSceneChange(value);
@@ -37,6 +43,8 @@ export abstract class GUI {
     abstract onCameraSamplesChange(value);
     abstract onHitSamplesChange(value);
     abstract onOutputChange(value);
+    abstract onEyeChange(value);
+    abstract onLookAtChange(value);
     abstract onThreadsChange(value);
 
     rendererList:string[] = [
@@ -75,6 +83,8 @@ export abstract class GUI {
         this._hitSamples.value = value;
     }
     bounces:number;
+    //scene:SharedScene;
+    camera:Camera;
 
     constructor() {
 
@@ -135,7 +145,7 @@ export abstract class GUI {
         } else {
 
             this.isSupported = true;
-            var ui = new UIL.Gui({css: 'top:10px; right:10px;', size: 380, left: 200});
+            var ui = new UIL.Gui({css: 'top:10px; right:10px;', Tpercent:50, size: 250, left: 200});
             ui.add('title', {name: 'Options', id: "v1.0", titleColor: '#D4B87B', fontColor: "#D4B87B"});
 
             ui.add('list', {name: 'Scenes', callback: this.onSceneChange.bind(this), list: this.sceneList});
@@ -183,8 +193,45 @@ export abstract class GUI {
                 step: 1
             });
 
-            renderGroup.add('number', {name: 'Output', callback: this.onOutputChange, value: [1280, 720], step: 1});
+            renderGroup.add('number', {name: 'Output', callback: this.onOutputChange.bind(this), value: [1280, 720], step: 1});
 
+
+            //Camera
+            var camera = ui.add('group', {name: 'Camera', titleColor: '#D4B87B', fontColor: '#D4B87B', height: 30});
+            this._eye = camera.add('number', {
+                name: 'Eye',
+                callback: this.onEyeChange.bind(this),
+                step: 1,
+                precision: 3,
+                value: [0, -1, 0]
+            });
+            this._lookAt = camera.add('number', {
+                name: 'Look At',
+                callback: this.onLookAtChange.bind(this),
+                step: 1,
+                precision: 3,
+                value: [0, 0, 0]
+            });
+            this._up = camera.add('number', {
+                name: 'Up',
+                callback: callback,
+                min: -1,
+                max: 1,
+                step: 1,
+                precision: 3,
+                value: [0, 1, 0]
+            });
+            this._fov = camera.add('number', {
+                name: 'FOV',
+                callback: callback,
+                min: 0,
+                max: 128,
+                step: 1,
+                precision: 0,
+                value: 45
+            });
+
+            //Lights
             var sun = ui.add('group', {name: 'Sun', titleColor: '#D4B87B', fontColor: '#D4B87B', height: 30});
 
             //ui.add('title', {name: 'Sun', id: "--", fontColor: "#D4B87B"});

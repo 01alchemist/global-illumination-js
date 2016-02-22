@@ -26,8 +26,11 @@ export class TestCase extends RenderBase {
     public paused:boolean = false;
 
     constructor() {
-        super(2560, 1440);
-        //super(1920, 1440 / 2);
+        super(2560/2, 1440/2);
+
+
+        this.sceneList.push("Materials");
+
     }
 
     onInit() {
@@ -37,8 +40,8 @@ export class TestCase extends RenderBase {
         //default ground
         scene.add(Cube.newCube(new Vector3(-100, -1, -100), new Vector3(100, 0, 100), new DiffuseMaterial(new Color(1, 1, 1))));
         //lights
-        scene.add(Sphere.newSphere(new Vector3(0, 5, 0), 1, new LightMaterial(new Color(1, 1, 1), 3, new LinearAttenuation(0.4))));
-        scene.add(Sphere.newSphere(new Vector3(-1, 4, -1), 0.5, new LightMaterial(new Color(1, 1, 1), 3, new LinearAttenuation(1))));
+        scene.add(Sphere.newSphere(new Vector3(0, 5, 0), 1, new LightMaterial(new Color(1, 1, 1), 1, new LinearAttenuation(0.84))));
+        //scene.add(Sphere.newSphere(new Vector3(-1, 4, -1), 0.5, new LightMaterial(new Color(1, 1, 1), 3, new LinearAttenuation(1))));
 
         var camera:Camera = Camera.lookAt(new Vector3(-3, 2, -7), new Vector3(0, 0, 3), new Vector3(0, 1, 0), 45);
 
@@ -58,8 +61,8 @@ export class TestCase extends RenderBase {
 
         var cameraSamples:number = -1;
         var hitSamples:number = 16;
-        var bounces:number = 4;
-        var iterations:number = Infinity;
+        var bounces:number = 6;
+        var iterations:number = 1000;
         var blockIterations:number = 4;
 
         this.render(scene, camera, cameraSamples, hitSamples, bounces, iterations, blockIterations);

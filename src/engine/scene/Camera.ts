@@ -34,10 +34,31 @@ export class Camera {
         return c
     }
 
-    setFocus(focalPoint:Vector3, apertureRadius:number) {
+    updateFromArray(eye, look, up, fovy:number) {
+
+        eye = new Vector3(eye[0], eye[1], eye[2]);
+        look = new Vector3(look[0], look[1], look[2]);
+        up = new Vector3(up[0], up[1], up[2]);
+
         var c:Camera = this;
-        c.focalDistance = focalPoint.sub(c.p).length();
-        c.apertureRadius = apertureRadius
+        c.p = eye;
+        c.w = look.sub(eye).normalize();
+        c.u = up.cross(c.w).normalize();
+        c.v = c.w.cross(c.u).normalize();
+        c.m = 1 / Math.tan(fovy * Math.PI / 360);
+    }
+
+    updateFromJson(prop) {
+        this.p.setFromJson(prop.p);
+        this.w.setFromJson(prop.w);
+        this.u.setFromJson(prop.u);
+        this.v.setFromJson(prop.v);
+        this.m = prop.m;
+    }
+
+    setFocus(focalPoint:Vector3, apertureRadius:number) {
+        this.focalDistance = focalPoint.sub(this.p).length();
+        this.apertureRadius = apertureRadius
     }
 
     static debug:boolean = true;
@@ -63,5 +84,15 @@ export class Camera {
         }
 
         return new Ray(p, d);
+    }
+
+    toJSON():{p:Vector3,w:Vector3,u:Vector3,v:Vector3,m:number} {
+        return {
+            p: this.p,
+            w: this.w,
+            u: this.u,
+            v: this.v,
+            m: this.m
+        };
     }
 }

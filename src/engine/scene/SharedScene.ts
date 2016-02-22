@@ -75,6 +75,11 @@ export class SharedScene extends Scene {
 
         Pointer.init();
         var memory:DirectMemory = Pointer.memory;
+        //scene flags
+        memory.writeByte(0);//pixels are not locked
+        memory.writeByte(0);//samples are not locked
+        memory.writeByte(0);//scene is not locked
+
         //write materials first
         Material.write(memory);
 
@@ -96,6 +101,10 @@ export class SharedScene extends Scene {
     static getScene(memory:ByteArrayBase|DirectMemory):SharedScene {
         //console.time("getScene");
         var scene:SharedScene = new SharedScene();
+        //skip flags
+        memory.position = 0;
+        memory.position += 3;
+
         var offset:number = Material.restore(memory);
 
         scene.color.read(memory);

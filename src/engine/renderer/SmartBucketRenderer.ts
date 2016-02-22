@@ -42,6 +42,14 @@ export class SmartBucketRenderer {
             job.extra.hitSamples = newValue;
         })
     }
+    updateCamera(newValue:any){
+        this.traceManager.stop();
+        this.traceManager.clear();
+        this.traceManager.queue.forEach(function(job){
+            job.extra.camera = newValue;
+        });
+        this.traceManager.restart();
+    }
 
     render(scene:SharedScene, camera:Camera, width:number, height:number, cameraSamples:number, hitSamples:number,
            bounces:number, iterations:number = 1, blockIterations:number = 1, onUpdate:Function):Uint8ClampedArray {
