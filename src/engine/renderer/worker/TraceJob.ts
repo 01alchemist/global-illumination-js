@@ -9,7 +9,11 @@ export class TraceJob {
 
     private id:number;
     private _time:number;
+    private _lifeCount:number;
 
+    public get lifeCount():number {
+        return this._lifeCount;
+    }
 
     public get time():number {
         return this._time;
@@ -27,6 +31,8 @@ export class TraceJob {
         var _param = this.getTraceParam();
         thread.trace(_param, function (thread:Thread) {
             self._time = performance.now() - self._time;
+            self._lifeCount = Math.round(self._time / 10);
+
             if (onComplete) {
                 onComplete(self, thread);
             }

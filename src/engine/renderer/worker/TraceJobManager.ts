@@ -9,6 +9,7 @@ import {Thread} from "./Thread";
  */
 export class TraceJobManager {
 
+    referenceQueue:TraceJob[];
     queue:TraceJob[];
     deferredQueue:TraceJob[];
     iterations:number = 0;
@@ -25,7 +26,6 @@ export class TraceJobManager {
     private initCount:number = 0;
     public maxLoop:number = 1;
     private currentLoop:number = 0;
-    private midTime:number = 10;//ms
     private totalThreads:number = 0;
     private _initialized:boolean;
     private _finished:boolean;
@@ -46,6 +46,7 @@ export class TraceJobManager {
     constructor() {
         this.queue = [];
         this.deferredQueue = [];
+        this.referenceQueue = [];
     }
 
     configure(param, scene:SharedScene) {
@@ -74,6 +75,7 @@ export class TraceJobManager {
 
     add(job:TraceJob) {
         this.queue.push(job);
+        this.referenceQueue.push(job);
     }
 
     init(callback?):void {
@@ -124,12 +126,8 @@ export class TraceJobManager {
             thread = this.threads[i];
             thread.terminate();
         }
-        for (i = 0; i < this.queue.length; i++) {
-            job = this.queue[i];
-            job.runCount = 0;
-        }
-        for (i = 0; i < this.deferredQueue.length; i++) {
-            job = this.deferredQueue[i];
+        for (i = 0; i < this.referenceQueue.length; i++) {
+            job = this.referenceQueue[i];
             job.runCount = 0;
         }
     }
@@ -162,7 +160,9 @@ export class TraceJobManager {
 
     restart() {
         this.flags[0] = 0;
-        this.queue = this.queue.concat(this.deferredQueue);
+        this.queue = null;
+        this.deferredQueue = null;
+        this.queue = this.referenceQueue.concat();
         this.deferredQueue = [];
         this._await = false;
         this.start();
@@ -181,6 +181,10 @@ export class TraceJobManager {
     }
 
     start() {
+        if (this.currentLoop >= this.maxLoop || (this.queue.length == 0 && this.deferredQueue.length === 0)) {
+            console.log("Rendering finished");
+            return;
+        }
         console.log("queue:" + this.queue.length);
         console.time('trace::start');
         var self = this;
@@ -235,7 +239,7 @@ export class TraceJobManager {
 
     private initDeferredQueue() {
 
-        if (this.currentLoop >= this.maxLoop) {
+        if (this.currentLoop >= this.maxLoop || (this.queue.length == 0 && this.deferredQueue.length === 0)) {
             console.log("Rendering finished");
             return;
         }
@@ -246,21 +250,15 @@ export class TraceJobManager {
         self.deferredQueue.sort(function (a, b) {
             return b.time - a.time;
         });
-        /*console.log("Trace time");
-         console.log("   min:" + self.deferredQueue[self.deferredQueue.length - 1].time);
-         console.log("   max:" + self.deferredQueue[0].time);*/
+        console.log("Trace time");
+        console.log("   min:" + self.deferredQueue[self.deferredQueue.length - 1].time);
+        console.log("   max:" + self.deferredQueue[0].time);
 
-        if (this.currentLoop > 1) {
-
-            /*if (this.midTime === 0) {
-             //this.midTime = self.deferredQueue[self.deferredQueue.length - 1].time;
-             this.midTime = self.deferredQueue[Math.floor(self.deferredQueue.length / 2)].time;
-             }*/
-
+        if (this.currentLoop > 5) {
             self.queue = self.deferredQueue;
-            /*self.queue = self.deferredQueue.filter(function (a) {
-             return a.time > self.midTime;
-             });*/
+            self.queue = self.deferredQueue.filter(function (a) {
+                return a.lifeCount > a.runCount;
+            });
         } else {
             self.queue = self.deferredQueue;
         }

@@ -12,6 +12,10 @@ export abstract class RenderBase extends CanvasDisplay {
         super(i_width, i_height);
     }
 
+    onSceneChange(newValue){
+        console.log(newValue);
+    }
+
     onRendererChange(newValue:string) {
         console.log(newValue);
     }
