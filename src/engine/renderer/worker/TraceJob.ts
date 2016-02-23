@@ -5,20 +5,17 @@ import {ByteArrayBase} from "../../../pointer/ByteArrayBase";
 export class TraceJob {
 
     public finished:boolean;
+    public runCount:number = 0;
 
     private id:number;
     private _time:number;
-    private _runCount:number = 0;
+
 
     public get time():number {
         return this._time;
     }
 
-    public get runCount():number {
-        return this._runCount;
-    }
-
-    constructor(public param, public extra = {}) {
+    constructor(public param:any, public extra:any = {}) {
         this.id = param.id;
         this.finished = false;
     }
@@ -35,7 +32,7 @@ export class TraceJob {
             }
         });
 
-        this._runCount++;
+        this.runCount++;
     }
 
     getTraceParam() {
@@ -45,10 +42,6 @@ export class TraceJob {
         for (key in this.extra) {
             if (this.extra.hasOwnProperty(key)) {
                 _param[key] = this.extra[key];
-                if (key === "camera") {
-                    this._runCount = 0;
-                }
-
                 delete this.extra[key];
                 extraCount++;
             }
@@ -63,7 +56,7 @@ export class TraceJob {
             _param = this.param;
         }
 
-        _param.init_iterations = (this._runCount * this.param.blockIterations) - (this._runCount > 0 ? (this.param.blockIterations - 1) : 0);
+        _param.init_iterations = (this.runCount * this.param.blockIterations) - (this.runCount > 0 ? (this.param.blockIterations - 1) : 0);
         return _param;
     }
 }

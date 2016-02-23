@@ -55,6 +55,8 @@ export class Thread {
     }
 
     terminate():void {
-        this.send(TraceWorker.TERMINATE);
+        //this.onTraceComplete = null;
+        this.isTracing = false;
+        //this.send(TraceWorker.TERMINATE);
     }
 }

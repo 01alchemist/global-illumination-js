@@ -51,7 +51,7 @@ export class TraceWorker {
 
             var data = e.data;
 
-            switch (data.command){
+            switch (data.command) {
 
                 case TraceWorker.INIT:
 
@@ -79,6 +79,12 @@ export class TraceWorker {
 
                 case TraceWorker.TRACE:
 
+                    if (this.flags[0] === 1) {//pixels are locked
+                        console.log("exit:1");
+                        self.locked = true;
+                        return;
+                    }
+
                     self.init(
                         e.data.width,
                         e.data.height,
@@ -94,6 +100,11 @@ export class TraceWorker {
                     }
 
                     self.iterations = e.data.init_iterations || 0;
+
+                    if (self.locked) {
+                        console.log("restarted:" + self.iterations, "samples:" + self.checkSamples());
+                        self.locked = false;
+                    }
 
                     if (self.iterations > 0 && e.data.blockIterations) {
                         for (var i = 0; i < e.data.blockIterations; i++) {
@@ -123,10 +134,9 @@ export class TraceWorker {
         this.absCameraSamples = Math.round(Math.abs(this.cameraSamples));
     }
 
+    locked:boolean = false;
+
     run():void {
-        if (this.flags[0] === 1) {//pixels are locked
-            return;
-        }
 
         this.iterations++;
         var hitSamples = this.hitSamples;
@@ -144,6 +154,8 @@ export class TraceWorker {
             for (var x:number = this.xoffset; x < this.xoffset + this.width; x++) {
 
                 if (this.flags[0] === 1) {//pixels are locked
+                    console.log("exit:3");
+                    this.locked = true;
                     return;
                 }
 
@@ -156,11 +168,6 @@ export class TraceWorker {
                 if (cameraSamples <= 0) {
                     // random subsampling
                     for (let i = 0; i < absCameraSamples; i++) {
-
-                        if (this.flags[0] === 1) {//pixels are locked
-                            return;
-                        }
-
                         var fu = Math.random();
                         var fv = Math.random();
                         var ray = this.camera.castRay(x, y, this.full_width, this.full_height, fu, fv);
@@ -172,11 +179,6 @@ export class TraceWorker {
                     var n:number = Math.round(Math.sqrt(cameraSamples));
                     for (var u = 0; u < n; u++) {
                         for (var v = 0; v < n; v++) {
-
-                            if (this.flags[0] === 1) {//pixels are locked
-                                return;
-                            }
-
                             var fu = (u + 0.5) / n;
                             var fv = (v + 0.5) / n;
                             var ray:Ray = this.camera.castRay(x, y, this.full_width, this.full_height, fu, fv);
@@ -185,6 +187,13 @@ export class TraceWorker {
                     }
                     c = c.divScalar(n * n);
                 }
+
+                if (this.flags[0] === 1) {//pixels are locked
+                    console.log("exit:7");
+                    this.locked = true;
+                    return;
+                }
+
                 c = c.pow(1 / 2.2);
 
                 this.updatePixel(c, screen_index);
@@ -200,6 +209,8 @@ export class TraceWorker {
     updatePixel(color:Color, si:number):void {
 
         if (this.flags[0] === 1) {//pixels are locked
+            console.log("exit:8");
+            this.locked = true;
             return;
         }
         this.sampleMemory[si] += color.r;
@@ -212,15 +223,18 @@ export class TraceWorker {
 
     }
 
-    clearSamples() {
+    checkSamples() {
         for (var y:number = this.yoffset; y < this.yoffset + this.height; y++) {
             for (var x:number = this.xoffset; x < this.xoffset + this.width; x++) {
                 var si:number = (y * (this.full_width * 3)) + (x * 3);
-                this.sampleMemory[si] = 0;
-                this.sampleMemory[si + 1] = 0;
-                this.sampleMemory[si + 2] = 0;
+                if (this.sampleMemory[si] !== 0 &&
+                    this.sampleMemory[si + 1] !== 0 &&
+                    this.sampleMemory[si + 2] !== 0) {
+                    return "NOT_OK";
+                }
             }
         }
+        return "OK";
     }
 
     drawColor(i:number, rgba:RGBA):void {

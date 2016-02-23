@@ -1,5 +1,10 @@
 declare function postMessage(arg:any);
-
+interface Atomics{
+    futexWait(ta, index:number, value:number, timeOut:number);
+    futexWake(ta, index:number, count:number);
+    store(ta, index:number, value:number, timeOut:number);
+    load(ta, index:number, value:number, timeOut:number);
+}
 interface SharedArrayBuffer {
     /**
      * Read-only. The length of the ArrayBuffer (in bytes).

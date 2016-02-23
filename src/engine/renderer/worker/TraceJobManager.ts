@@ -16,7 +16,7 @@ export class TraceJobManager {
 
     private width:number;
     private height:number;
-    private pixelMemory:Uint8ClampedArray;
+    private pixelMemory:Uint8Array;
     private sampleMemory:Float32Array;
     private sceneMemory:DirectMemory;
     private flags:Uint8Array;
@@ -56,7 +56,7 @@ export class TraceJobManager {
 
         this.sceneMemory = scene.getMemory();
         this.flags = new Uint8Array(this.sceneMemory.data.buffer, 0, 3);
-        this.pixelMemory = new Uint8ClampedArray(new SharedArrayBuffer(this.width * this.height * 3));
+        this.pixelMemory = new Uint8Array(new SharedArrayBuffer(this.width * this.height * 3));
         this.sampleMemory = new Float32Array(new SharedArrayBuffer(4 * this.width * this.height * 3));
 
         this.traceParameters = {
@@ -119,23 +119,33 @@ export class TraceJobManager {
         this.flags[0] = 1;
         this._await = true;
         var thread:Thread;
+        var job:TraceJob;
         for (var i:number = 0; i < this.threads.length; i++) {
             thread = this.threads[i];
             thread.terminate();
         }
+        for (i = 0; i < this.queue.length; i++) {
+            job = this.queue[i];
+            job.runCount = 0;
+        }
+        for (i = 0; i < this.deferredQueue.length; i++) {
+            job = this.deferredQueue[i];
+            job.runCount = 0;
+        }
     }
 
     clear() {
-
-        this.flags[0] = 1;
-        this._await = true;
-
         for (var y:number = 0; y < this.height; y++) {
             for (var x:number = 0; x < this.width; x++) {
                 var si:number = (y * (this.width * 3)) + (x * 3);
-                this.pixelMemory[si] = this.sampleMemory[si] = 0;
-                this.pixelMemory[si + 1] = this.sampleMemory[si + 1] = 0;
-                this.pixelMemory[si + 2] = this.sampleMemory[si + 2] = 0;
+
+                this.pixelMemory[si] = 0;
+                this.pixelMemory[si + 1] = 0;
+                this.pixelMemory[si + 2] = 0;
+
+                this.sampleMemory[si] = 0;
+                this.sampleMemory[si + 1] = 0;
+                this.sampleMemory[si + 2] = 0;
             }
         }
 
@@ -152,7 +162,7 @@ export class TraceJobManager {
 
     restart() {
         this.flags[0] = 0;
-        this.queue = this.deferredQueue.concat(this.queue);
+        this.queue = this.queue.concat(this.deferredQueue);
         this.deferredQueue = [];
         this._await = false;
         this.start();
@@ -233,12 +243,12 @@ export class TraceJobManager {
         this.currentLoop++;
         this._finished = false;
         var self = this;
-        /*self.deferredQueue.sort(function (a, b) {
-         return b.time - a.time;
-         });*/
+        self.deferredQueue.sort(function (a, b) {
+            return b.time - a.time;
+        });
         /*console.log("Trace time");
-        console.log("   min:" + self.deferredQueue[self.deferredQueue.length - 1].time);
-        console.log("   max:" + self.deferredQueue[0].time);*/
+         console.log("   min:" + self.deferredQueue[self.deferredQueue.length - 1].time);
+         console.log("   max:" + self.deferredQueue[0].time);*/
 
         if (this.currentLoop > 1) {
 

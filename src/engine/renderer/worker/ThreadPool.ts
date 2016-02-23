@@ -6,7 +6,7 @@ import {TraceWorker} from "./TraceWorker";
 export class ThreadPool {
 
     public static get maxThreads():number {
-        return 8
+        return navigator["hardwareConcurrency"] || 2;
     };
 
     private static pool:Thread[];

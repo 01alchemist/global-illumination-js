@@ -20,7 +20,7 @@ export class SmartBucketRenderer {
         return this.traceManager.initialized;
     }
 
-    bucketSize:number = 64;
+    bucketSize:number = 32;
 
     constructor() {
         this.traceManager = new TraceJobManager();
@@ -43,6 +43,7 @@ export class SmartBucketRenderer {
         })
     }
     updateCamera(newValue:any){
+        this.traceManager.stop();
         this.traceManager.clear();
         this.traceManager.queue.forEach(function(job){
             job.extra.camera = newValue;
