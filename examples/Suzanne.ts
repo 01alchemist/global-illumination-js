@@ -31,25 +31,25 @@ export class Suzanne extends RenderBase {
     onInit() {
 
         var scene:SharedScene = new SharedScene();
-        //var material = new DiffuseMaterial(Color.hexColor(0x334D5C));
-        var material = new DiffuseMaterial(Color.hexColor(0xffffff));
+        var material = new DiffuseMaterial(Color.hexColor(0x334D5C));
+        //var material = new DiffuseMaterial(Color.hexColor(0xffffff));
 
-        scene.add(Sphere.newSphere(new Vector3(0.5, 1, 3), 1, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
-        scene.add(Sphere.newSphere(new Vector3(3, 0, 1), 0.3, new LightMaterial(new Color(1, 0, 0), 0.5, new LinearAttenuation(0.84))));
-        scene.add(Sphere.newSphere(new Vector3(-1, 0, -0.3), 0.3, new LightMaterial(new Color(0, 0, 1), 0.5, new LinearAttenuation(0.84))));
+        scene.add(Sphere.newSphere(new Vector3(0.5, 1, 3), 0.15, new LightMaterial(new Color(1, 1, 1), 5, new LinearAttenuation(1))));
+        scene.add(Sphere.newSphere(new Vector3(-5, 0, 0), 0.25, new LightMaterial(new Color(1, 1, 1), 20, new LinearAttenuation(1))));
+        //scene.add(Sphere.newSphere(new Vector3(-1, 0.015, -0.3), 0.015, new LightMaterial(new Color(0, 0, 1), 5, new LinearAttenuation(4))));
 
         scene.add(Cube.newCube(new Vector3(-5, -5, -2), new Vector3(5, 5, -1), material));
 
         var loader:OBJLoader = new OBJLoader();
         //loader.parentMaterial = new SpecularMaterial(Color.hexColor(0xEFC94C), 2);
         //loader.parentMaterial = new GlossyMaterial(new Color(1,0.2,0), 2, MathUtils.radians(45));
-        loader.parentMaterial = new ClearMaterial(1.5, MathUtils.radians(6));
+        loader.parentMaterial = new ClearMaterial(1.3, MathUtils.radians(2));
 
         var self = this;
         var mesh;
         var cameraSamples:number = -1;
-        var hitSamples:number = 16;
-        var bounces:number = 6;
+        var hitSamples:number = 4;
+        var bounces:number = 4;
         var iterations:number = 1000;
         var blockIterations:number = 1;
 

@@ -63,7 +63,7 @@ export class TestCase extends RenderBase {
         var hitSamples:number = 16;
         var bounces:number = 6;
         var iterations:number = 5000;
-        var blockIterations:number = 16;
+        var blockIterations:number = 1;
 
         this.render(scene, camera, cameraSamples, hitSamples, bounces, iterations, blockIterations);
     }
