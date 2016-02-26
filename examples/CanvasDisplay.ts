@@ -17,7 +17,7 @@ export abstract class CanvasDisplay extends GUI {
     constructor(public i_width:number = 640, public i_height:number = 480) {
         super();
         var self = this;
-        this.viewport = document.getElementById("viewport");
+        this.viewport = document.getElementById("imageOutput");
         if (this.viewport) {
             self.init.call(self);
             return;
@@ -37,8 +37,7 @@ export abstract class CanvasDisplay extends GUI {
 
             this.canvas = <HTMLCanvasElement>document.createElement("canvas");
             this.canvas.id = "viewport";
-            this.canvas.style.left = "10px";
-            this.canvas.style.top = "50px";
+
             this.canvas.style.backgroundColor = "#3C3C3C";
             this.canvas.style.position = "absolute";
 
@@ -47,13 +46,20 @@ export abstract class CanvasDisplay extends GUI {
 
             this.viewport.appendChild(this.canvas);
 
-
             this.ctx = this.canvas.getContext("2d");
 
             this.imageData = this.ctx.getImageData(0, 0, this.i_width, this.i_height);
             this.data = this.imageData.data;
 
+            this.resize();
+
+            window.onresize = this.resize.bind(this);
         }
+    }
+
+    resize(){
+        this.canvas.style.left = (window.innerWidth - this.i_width) / 2 + "px";
+        this.canvas.style.top = (window.innerHeight - this.i_height) / 2 + "px";
     }
 
     drawPixels(pixels:Uint8ClampedArray, rect:{x:number,y:number,width:number,height:number}):void {
@@ -93,12 +99,12 @@ export abstract class CanvasDisplay extends GUI {
 
 
         /*if (this.iterations < iterations) {
-            var _time = this.time;
-            this.time = performance.now();
-            this.delta = Math.round(this.time - _time) / 1000;
-            this.totalTime += this.delta;
-            this.iterations = iterations;
-        }*/
+         var _time = this.time;
+         this.time = performance.now();
+         this.delta = Math.round(this.time - _time) / 1000;
+         this.totalTime += this.delta;
+         this.iterations = iterations;
+         }*/
         //this.info.innerHTML = "Iterations:" + iterations + ", time/iteration:" + this.delta + " sec, total time:" + this.totalTime.toFixed(2) + " sec";
     }
 
@@ -119,12 +125,12 @@ export abstract class CanvasDisplay extends GUI {
 
 
         /*if (this.iterations < iterations) {
-            var _time = this.time;
-            this.time = performance.now();
-            this.delta = Math.round(this.time - _time) / 1000;
-            this.totalTime += this.delta;
-            this.iterations = iterations;
-        }*/
+         var _time = this.time;
+         this.time = performance.now();
+         this.delta = Math.round(this.time - _time) / 1000;
+         this.totalTime += this.delta;
+         this.iterations = iterations;
+         }*/
         //this.info.innerHTML = "Iterations:" + iterations + ", time/iteration:" + this.delta + " sec, total time:" + this.totalTime.toFixed(2) + " sec";
     }
 }

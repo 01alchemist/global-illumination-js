@@ -138,6 +138,10 @@ export class Vector3 {
         return this.x == v.x && this.y == v.y && this.z == v.z;
     }
 
+    isZero():Boolean {
+        return this.x == 0 && this.y == 0 && this.z == 0;
+    }
+
     directWrite(memory:Float32Array, offset:number):number {
         memory[offset++] = this.x;
         memory[offset++] = this.y;

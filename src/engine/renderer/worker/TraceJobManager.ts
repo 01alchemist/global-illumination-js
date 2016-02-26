@@ -254,14 +254,15 @@ export class TraceJobManager {
         console.log("   min:" + self.deferredQueue[self.deferredQueue.length - 1].time);
         console.log("   max:" + self.deferredQueue[0].time);
 
-        if (this.currentLoop > 5) {
+        /*if (this.currentLoop > 5) {
             self.queue = self.deferredQueue;
             self.queue = self.deferredQueue.filter(function (a) {
                 return a.lifeCount > a.runCount;
             });
         } else {
             self.queue = self.deferredQueue;
-        }
+        }*/
+        self.queue = self.deferredQueue;
 
         self.deferredQueue = [];
 

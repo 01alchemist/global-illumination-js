@@ -1,4 +1,3 @@
-import {SharedScene} from "../src/engine/scene/SharedScene";
 import {Camera} from "../src/engine/scene/Camera";
 /**
  * Created by Nidin Vinayakan on 20-01-2016.
@@ -24,6 +23,8 @@ export abstract class GUI {
 
     isSupported:boolean;
     info:UIL.Title;
+    appContainer:HTMLElement;
+    controlGui:HTMLElement;
     protected _iterations:any;
     protected _blockIterations:any;
     protected _cameraSamples:any;
@@ -32,19 +33,31 @@ export abstract class GUI {
     protected _lookAt:any;
     protected _up:any;
     protected _fov:any;
+    protected _focus:any;
+    protected _aperture:any;
 
     abstract onInit();
+
     abstract onSceneChange(value);
+
     abstract onRendererChange(value);
+
     abstract onEngineChange(value);
+
     abstract onBucketSizeChange(value);
+
     abstract onIterationsChange(value);
+
     abstract onBlockIterationsChange(value);
+
     abstract onCameraSamplesChange(value);
+
     abstract onHitSamplesChange(value);
+
     abstract onOutputChange(value);
-    abstract onEyeChange(value);
-    abstract onLookAtChange(value);
+
+    abstract onCameraChange(value);
+
     abstract onThreadsChange(value);
 
     rendererList:string[] = [
@@ -69,19 +82,22 @@ export abstract class GUI {
     ];
 
 
-    get cameraSamples():number{
+    get cameraSamples():number {
         return this._cameraSamples.value;
     }
-    set cameraSamples(value:number){
+
+    set cameraSamples(value:number) {
         this._cameraSamples.value = value;
     }
 
-    get hitSamples():number{
+    get hitSamples():number {
         return this._hitSamples.value;
     }
-    set hitSamples(value:number){
+
+    set hitSamples(value:number) {
         this._hitSamples.value = value;
     }
+
     bounces:number;
     //scene:SharedScene;
     camera:Camera;
@@ -92,12 +108,20 @@ export abstract class GUI {
 
     init():void {
         /*some styling */
-        document.body.style.background = "#161616";
-        document.body.style.fontFamily = "Courier New";
-        document.body.style.color = "#CCCCCC";
+
+        document.body.style.margin = 0;
+        this.appContainer = document.getElementById("appContainer");
+        this.controlGui = document.getElementById("control-gui");
+
+        this.appContainer.style.background = "#161616";
+        this.appContainer.style.fontFamily = "Courier New";
+        this.appContainer.style.color = "#7F8184";
+        this.appContainer.style.width = "100%";
+        this.appContainer.style.height = "100%";
+        this.appContainer.style.position = "absolute";
 
         new UIL.Title({
-            target: document.body,
+            target: this.controlGui,
             name: 'Global illumination JS by Nidin Vinayakan',
             id: "v1.0",
             size: 400,
@@ -106,7 +130,7 @@ export abstract class GUI {
         });
 
         this.info = new UIL.Title({
-            target: document.body,
+            target: this.controlGui,
             name: 'Info:',
             id: "!",
             size: 400,
@@ -117,7 +141,7 @@ export abstract class GUI {
         if (!window["SharedArrayBuffer"]) {
             var msg:string = "Oops! Your browser does not supported. If you want to try this app go and get Firefox Nightly 46";
             new UIL.Title({
-                target: document.body,
+                target: this.controlGui,
                 name: msg,
                 id: "!",
                 size: "790",
@@ -127,7 +151,7 @@ export abstract class GUI {
                 simple: false
             });
             new UIL.Button({
-                target: document.body,
+                target: this.controlGui,
                 callback: gotoDownloadPage,
                 name: 'Download Firefox Nightly',
                 size: 200,
@@ -145,7 +169,13 @@ export abstract class GUI {
         } else {
 
             this.isSupported = true;
-            var ui = new UIL.Gui({css: 'top:10px; right:10px;', Tpercent:50, size: 250, left: 200});
+            var ui = new UIL.Gui({
+                target: this.controlGui,
+                css: 'top:10px; right:10px;',
+                Tpercent: 50,
+                size: 250,
+                left: 200
+            });
             ui.add('title', {name: 'Options', id: "v1.0", titleColor: '#D4B87B', fontColor: "#D4B87B"});
 
             ui.add('list', {name: 'Scenes', callback: this.onSceneChange.bind(this), list: this.sceneList});
@@ -153,7 +183,12 @@ export abstract class GUI {
             //ui.add('list', {name: 'Renderer', callback: this.onRendererChange.bind(this), list: this.rendererList});
             //ui.add('list', {name: 'GI Engine', callback: this.onEngineChange.bind(this), list: this.GIEngineList});
 
-            var renderGroup = ui.add('group', {name: 'Render', titleColor: '#D4B87B', fontColor: '#D4B87B', height: 30});
+            var renderGroup = ui.add('group', {
+                name: 'Render',
+                titleColor: '#D4B87B',
+                fontColor: '#D4B87B',
+                height: 30
+            });
 
             renderGroup.add('list', {
                 name: 'Block Size',
@@ -193,28 +228,33 @@ export abstract class GUI {
                 step: 1
             });
 
-            renderGroup.add('number', {name: 'Output', callback: this.onOutputChange.bind(this), value: [1280, 720], step: 1});
+            renderGroup.add('number', {
+                name: 'Output',
+                callback: this.onOutputChange.bind(this),
+                value: [1280, 720],
+                step: 1
+            });
 
 
             //Camera
             var camera = ui.add('group', {name: 'Camera', titleColor: '#D4B87B', fontColor: '#D4B87B', height: 30});
             this._eye = camera.add('number', {
                 name: 'Eye',
-                callback: this.onEyeChange.bind(this),
+                callback: this.onCameraChange.bind(this),
                 step: 1,
                 precision: 3,
                 value: [0, -1, 0]
             });
             this._lookAt = camera.add('number', {
                 name: 'Look At',
-                callback: this.onLookAtChange.bind(this),
+                callback: this.onCameraChange.bind(this),
                 step: 1,
                 precision: 3,
                 value: [0, 0, 0]
             });
             this._up = camera.add('number', {
                 name: 'Up',
-                callback: callback,
+                callback: this.onCameraChange.bind(this),
                 min: -1,
                 max: 1,
                 step: 1,
@@ -223,12 +263,24 @@ export abstract class GUI {
             });
             this._fov = camera.add('number', {
                 name: 'FOV',
-                callback: callback,
+                callback: this.onCameraChange.bind(this),
                 min: 0,
                 max: 128,
                 step: 1,
                 precision: 0,
                 value: 45
+            });
+            this._focus = camera.add('number', {
+                name: 'Focus',
+                callback: this.onCameraChange.bind(this),
+                step: 0.001,
+                value: 0.25
+            });
+            this._aperture = camera.add('number', {
+                name: 'Aperture',
+                callback: this.onCameraChange.bind(this),
+                step: 0.001,
+                value: 1/40
             });
 
             //Lights

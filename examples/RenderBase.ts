@@ -54,13 +54,10 @@ export abstract class RenderBase extends CanvasDisplay {
         console.log(newValue);
     }
 
-    onEyeChange(newValue:number[]) {
-        this.camera.updateFromArray(this._eye.value, this._lookAt.value, this._up.value, this._fov.value);
-        this.renderer.updateCamera(this.camera.toJSON());
-    }
-
-    onLookAtChange(newValue:number[]) {
-        this.camera.updateFromArray(this._eye.value, this._lookAt.value, this._up.value, this._fov.value);
+    onCameraChange(newValue:number[]) {
+        this.camera.updateFromArray(this._eye.value, this._lookAt.value, this._up.value,
+            this._fov.value, this._focus.value, this._aperture.value
+        );
         this.renderer.updateCamera(this.camera.toJSON());
     }
 

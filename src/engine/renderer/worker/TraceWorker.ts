@@ -97,6 +97,7 @@ export class TraceWorker {
 
                     if (e.data.camera) {
                         self.camera.updateFromJson(e.data.camera);
+                        //console.log(e.data.camera);
                     }
 
                     self.iterations = e.data.init_iterations || 0;

@@ -34,7 +34,7 @@ export class Camera {
         return c
     }
 
-    updateFromArray(eye, look, up, fovy:number) {
+    updateFromArray(eye, look, up, fovy:number, focus?:number, aperture?:number) {
 
         eye = new Vector3(eye[0], eye[1], eye[2]);
         look = new Vector3(look[0], look[1], look[2]);
@@ -46,6 +46,9 @@ export class Camera {
         c.u = up.cross(c.w).normalize();
         c.v = c.w.cross(c.u).normalize();
         c.m = 1 / Math.tan(fovy * Math.PI / 360);
+
+        c.focalDistance = focus < 0 ? null : focus;
+        c.apertureRadius = aperture < 0 ? null : aperture;
     }
 
     updateFromJson(prop) {
@@ -54,6 +57,10 @@ export class Camera {
         this.u.setFromJson(prop.u);
         this.v.setFromJson(prop.v);
         this.m = prop.m;
+        if (prop.focalDistance && prop.apertureRadius) {
+            this.focalDistance = prop.focalDistance;
+            this.apertureRadius = prop.apertureRadius;
+        }
     }
 
     setFocus(focalPoint:Vector3, apertureRadius:number) {
@@ -86,13 +93,15 @@ export class Camera {
         return new Ray(p, d);
     }
 
-    toJSON():{p:Vector3,w:Vector3,u:Vector3,v:Vector3,m:number} {
+    toJSON():{p:Vector3, w:Vector3 ,u:Vector3, v:Vector3, m:number, focalDistance:number, apertureRadius:number} {
         return {
             p: this.p,
             w: this.w,
             u: this.u,
             v: this.v,
-            m: this.m
+            m: this.m,
+            focalDistance: this.focalDistance,
+            apertureRadius: this.apertureRadius
         };
     }
 }

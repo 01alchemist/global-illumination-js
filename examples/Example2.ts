@@ -15,7 +15,6 @@ import {LinearAttenuation} from "../src/engine/scene/materials/Attenuation";
 import {SharedScene} from "../src/engine/scene/SharedScene";
 import {GlossyMaterial} from "../src/engine/scene/materials/GlossyMaterial";
 import {MathUtils} from "../src/engine/utils/MathUtils";
-import {SmartBucketRenderer} from "../src/engine/renderer/SmartBucketRenderer";
 import {RenderBase} from "./RenderBase";
 /**
  * Created by Nidin Vinayakan on 11-01-2016.
@@ -44,13 +43,15 @@ export class Example2 extends RenderBase {
         scene.add(Sphere.newSphere(new Vector3(-1, 3, -1), 0.5, new LightMaterial(new Color(1, 1, 1), 1, NoAttenuation)));
 
         var camera:Camera = Camera.lookAt(new Vector3(0, 0.7, 5), new Vector3(0, 0, 0), new Vector3(0, 1, 0), 45);
-        camera.setFocus(new Vector3(0, 0.4, 3), 1 / 40);
+        //camera.setFocus(new Vector3(0, 0.4, 3), 1 / 40);
+
+        console.log(camera.focalDistance);
 
         var cameraSamples:number = -1;
         var hitSamples:number = 4;
-        var bounces:number = 5;
-        var iterations:number = 1000;
-        var blockIterations:number = 4;
+        var bounces:number = 4;
+        var iterations:number = 10000;
+        var blockIterations:number = 1;
 
         this.render(scene, camera, cameraSamples, hitSamples, bounces, iterations, blockIterations);
     }
