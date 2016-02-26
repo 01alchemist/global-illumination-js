@@ -30,7 +30,8 @@ export class ThreeJSView {
         this.scene.position.y = 0;
         var ambient = new THREE.AmbientLight(0x101030);
         this.scene.add(ambient);
-        var directionalLight = new THREE.DirectionalLight(0xffeedd);
+        var directionalLight = new THREE.DirectionalLight(0xffeedd, 1);
+        directionalLight.castShadow = true;
         directionalLight.position.set(0, 1, 0);
         this.scene.add(directionalLight);
         // texture
@@ -55,7 +56,7 @@ export class ThreeJSView {
         // model
 
         var geometry = new THREE.PlaneGeometry( 200, 200);
-        var material = new THREE.MeshPhongMaterial( { color: 0xffffff, emissive:0, specular:0xffffff} );
+        var material = new THREE.MeshPhongMaterial( { color: 0xCFCFCF} );
         var mesh = new THREE.Mesh( geometry, material );
         mesh.rotation.set(MathUtils.radians(-90), 0,0);
         mesh.receiveShadow = true;
@@ -69,7 +70,6 @@ export class ThreeJSView {
                     //child.material.map = texture;
                     child.material.color = new THREE.Color(1,0,0);
                     child.castShadow = true;
-                    //self.scene.add( new THREE.ShadowMesh(child));
                 }
             });
             //object.position.y = -95;
@@ -79,6 +79,8 @@ export class ThreeJSView {
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(width, height);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFShadowMap;
         container.appendChild(this.renderer.domElement);
 
         document.addEventListener('mousemove', this.onDocumentMouseMove.bind(this), false);

@@ -73,7 +73,7 @@ export class ThreejsIntegration extends RenderBase {
         var self = this;
         var loader:OBJLoader = new OBJLoader();
         loader.parentMaterial = new SpecularMaterial(Color.hexColor(0xB9121B), 2);
-        /*loader.load("teapot.obj", function (_mesh) {
+        loader.load("teapot.obj", function (_mesh) {
             if (!_mesh) {
                 console.log("LoadOBJ error:");
             } else {
@@ -82,7 +82,7 @@ export class ThreejsIntegration extends RenderBase {
                 scene.add(_mesh);
                 self.render(scene, camera, cameraSamples, hitSamples, bounces, iterations, blockIterations);
             }
-        });*/
+        });
     }
 
     //configure GUI
