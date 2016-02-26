@@ -4,7 +4,7 @@ import {GUI} from "./GUI";
  */
 export abstract class CanvasDisplay extends GUI {
 
-    viewport:HTMLElement;
+    giOutput:HTMLElement;
     canvas:HTMLCanvasElement;
     ctx:CanvasRenderingContext2D;
     imageData:ImageData;
@@ -17,8 +17,8 @@ export abstract class CanvasDisplay extends GUI {
     constructor(public i_width:number = 640, public i_height:number = 480) {
         super();
         var self = this;
-        this.viewport = document.getElementById("imageOutput");
-        if (this.viewport) {
+        this.giOutput = document.getElementById("giOutput");
+        if (this.giOutput) {
             self.init.call(self);
             return;
         }
@@ -29,14 +29,21 @@ export abstract class CanvasDisplay extends GUI {
 
     init() {
         super.init();
-        //<canvas id="viewport" width="640" height="480" ></canvas>
-        //this.canvas = <HTMLCanvasElement>document.getElementById("viewport");
+
+        this.webglOutput = document.getElementById("webglOutput");
+        this.webglOutput.style.width = this.i_width + "px";
+        this.webglOutput.style.height = this.i_height + "px";
+        this.webglOutput.style.backgroundColor = "#585858";
+        this.webglOutput.style.position = "absolute";
+
+        this.initThreeJSViewer();
+
         if (this.isSupported) {
 
             console.log("isSupported:" + this.isSupported);
 
             this.canvas = <HTMLCanvasElement>document.createElement("canvas");
-            this.canvas.id = "viewport";
+            this.canvas.id = "giOutput";
 
             this.canvas.style.backgroundColor = "#3C3C3C";
             this.canvas.style.position = "absolute";
@@ -44,7 +51,7 @@ export abstract class CanvasDisplay extends GUI {
             this.canvas.width = this.i_width;
             this.canvas.height = this.i_height;
 
-            this.viewport.appendChild(this.canvas);
+            this.giOutput.appendChild(this.canvas);
 
             this.ctx = this.canvas.getContext("2d");
 
@@ -59,7 +66,9 @@ export abstract class CanvasDisplay extends GUI {
 
     resize(){
         this.canvas.style.left = (window.innerWidth - this.i_width) / 2 + "px";
+        this.webglOutput.style.left = (window.innerWidth - this.i_width) / 2 + "px";
         this.canvas.style.top = (window.innerHeight - this.i_height) / 2 + "px";
+        this.webglOutput.style.top = (window.innerHeight - this.i_height) / 2 + "px";
     }
 
     drawPixels(pixels:Uint8ClampedArray, rect:{x:number,y:number,width:number,height:number}):void {

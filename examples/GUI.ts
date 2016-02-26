@@ -1,4 +1,3 @@
-import {Camera} from "../src/engine/scene/Camera";
 /**
  * Created by Nidin Vinayakan on 20-01-2016.
  */
@@ -37,6 +36,8 @@ export abstract class GUI {
     protected _aperture:any;
 
     abstract onInit();
+
+    abstract toggleWebGL(value);
 
     abstract onSceneChange(value);
 
@@ -99,8 +100,6 @@ export abstract class GUI {
     }
 
     bounces:number;
-    //scene:SharedScene;
-    camera:Camera;
 
     constructor() {
 
@@ -115,7 +114,7 @@ export abstract class GUI {
 
         this.appContainer.style.background = "#161616";
         this.appContainer.style.fontFamily = "Courier New";
-        this.appContainer.style.color = "#7F8184";
+        this.appContainer.style.color = "#7F8184"//"#CCCCCC";
         this.appContainer.style.width = "100%";
         this.appContainer.style.height = "100%";
         this.appContainer.style.position = "absolute";
@@ -169,6 +168,7 @@ export abstract class GUI {
         } else {
 
             this.isSupported = true;
+
             var ui = new UIL.Gui({
                 target: this.controlGui,
                 css: 'top:10px; right:10px;',
@@ -178,7 +178,9 @@ export abstract class GUI {
             });
             ui.add('title', {name: 'Options', id: "v1.0", titleColor: '#D4B87B', fontColor: "#D4B87B"});
 
-            ui.add('list', {name: 'Scenes', callback: this.onSceneChange.bind(this), list: this.sceneList});
+            ui.add('bool', {name: 'WebGL', value:true, callback: this.toggleWebGL.bind(this), height: 30});
+
+            ui.add('list', {name: 'Scenes', callback: this.onSceneChange.bind(this), list: this.sceneList, height: 30});
             //ui.add('list', {name: 'Antialiasing', callback: callback, list: this.superSampling});
             //ui.add('list', {name: 'Renderer', callback: this.onRendererChange.bind(this), list: this.rendererList});
             //ui.add('list', {name: 'GI Engine', callback: this.onEngineChange.bind(this), list: this.GIEngineList});

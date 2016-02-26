@@ -1,3 +1,4 @@
+/examples/three/three.js
 /reference
 /node_modules
 # Windows image file caches
@@ -29,6 +30,7 @@ $RECYCLE.BIN/
 .DS_Store
 .AppleDouble
 .LSOverride
+/examples/three
 
 # Thumbnails
 ._*

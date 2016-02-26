@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Threjs Integration</title>
+    <script src="uil.js"></script>
+    <script src="three/three.js"></script>
+    <script src="three/ShadowMesh.js"></script>
+    <script src="three/loaders/OBJLoader.js"></script>
+    <script src="../node_modules/systemjs/dist/system.src.js"></script>
+    <script>
+        System.config({
+            packages: {
+                "../": {
+                    format: 'register',
+                    defaultExtension: 'js'
+                }
+            }
+        });
+        System.import('../examples/ThreejsIntegration').then(function(module){
+            new module.ThreejsIntegration();
+        }, console.error.bind(console));
+    </script>
+</head>
+<body>
+<div id="appContainer">
+    <div id="giOutput"></div>
+    <div id="webglOutput"></div>
+    <div id="control-gui"></div>
+</div>
+</body>
+</html>
